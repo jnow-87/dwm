@@ -193,6 +193,7 @@ static Client *nexttiled(Client *c);
 static void pop(Client *c);
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
+static void restart(const Arg *arg);
 static Monitor *recttomon(int x, int y, int w, int h);
 static void resize(Client *c, int x, int y, int w, int h, int interact);
 static void resizeclient(Client *c, int x, int y, int w, int h);
@@ -1359,6 +1360,10 @@ quit(const Arg *arg)
 	running = 0;
 }
 
+static void restart(const Arg *arg){
+	running = -1;
+}
+
 Monitor *
 recttomon(int x, int y, int w, int h)
 {
@@ -1483,7 +1488,7 @@ run(void)
 	XEvent ev;
 	/* main event loop */
 	XSync(dpy, False);
-	while (running && !XNextEvent(dpy, &ev))
+	while (running > 0 && !XNextEvent(dpy, &ev))
 		if (handler[ev.type])
 			handler[ev.type](&ev); /* call handler */
 }
@@ -2258,5 +2263,9 @@ main(int argc, char *argv[])
 	run();
 	cleanup();
 	XCloseDisplay(dpy);
+
+	if(running < 0)
+		execvp(argv[0], argv);
+
 	return EXIT_SUCCESS;
 }
