@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <X11/cursorfont.h>
@@ -186,6 +187,8 @@ static void maprequest(XEvent *e);
 static void monocle(Monitor *m);
 static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
+static void moveclient(const Arg *arg);
+static void reszclient(const Arg *arg);
 static Client *nexttiled(Client *c);
 static void pop(Client *c);
 static void propertynotify(XEvent *e);
@@ -1184,6 +1187,118 @@ movemouse(const Arg *arg)
 		focus(NULL);
 	}
 }
+
+void moveclient(const Arg *arg){
+	int nx, ny;
+	Client *c;
+
+	if (!(c = selmon->sel))
+		return;
+
+	if (c->isfullscreen) /* no support moving fullscreen windows by mouse */
+		return;
+
+	restack(selmon);
+
+	nx = ((int*)(arg->v))[0];
+	ny = ((int*)(arg->v))[1];
+
+	switch(nx){
+	case -INT_MAX:	nx = selmon->mx; break;
+	case INT_MAX:	nx = selmon->mx + selmon->mw - c->w - c->bw*2; break;
+	default:		nx += c->x; break;
+	}
+
+	switch(ny){
+	case -INT_MAX:	ny = selmon->my; break;
+	case INT_MAX:	ny = selmon->my + selmon->mh - c->h - c->bw*2; break;
+	default:		ny += c->y;
+	}
+
+	if (!c->isfloating)
+		togglefloating(NULL);
+
+	// TODO why do the following two lines not lead to the following glitch
+	// 	- tiling mode with two windows
+	// 	- resize the right windw
+	// 	- move it to top-right
+	// 	- move it to top-left
+	// 	- move it bottom-left
+	// 		=> focus moves to the other window
+	resizeclient(c, nx, ny, c->w, c->h);
+	focus(c);
+//	if (!selmon->lt[selmon->sellt]->arrange || c->isfloating)
+//		resize(c, nx, ny, c->w, c->h, 1);
+//
+//	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
+//		sendmon(c, m);
+//		selmon = m;
+//		focus(NULL);
+//	}
+}
+
+void reszclient(const Arg *arg){
+	int nx, ny, nw, nh;
+	Client *c;
+
+	if (!(c = selmon->sel))
+		return;
+
+	if (c->isfullscreen) /* no support moving fullscreen windows by mouse */
+		return;
+
+	restack(selmon);
+
+	nw = ((int*)(arg->v))[0];
+	nh = ((int*)(arg->v))[1];
+
+	if(nw == INT_MAX){
+		nx = selmon->mx;
+		nw = selmon->mw - c->bw * 2;
+
+		if(c->x == nx && c->w == nw){
+			nx = c->oldx;
+			nw = c->oldw;
+		}
+
+	}
+	else{
+		nx = c->x - nw / 2;
+		nw += c->w;
+	}
+
+	if(nh == INT_MAX){
+		ny = selmon->my;
+		nh = selmon->mh - c->bw * 2;
+
+		if(c->y == ny && c->h == nh){
+			ny = c->oldy;
+			nh = c->oldh;
+		}
+
+	}
+	else{
+		ny = c->y - nh / 2;
+		nh += c->h;
+	}
+
+	if (!c->isfloating)
+		togglefloating(NULL);
+
+	nw = MAX(nw, 32);
+	nh = MAX(nh, 32);
+
+	if(nw == c->w)
+		nx = c->x;
+
+	if(nh == c->h)
+		ny = c->y;
+
+	resizeclient(c, nx, ny, nw, nh);
+	focus(c);
+}
+
+
 
 Client *
 nexttiled(Client *c)
