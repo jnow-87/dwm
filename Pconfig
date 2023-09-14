@@ -1,5 +1,9 @@
 mainmenu "dwm configuration"
 
+config FONT
+	qstring "font"
+	default "monospace:size=10"
+
 config XINERAMA
 	bool "xinerama"
 

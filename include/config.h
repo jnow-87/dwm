@@ -5,8 +5,6 @@ static const unsigned int borderpx  = 1;        /* border pixel of windows */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
-static const char *fonts[]          = { "monospace:size=10" };
-static const char dmenufont[]       = "monospace:size=10";
 static const char col_gray1[]       = "#222222";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
@@ -19,7 +17,7 @@ static const char *colors[][3]      = {
 };
 
 /* tagging */
-static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+static const char *tags[] = { "💻", "💻", "🗇", "📟" };
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -45,72 +43,91 @@ static const Layout layouts[] = {
 };
 
 /* key definitions */
-#define MODKEY Mod1Mask
+#define ALT		Mod1Mask
+#define WIN		Mod4Mask
+#define MODKEY	WIN
+
+	// move to tag
+	// move window to tag
+	// toggle to view windows for tag
+	// toggle add window to tag
 #define TAGKEYS(KEY,TAG) \
-	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
-	{ MODKEY|ShiftMask,             KEY,      tag,            {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
+	{ ControlMask,				KEY,	view,		{.ui = 1 << TAG} }, \
+	{ MODKEY,					KEY,	tag,		{.ui = 1 << TAG} }, \
+	{ MODKEY|ControlMask,		KEY,	toggleview,	{.ui = 1 << TAG} }, \
+	{ ControlMask|ShiftMask,	KEY,	toggletag,	{.ui = 1 << TAG} },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
-static const char *termcmd[]  = { "st", NULL };
+static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", CONFIG_FONT, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
 
 static const Key keys[] = {
-	/* modifier                     key        function        argument */
-	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
-	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
-	{ MODKEY,                       XK_b,      togglebar,      {0} },
-	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
-	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
-	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
-	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
-	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
-	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
-	{ MODKEY,                       XK_Return, zoom,           {0} },
-	{ MODKEY,                       XK_Tab,    view,           {0} },
-	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
-	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
-	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
-	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
-	{ MODKEY,                       XK_space,  setlayout,      {0} },
-	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
-	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
-	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
-	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
-	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
-	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
-	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
-	TAGKEYS(                        XK_1,                      0)
-	TAGKEYS(                        XK_2,                      1)
-	TAGKEYS(                        XK_3,                      2)
-	TAGKEYS(                        XK_4,                      3)
-	TAGKEYS(                        XK_5,                      4)
-	TAGKEYS(                        XK_6,                      5)
-	TAGKEYS(                        XK_7,                      6)
-	TAGKEYS(                        XK_8,                      7)
-	TAGKEYS(                        XK_9,                      8)
-	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
+	// tag control
+	TAGKEYS(					XK_F1,	0)
+	TAGKEYS(					XK_F2,	1)
+	TAGKEYS(					XK_F3,	2)
+	TAGKEYS(					XK_F4,	3)
+
+	// window movement
+	{ MODKEY,					XK_Up,		moveclient,	{ .v = (int[]){ 0, -30 } } },
+	{ MODKEY,					XK_Down,	moveclient,	{ .v = (int[]){ 0, 30 } } },
+	{ MODKEY,					XK_Left,	moveclient,	{ .v = (int[]){ -40, 0 } } },
+	{ MODKEY,					XK_Right,	moveclient,	{ .v = (int[]){ 40, 0 } } },
+	{ MODKEY | ShiftMask,		XK_Up,		moveclient,	{ .v = (int[]){ 0, -INT_MAX } } },
+	{ MODKEY | ShiftMask,		XK_Down,	moveclient,	{ .v = (int[]){ 0, INT_MAX } } },
+	{ MODKEY | ShiftMask,		XK_Left,	moveclient,	{ .v = (int[]){ -INT_MAX, 0 } } },
+	{ MODKEY | ShiftMask,		XK_Right,	moveclient,	{ .v = (int[]){ INT_MAX, 0 } } },
+
+	// window size
+	{ MODKEY,					XK_Next,	reszclient,	{ .v = (int []){ 0, 25 } } },
+	{ MODKEY,					XK_Prior,	reszclient,	{ .v = (int []){ 0, -25 } } },
+	{ MODKEY,					XK_End,		reszclient,	{ .v = (int []){ 25, 0 } } },
+	{ MODKEY,					XK_Home,	reszclient,	{ .v = (int []){ -25, 0 } } },
+	{ MODKEY | ALT | ShiftMask,	XK_Down,	reszclient,	{ .v = (int []){ 0, INT_MAX } } },
+	{ MODKEY | ALT | ShiftMask,	XK_Up,		reszclient,	{ .v = (int []){ 0, INT_MAX } } },
+	{ MODKEY | ALT | ShiftMask,	XK_Right,	reszclient,	{ .v = (int []){ INT_MAX, 0 } } },
+	{ MODKEY | ALT | ShiftMask,	XK_Left,	reszclient,	{ .v = (int []){ INT_MAX, 0 } } },
+	{ MODKEY | ALT | ShiftMask,	XK_Left,	reszclient,	{ .v = (int []){ INT_MAX, 0 } } },
+	{ MODKEY,					XK_Insert,	reszclient,	{ .v = (int []){ INT_MAX, INT_MAX } } },
+
+	// window open/close/focus
+	{ ALT,					XK_F4,		killclient,	{ 0 } },
+	{ ALT,					XK_Tab,		focusstack,	{ .i = +1 } },
+	{ ALT | ShiftMask,		XK_Tab,		focusstack,	{ .i = -1 } },
+
+	// dwm start/stop
+	{ MODKEY|ShiftMask,		XK_q,		quit,		{ 0 } },
+	{ ALT | ControlMask,	XK_Delete,	restart,	{ 0 } },
+
+	// launch programs
+	{ MODKEY,				XK_s,		togglebar,		{ 0 } },
+	{ ALT,					XK_F2,		spawn,			{ .v = dmenucmd } },
+
+	// winfade
+	{ MODKEY,				XK_1,	spawn,			{ .v = (char const *[]){ "winfade", "--group", "1", "fade" } } },
+	{ MODKEY,				XK_2,	spawn,			{ .v = (char const *[]){ "winfade", "--group", "2", "fade" } } },
+	{ MODKEY,				XK_3,	spawn,			{ .v = (char const *[]){ "winfade", "--group", "3", "fade" } } },
+	{ MODKEY | ShiftMask,	XK_1,	spawn,			{ .v = (char const *[]){ "winfade", "--group", "1", "select" } } },
+	{ MODKEY | ShiftMask,	XK_2,	spawn,			{ .v = (char const *[]){ "winfade", "--group", "2", "select" } } },
+	{ MODKEY | ShiftMask,	XK_3,	spawn,			{ .v = (char const *[]){ "winfade", "--group", "3", "select" } } },
 };
 
 /* button definitions */
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static const Button buttons[] = {
-	/* click                event mask      button          function        argument */
-	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
-	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
-	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
-	{ ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
-	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
-	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
-	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
-	{ ClkTagBar,            0,              Button1,        view,           {0} },
-	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
-	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
-	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
-};
+	// window movement/size
+	{ ClkClientWin,	MODKEY,				Button1,	movemouse,		{0} },
+	{ ClkClientWin,	MODKEY | ShiftMask,	Button1,	resizemouse,	{0} },
 
+	// status bar actions
+	{ ClkLtSymbol,	0,					Button1,	setlayout,		{0} },
+	{ ClkLtSymbol,	0,					Button3,	setlayout,		{.v = &layouts[2]} },
+	{ ClkWinTitle,	0,					Button2,	zoom,			{0} },
+	{ ClkTagBar,	0,					Button1,	view,			{0} },
+	{ ClkTagBar,	0,					Button3,	toggleview,		{0} },
+	{ ClkTagBar,	MODKEY,				Button1,	tag,			{0} },
+	{ ClkTagBar,	MODKEY,				Button3,	toggletag,		{0} },
+};

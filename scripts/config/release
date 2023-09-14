@@ -2,6 +2,7 @@
 # Automatically generated file; DO NOT EDIT.
 # dwm configuration
 #
+CONFIG_FONT="DejaVu Sans Mono for Powerline:size=10"
 CONFIG_XINERAMA=y
 CONFIG_BUILD_RELEASE=y
 # CONFIG_BUILD_DEBUG is not set
