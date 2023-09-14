@@ -20,6 +20,9 @@
  *
  * To understand everything else, start reading main().
  */
+
+#include <config/config.h>
+#include <version.h>
 #include <errno.h>
 #include <locale.h>
 #include <signal.h>
@@ -36,9 +39,9 @@
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
 #include <X11/Xutil.h>
-#ifdef XINERAMA
+#ifdef CONFIG_XINERAMA
 #include <X11/extensions/Xinerama.h>
-#endif /* XINERAMA */
+#endif /* CONFIG_XINERAMA */
 #include <X11/Xft/Xft.h>
 
 #include "drw.h"
@@ -984,7 +987,7 @@ incnmaster(const Arg *arg)
 	arrange(selmon);
 }
 
-#ifdef XINERAMA
+#ifdef CONFIG_XINERAMA
 static int
 isuniquegeom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info)
 {
@@ -994,7 +997,7 @@ isuniquegeom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info)
 			return 0;
 	return 1;
 }
-#endif /* XINERAMA */
+#endif /* CONFIG_XINERAMA */
 
 void
 keypress(XEvent *e)
@@ -1869,7 +1872,7 @@ updategeom(void)
 {
 	int dirty = 0;
 
-#ifdef XINERAMA
+#ifdef CONFIG_XINERAMA
 	if (XineramaIsActive(dpy)) {
 		int i, j, n, nn;
 		Client *c;
@@ -1924,7 +1927,7 @@ updategeom(void)
 		}
 		free(unique);
 	} else
-#endif /* XINERAMA */
+#endif /* CONFIG_XINERAMA */
 	{ /* default monitor setup */
 		if (!mons)
 			mons = createmon();
@@ -2005,8 +2008,7 @@ updatesizehints(Client *c)
 void
 updatestatus(void)
 {
-	if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext)))
-		strcpy(stext, "dwm-"VERSION);
+	gettextprop(root, XA_WM_NAME, stext, sizeof(stext));
 	drawbar(selmon);
 }
 

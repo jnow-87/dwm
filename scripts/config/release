@@ -1,0 +1,8 @@
+#
+# Automatically generated file; DO NOT EDIT.
+# dwm configuration
+#
+CONFIG_XINERAMA=y
+CONFIG_BUILD_RELEASE=y
+# CONFIG_BUILD_DEBUG is not set
+CONFIG_BUILD_TYPE=release

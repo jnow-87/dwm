@@ -1,0 +1,24 @@
+mainmenu "dwm configuration"
+
+config XINERAMA
+	bool "xinerama"
+
+# build config
+choice
+	prompt "Build type"
+
+	config BUILD_RELEASE
+		bool "release"
+
+	config BUILD_DEBUG
+		bool "debug"
+endchoice
+
+menu "Hidden"
+	visible if 0
+
+	config BUILD_TYPE
+		string "Build type"
+		default "debug" if BUILD_DEBUG
+		default "release" if BUILD_RELEASE
+endmenu
