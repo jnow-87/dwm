@@ -99,6 +99,7 @@ static const Key keys[] = {
 	{ ALT | ShiftMask,		XK_Tab,		focusstack,	{ .i = -1 } },
 
 	// dwm start/stop
+	// TODO call dmenu as menu asking for exit | restart
 	{ MODKEY|ShiftMask,		XK_q,		quit,		{ 0 } },
 	{ ALT | ControlMask,	XK_Delete,	restart,	{ 0 } },
 
@@ -106,13 +107,35 @@ static const Key keys[] = {
 	{ MODKEY,				XK_s,		togglebar,		{ 0 } },
 	{ ALT,					XK_F2,		spawn,			{ .v = dmenucmd } },
 
+	// TODO pstree comparing starting xterm via spawn and via dmenu
+//	{ MODKEY,				XK_x,		spawn,			{ .v = termcmd } },
+
 	// winfade
+	// TODO dwm doesn't set _NET_CURRENT_DESKTOP
 	{ MODKEY,				XK_1,	spawn,			{ .v = (char const *[]){ "winfade", "--group", "1", "fade" } } },
 	{ MODKEY,				XK_2,	spawn,			{ .v = (char const *[]){ "winfade", "--group", "2", "fade" } } },
 	{ MODKEY,				XK_3,	spawn,			{ .v = (char const *[]){ "winfade", "--group", "3", "fade" } } },
 	{ MODKEY | ShiftMask,	XK_1,	spawn,			{ .v = (char const *[]){ "winfade", "--group", "1", "select" } } },
 	{ MODKEY | ShiftMask,	XK_2,	spawn,			{ .v = (char const *[]){ "winfade", "--group", "2", "select" } } },
 	{ MODKEY | ShiftMask,	XK_3,	spawn,			{ .v = (char const *[]){ "winfade", "--group", "3", "select" } } },
+//	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
+//	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
+//	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
+//	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
+//	{ MODKEY,                       XK_Return, zoom,           {0} },
+//	{ MODKEY,                       XK_Tab,    view,           {0} },
+//	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
+//	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
+//	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
+//	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
+//	{ MODKEY,                       XK_space,  setlayout,      {0} },
+//	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
+//	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
+//	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
+//	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
+//	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
+//	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
+//	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
 };
 
 /* button definitions */
