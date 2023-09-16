@@ -10,8 +10,13 @@
 #include <X11/cursorfont.h>
 #include <X11/Xatom.h>
 #include <dwm.h>
+#include <client.h>
+#include <layout.h>
+#include <monitor.h>
 #include <statusbar.h>
 #include <utils.h>
+#include <events.h>
+#include <config.h>
 
 
 /* local/static prototypes */
@@ -20,6 +25,7 @@ static void setup(void);
 static void scan(void);
 static void run(void);
 static void cleanup(void);
+static long getstate(Window w);
 
 
 /* global variables */
@@ -35,35 +41,14 @@ color_t **scheme;
 Atom wmatom[WMLast];
 Window root;
 cursor_t *cursor[CurLast];
-void (*handler[LASTEvent]) (XEvent *) = {
-	[ButtonPress] = buttonpress,
-	[ClientMessage] = clientmessage,
-	[ConfigureRequest] = configurerequest,
-	[ConfigureNotify] = configurenotify,
-	[DestroyNotify] = destroynotify,
-	[EnterNotify] = 0x0,
-	[Expose] = expose,
-	[FocusIn] = focusin,
-	[KeyPress] = keypress,
-	[MappingNotify] = mappingnotify,
-	[MapRequest] = maprequest,
-	[MotionNotify] = motionnotify,
-	[PropertyNotify] = propertynotify,
-	[UnmapNotify] = unmapnotify
-};
 int running = 1;
 int bar_height;
 int (*xlib_xerror_hdlr)(Display *, XErrorEvent *);	// default error handler used by xlib
+unsigned int numlockmask = 0;
 
 
 /* static variables */
 static Window wmcheckwin;
-static const char *colors[][3]      = {
-	/*               fg         bg         border   */
-	[SchemeNorm] = { CONFIG_COL_INACT_FG, CONFIG_COL_INACT_BG, CONFIG_COL_INACT_BORDER },
-	[SchemeSel]  = { CONFIG_COL_ACT_FG, CONFIG_COL_ACT_BG,  CONFIG_COL_ACT_BORDER  },
-};
-unsigned int ncolors = LENGTH(colors);
 
 
 /* global functions */
@@ -210,8 +195,7 @@ static void run(void){
 	/* main event loop */
 	XSync(dpy, False);
 	while (running > 0 && !XNextEvent(dpy, &ev))
-		if (handler[ev.type])
-			handler[ev.type](&ev); /* call handler */
+		handle_event(&ev);
 }
 
 static void cleanup(void){
@@ -238,4 +222,20 @@ static void cleanup(void){
 	XSync(dpy, False);
 	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
+}
+
+static long getstate(Window w){
+	int format;
+	long result = -1;
+	unsigned char *p = NULL;
+	unsigned long n, extra;
+	Atom real;
+
+	if (XGetWindowProperty(dpy, w, wmatom[WMState], 0L, 2L, False, wmatom[WMState],
+		&real, &format, &n, &extra, (unsigned char **)&p) != Success)
+		return -1;
+	if (n != 0)
+		result = *p;
+	XFree(p);
+	return result;
 }

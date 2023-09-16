@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <dwm.h>
+#include <client.h>
 #include <layout.h>
 
 

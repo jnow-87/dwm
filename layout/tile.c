@@ -1,5 +1,7 @@
 #include <dwm.h>
+#include <client.h>
 #include <layout.h>
+#include <utils.h>
 
 
 /* global functions */

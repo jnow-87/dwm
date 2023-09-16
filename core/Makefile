@@ -8,7 +8,8 @@ dwm-y := \
 	statusbar.o \
 	config/ \
 	layout/ \
-	common/
+	common/ \
+	xlib/
 
 
 # flags

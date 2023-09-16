@@ -1,5 +1,9 @@
 #include <config/config.h>
-#include <dwm.h>
+#include <limits.h>
+#include <X11/X.h>
+#include <X11/keysym.h>
+#include <action.h>
+#include <utils.h>
 
 
 /* macros */

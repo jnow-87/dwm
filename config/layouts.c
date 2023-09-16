@@ -1,4 +1,4 @@
-#include <dwm.h>
+#include <utils.h>
 #include <layout.h>
 
 

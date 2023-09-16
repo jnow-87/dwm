@@ -4,6 +4,15 @@
 #define CONFIG_H
 
 
+#include <action.h>
+#include <layout.h>
+#include <rule.h>
+
+
+/* macros */
+#define TAGMASK                 ((1 << ntags) - 1)
+
+
 // TODO replace the size variables n*, e.g. by using linker arrays
 extern const char *tags[];
 extern unsigned int ntags;
@@ -15,7 +24,7 @@ extern const button_map_t buttons[];
 extern const unsigned int nbuttons;
 extern const layout_t layouts[];
 extern unsigned int nlayouts;
-
-
+extern const char *colors[][3];
+extern unsigned int ncolors;
 
 #endif // CONFIG_H

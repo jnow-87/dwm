@@ -1,4 +1,5 @@
-#include <dwm.h>
+#include <utils.h>
+#include <rule.h>
 
 
 /* global variables */

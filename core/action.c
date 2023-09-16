@@ -8,6 +8,15 @@
 #include <action.h>
 #include <layout.h>
 #include <statusbar.h>
+#include <client.h>
+#include <events.h>
+#include <monitor.h>
+#include <utils.h>
+#include <config.h>
+
+
+/* macros */
+#define MOUSEMASK               (ButtonPressMask|ButtonReleaseMask|PointerMotionMask)
 
 
 /* global functions */
@@ -85,7 +94,7 @@ void action_movemouse(const action_arg_t *arg){
 		case ConfigureRequest:
 		case Expose:
 		case MapRequest:
-			handler[ev.type](&ev);
+			handle_event(&ev);
 			break;
 		case MotionNotify:
 			if ((ev.xmotion.time - lasttime) <= (1000 / 60))
@@ -260,7 +269,7 @@ void action_resizemouse(const action_arg_t *arg){
 		case ConfigureRequest:
 		case Expose:
 		case MapRequest:
-			handler[ev.type](&ev);
+			handle_event(&ev);
 			break;
 		case MotionNotify:
 			if ((ev.xmotion.time - lasttime) <= (1000 / 60))

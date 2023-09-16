@@ -2,7 +2,15 @@
 #define LAYOUT_H
 
 
-#include <dwm.h>
+#include <client.h>
+#include <monitor.h>
+
+
+/* types */
+typedef struct layout_t{
+	const char *symbol;
+	void (*arrange)(monitor_t *);
+} layout_t;
 
 
 /* prototypes */

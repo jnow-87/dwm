@@ -8,6 +8,10 @@
 #include <X11/Xft/Xft.h>
 
 
+/* macros */
+#define TEXTW(X)	(drw_fontset_getwidth(drw, (X)) + lrpad)
+
+
 /* types */
 typedef enum{
 	ColFg,

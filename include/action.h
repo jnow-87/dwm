@@ -3,12 +3,37 @@
 
 
 /* types */
+typedef enum{
+	ClkTagBar,
+	ClkLtSymbol,
+	ClkStatusText,
+	ClkWinTitle,
+	ClkClientWin,
+	ClkRootWin,
+	ClkLast
+} clicks_t;
+
 typedef union{
 	int i;
 	unsigned int ui;
 	float f;
 	const void *v;
 } action_arg_t;
+
+typedef struct{
+	unsigned int click;
+	unsigned int mask;
+	unsigned int button;
+	void (*func)(const action_arg_t *arg);
+	const action_arg_t arg;
+} button_map_t;
+
+typedef struct{
+	unsigned int mod;
+	KeySym keysym;
+	void (*func)(const action_arg_t *);
+	const action_arg_t arg;
+} key_map_t;
 
 
 /* prototypes */
