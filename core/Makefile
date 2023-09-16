@@ -5,8 +5,10 @@ dwm-y := \
 	action.o \
 	drw.o \
 	dwm.o \
+	statusbar.o \
 	config/ \
-	layout/
+	layout/ \
+	common/
 
 
 # flags

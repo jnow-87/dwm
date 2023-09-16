@@ -1,4 +1,5 @@
 #include <dwm.h>
+#include <layout.h>
 
 
 /* global functions */

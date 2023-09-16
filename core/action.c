@@ -7,6 +7,7 @@
 #include <dwm.h>
 #include <action.h>
 #include <layout.h>
+#include <statusbar.h>
 
 
 /* global functions */

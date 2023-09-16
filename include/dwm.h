@@ -9,6 +9,8 @@
 
 
 /* macros */
+#define BROKEN	"broken"
+
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
 #define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
@@ -141,10 +143,7 @@ typedef struct {
 
 /* prototypes */
 void die(const char *fmt, ...);
-void *ecalloc(size_t nmemb, size_t size);void applyrules(client_t *c);
 int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int interact);
-void arrange(monitor_t *m);
-void arrangemon(monitor_t *m);
 void attach(client_t *c);
 void attachstack(client_t *c);
 void buttonpress(XEvent *e);
@@ -158,8 +157,6 @@ void destroynotify(XEvent *e);
 void detach(client_t *c);
 void detachstack(client_t *c);
 monitor_t *dirtomon(int dir);
-void drawbar(monitor_t *m);
-void drawbars(void);
 void expose(XEvent *e);
 void focus(client_t *c);
 void focusin(XEvent *e);
@@ -190,14 +187,10 @@ void showhide(client_t *c);
 void unfocus(client_t *c, int setfocus);
 void unmanage(client_t *c, int destroyed);
 void unmapnotify(XEvent *e);
-void updatebarpos(monitor_t *m);
-void updatebars(void);
 void updateclientlist(void);
 int updategeom(void);
 void updatenumlockmask(void);
 void updatesizehints(client_t *c);
-void updatestatus(void);
-void updatetitle(client_t *c);
 void updatewindowtype(client_t *c);
 void updatewmhints(client_t *c);
 client_t *wintoclient(Window w);

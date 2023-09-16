@@ -10,6 +10,8 @@
 #include <X11/cursorfont.h>
 #include <X11/Xatom.h>
 #include <dwm.h>
+#include <statusbar.h>
+#include <utils.h>
 
 
 /* local/static prototypes */
