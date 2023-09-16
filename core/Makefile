@@ -1,8 +1,12 @@
 bin-y := dwm
 
-dwm-y := dwm.o drw.o util.o
+dwm-y := \
+	action.o \
+	drw.o \
+	dwm.o
 
 
+# flags
 dwm-cppflags := \
 	-I/usr/X11R6/include \
 	-I/usr/include/freetype2 \
