@@ -1,6 +1,7 @@
 bin-y := dwm
 
 dwm-y := \
+	main.o \
 	action.o \
 	drw.o \
 	dwm.o

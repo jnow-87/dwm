@@ -148,7 +148,6 @@ void arrangemon(monitor_t *m);
 void attach(client_t *c);
 void attachstack(client_t *c);
 void buttonpress(XEvent *e);
-void cleanup(void);
 void cleanupmon(monitor_t *mon);
 void clientmessage(XEvent *e);
 void configure(client_t *c);
@@ -183,14 +182,11 @@ monitor_t *recttomon(int x, int y, int w, int h);
 void resize(client_t *c, int x, int y, int w, int h, int interact);
 void resizeclient(client_t *c, int x, int y, int w, int h);
 void restack(monitor_t *m);
-void run(void);
-void scan(void);
 int sendevent(client_t *c, Atom proto);
 void sendmon(client_t *c, monitor_t *m);
 void setclientstate(client_t *c, long state);
 void setfocus(client_t *c);
 void setfullscreen(client_t *c, int fullscreen);
-void setup(void);
 void seturgent(client_t *c, int urg);
 void showhide(client_t *c);
 void tile(monitor_t *m);
@@ -210,6 +206,9 @@ void updatewmhints(client_t *c);
 client_t *wintoclient(Window w);
 monitor_t *wintomon(Window w);
 void killclient(Window win);
+int xerror_hdlr(Display *dpy, XErrorEvent *ee);
+int startup_xerror_hdlr(Display *dpy, XErrorEvent *ee);
+int dummy_xerror_hdlr(Display *dpy, XErrorEvent *ee);
 
 
 /* external variables */
@@ -224,10 +223,19 @@ extern void (*handler[]) (XEvent *);
 extern int running;
 extern const char *tags[];
 extern unsigned int ntags;	// TODO replace with LENGTH(tags)
+extern const char *colors[][3];
+extern unsigned int ncolors;	// TODO replace with LENGTH(colors)
 extern const unsigned int snap;
 extern const char *dmenucmd[];
 extern char dmenumon[];
 extern int bar_height;
+extern int (*xlib_xerror_hdlr)(Display *, XErrorEvent *);	// default error handler used by xlib
+extern int screen;
+extern int sw, sh;           /* X display screen geometry width, height */
+extern drw_t *drw;
+extern int lrpad;            /* sum of left and right padding for text */
+extern Atom netatom[NetLast];
+extern color_t **scheme;
 
 
 #endif // DWM_H
