@@ -4,7 +4,9 @@ dwm-y := \
 	main.o \
 	action.o \
 	drw.o \
-	dwm.o
+	dwm.o \
+	config/ \
+	layout/
 
 
 # flags

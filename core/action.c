@@ -1,3 +1,4 @@
+#include <config/config.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
@@ -5,6 +6,7 @@
 #include <X11/Xft/Xft.h>
 #include <dwm.h>
 #include <action.h>
+#include <layout.h>
 
 
 /* global functions */
@@ -23,7 +25,7 @@ void action_focusmon(const action_arg_t *arg){
 void action_focusstack(const action_arg_t *arg){
 	client_t *c = NULL, *i;
 
-	if (!selmon->sel || (selmon->sel->isfullscreen && lockfullscreen))
+	if (!selmon->sel || (selmon->sel->isfullscreen && CONFIG_LAYOUT_LOCK_FULLSCREEN))
 		return;
 	if (arg->i > 0) {
 		for (c = selmon->sel->next; c && !ISVISIBLE(c); c = c->next);
@@ -91,16 +93,16 @@ void action_movemouse(const action_arg_t *arg){
 
 			nx = ocx + (ev.xmotion.x - x);
 			ny = ocy + (ev.xmotion.y - y);
-			if (abs(selmon->wx - nx) < snap)
+			if (abs(selmon->wx - nx) < CONFIG_SNAP_PIXEL)
 				nx = selmon->wx;
-			else if (abs((selmon->wx + selmon->ww) - (nx + WIDTH(c))) < snap)
+			else if (abs((selmon->wx + selmon->ww) - (nx + WIDTH(c))) < CONFIG_SNAP_PIXEL)
 				nx = selmon->wx + selmon->ww - WIDTH(c);
-			if (abs(selmon->wy - ny) < snap)
+			if (abs(selmon->wy - ny) < CONFIG_SNAP_PIXEL)
 				ny = selmon->wy;
-			else if (abs((selmon->wy + selmon->wh) - (ny + HEIGHT(c))) < snap)
+			else if (abs((selmon->wy + selmon->wh) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
 				ny = selmon->wy + selmon->wh - HEIGHT(c);
 			if (!c->isfloating && selmon->lt[selmon->sellt]->arrange
-			&& (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
+			&& (abs(nx - c->x) > CONFIG_SNAP_PIXEL || abs(ny - c->y) > CONFIG_SNAP_PIXEL))
 				action_togglefloating(NULL);
 			if (!selmon->lt[selmon->sellt]->arrange || c->isfloating)
 				resize(c, nx, ny, c->w, c->h, 1);
@@ -270,7 +272,7 @@ void action_resizemouse(const action_arg_t *arg){
 			&& c->mon->wy + nh >= selmon->wy && c->mon->wy + nh <= selmon->wy + selmon->wh)
 			{
 				if (!c->isfloating && selmon->lt[selmon->sellt]->arrange
-				&& (abs(nw - c->w) > snap || abs(nh - c->h) > snap))
+				&& (abs(nw - c->w) > CONFIG_SNAP_PIXEL || abs(nh - c->h) > CONFIG_SNAP_PIXEL))
 					action_togglefloating(NULL);
 			}
 			if (!selmon->lt[selmon->sellt]->arrange || c->isfloating)

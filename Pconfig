@@ -4,6 +4,62 @@ config FONT
 	qstring "font"
 	default "monospace:size=10"
 
+config STATUSBAR_SHOW
+	bool "show statusbar"
+	default y
+
+config STATUSBAR_TOP
+	bool "show statusbar at the top"
+	default y
+
+config BORDER_PIXEL
+	int "number of border pixels"
+	default 1
+
+config SNAP_PIXEL
+	int "number of pixels to trigger window snapping"
+	default 32
+
+config LAYOUT_MASTER_RATIO
+	int "relative size of the master window (55..95)"
+	default 55
+
+config LAYOUT_MASTER_WINDOWS
+	int "number of windows in master area"
+	default 1
+
+config LAYOUT_RESPECT_SIZE_HINTS
+	bool "respect size hints in tiled resizals"
+	default y
+
+config LAYOUT_LOCK_FULLSCREEN
+	bool "force focus on the fullscreen window"
+	default y
+
+config COL_ACT_FG
+	qstring "active foreground color"
+	default "#eeeeee"
+
+config COL_ACT_BG
+	qstring "active background color"
+	default "#005f5f"
+
+config COL_ACT_BORDER
+	qstring "active border color"
+	default "#005f5f"
+
+config COL_INACT_FG
+	qstring "inactive foreground color"
+	default "#bbbbbb"
+
+config COL_INACT_BG
+	qstring "inactive background color"
+	default "#222222"
+
+config COL_INACT_BORDER
+	qstring "inactive border color"
+	default "#005f5f"
+
 config XINERAMA
 	bool "xinerama"
 

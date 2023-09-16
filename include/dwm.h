@@ -173,9 +173,7 @@ void keypress(XEvent *e);
 void manage(Window w, XWindowAttributes *wa);
 void mappingnotify(XEvent *e);
 void maprequest(XEvent *e);
-void monocle(monitor_t *m);
 void motionnotify(XEvent *e);
-client_t *nexttiled(client_t *c);
 void pop(client_t *c);
 void propertynotify(XEvent *e);
 monitor_t *recttomon(int x, int y, int w, int h);
@@ -189,7 +187,6 @@ void setfocus(client_t *c);
 void setfullscreen(client_t *c, int fullscreen);
 void seturgent(client_t *c, int urg);
 void showhide(client_t *c);
-void tile(monitor_t *m);
 void unfocus(client_t *c, int setfocus);
 void unmanage(client_t *c, int destroyed);
 void unmapnotify(XEvent *e);
@@ -223,9 +220,6 @@ extern void (*handler[]) (XEvent *);
 extern int running;
 extern const char *tags[];
 extern unsigned int ntags;	// TODO replace with LENGTH(tags)
-extern const char *colors[][3];
-extern unsigned int ncolors;	// TODO replace with LENGTH(colors)
-extern const unsigned int snap;
 extern const char *dmenucmd[];
 extern char dmenumon[];
 extern int bar_height;

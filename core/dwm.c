@@ -46,6 +46,7 @@
 #include <X11/Xft/Xft.h>
 #include <dwm.h>
 #include <drw.h>
+#include <config.h>
 
 
 /* macros */
@@ -55,12 +56,6 @@
 /* static variables */
 static char stext[256];
 static unsigned int numlockmask = 0;
-
-
-/* configuration, allows nested code to access above variables */
-#include <config.h>
-
-static_assert(LENGTH(tags) < 32, "too many tags, number of tags must fit into an unsigned int bit array");
 
 
 /* global functions */
@@ -103,7 +98,7 @@ void applyrules(client_t *c){
 	class    = ch.res_class ? ch.res_class : BROKEN;
 	instance = ch.res_name  ? ch.res_name  : BROKEN;
 
-	for (i = 0; i < LENGTH(rules); i++) {
+	for (i = 0; i < nrules; i++) {
 		r = &rules[i];
 		if ((!r->title || strstr(c->name, r->title))
 		&& (!r->class || strstr(class, r->class))
@@ -153,7 +148,7 @@ int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int interact){
 		*h = bar_height;
 	if (*w < bar_height)
 		*w = bar_height;
-	if (resizehints || c->isfloating || !c->mon->lt[c->mon->sellt]->arrange) {
+	if (CONFIG_LAYOUT_RESPECT_SIZE_HINTS || c->isfloating || !c->mon->lt[c->mon->sellt]->arrange) {
 		if (!c->hintsvalid)
 			updatesizehints(c);
 		/* see last two sentences in ICCCM 4.1.2.3 */
@@ -189,24 +184,6 @@ int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int interact){
 	return *x != c->x || *y != c->y || *w != c->w || *h != c->h;
 }
 
-void arrange(monitor_t *m){
-	if (m)
-		showhide(m->stack);
-	else for (m = mons; m; m = m->next)
-		showhide(m->stack);
-	if (m) {
-		arrangemon(m);
-		restack(m);
-	} else for (m = mons; m; m = m->next)
-		arrangemon(m);
-}
-
-void arrangemon(monitor_t *m){
-	strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
-	if (m->lt[m->sellt]->arrange)
-		m->lt[m->sellt]->arrange(m);
-}
-
 void attach(client_t *c){
 	c->next = c->mon->clients;
 	c->mon->clients = c;
@@ -235,8 +212,8 @@ void buttonpress(XEvent *e){
 		i = x = 0;
 		do
 			x += TEXTW(tags[i]);
-		while (ev->x >= x && ++i < LENGTH(tags));
-		if (i < LENGTH(tags)) {
+		while (ev->x >= x && ++i < ntags);
+		if (i < ntags) {
 			click = ClkTagBar;
 			arg.ui = 1 << i;
 		} else if (ev->x < x + TEXTW(selmon->ltsymbol))
@@ -251,7 +228,7 @@ void buttonpress(XEvent *e){
 		XAllowEvents(dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
 	}
-	for (i = 0; i < LENGTH(buttons); i++)
+	for (i = 0; i < nbuttons; i++)
 		if (click == buttons[i].click && buttons[i].func && buttons[i].button == ev->button
 		&& CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state))
 			buttons[i].func(click == ClkTagBar && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
@@ -386,12 +363,15 @@ monitor_t *createmon(void){
 
 	m = ecalloc(1, sizeof(monitor_t));
 	m->tagset[0] = m->tagset[1] = 1;
-	m->mfact = mfact;
-	m->nmaster = nmaster;
-	m->showbar = showbar;
-	m->topbar = topbar;
+
+	// TODO the following values can prbably be hard-coded
+	m->mfact = CONFIG_LAYOUT_MASTER_RATIO / 100.0;
+	m->nmaster = CONFIG_LAYOUT_MASTER_WINDOWS;
+	m->showbar = CONFIG_STATUSBAR_SHOW;
+	m->topbar = CONFIG_STATUSBAR_TOP;
+
 	m->lt[0] = &layouts[0];
-	m->lt[1] = &layouts[1 % LENGTH(layouts)];
+	m->lt[1] = &layouts[1 % nlayouts];
 	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
 	return m;
 }
@@ -459,7 +439,7 @@ void drawbar(monitor_t *m){
 			urg |= c->tags;
 	}
 	x = 0;
-	for (i = 0; i < LENGTH(tags); i++) {
+	for (i = 0; i < ntags; i++) {
 		w = TEXTW(tags[i]);
 		drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
 		drw_text(drw, x, 0, w, bar_height, lrpad / 2, tags[i], urg & 1 << i);
@@ -601,7 +581,7 @@ void grabbuttons(client_t *c, int focused){
 		if (!focused)
 			XGrabButton(dpy, AnyButton, AnyModifier, c->win, False,
 				BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
-		for (i = 0; i < LENGTH(buttons); i++)
+		for (i = 0; i < nbuttons; i++)
 			if (buttons[i].click == ClkClientWin)
 				for (j = 0; j < LENGTH(modifiers); j++)
 					XGrabButton(dpy, buttons[i].button,
@@ -625,7 +605,7 @@ void grabkeys(void){
 		if (!syms)
 			return;
 		for (k = start; k <= end; k++)
-			for (i = 0; i < LENGTH(keys); i++)
+			for (i = 0; i < nkeys; i++)
 				/* skip modifier codes, we do that ourselves */
 				if (keys[i].keysym == syms[(k - start) * skip])
 					for (j = 0; j < LENGTH(modifiers); j++)
@@ -654,7 +634,7 @@ void keypress(XEvent *e){
 
 	ev = &e->xkey;
 	keysym = XKeycodeToKeysym(dpy, (KeyCode)ev->keycode, 0);
-	for (i = 0; i < LENGTH(keys); i++)
+	for (i = 0; i < nkeys; i++)
 		if (keysym == keys[i].keysym
 		&& CLEANMASK(keys[i].mod) == CLEANMASK(ev->state)
 		&& keys[i].func)
@@ -690,7 +670,7 @@ void manage(Window w, XWindowAttributes *wa){
 		c->y = c->mon->wy + c->mon->wh - HEIGHT(c);
 	c->x = MAX(c->x, c->mon->wx);
 	c->y = MAX(c->y, c->mon->wy);
-	c->bw = borderpx;
+	c->bw = CONFIG_BORDER_PIXEL;
 
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
@@ -737,19 +717,6 @@ void maprequest(XEvent *e){
 		manage(ev->window, &wa);
 }
 
-void monocle(monitor_t *m){
-	unsigned int n = 0;
-	client_t *c;
-
-	for (c = m->clients; c; c = c->next)
-		if (ISVISIBLE(c))
-			n++;
-	if (n > 0) /* override layout symbol */
-		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
-	for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
-		resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
-}
-
 void motionnotify(XEvent *e){
 	static monitor_t *mon = NULL;
 	monitor_t *m;
@@ -763,11 +730,6 @@ void motionnotify(XEvent *e){
 		focus(NULL);
 	}
 	mon = m;
-}
-
-client_t *nexttiled(client_t *c){
-	for (; c && (c->isfloating || !ISVISIBLE(c)); c = c->next);
-	return c;
 }
 
 void pop(client_t *c){
@@ -970,32 +932,6 @@ void showhide(client_t *c){
 		showhide(c->snext);
 		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 	}
-}
-
-void tile(monitor_t *m){
-	unsigned int i, n, h, mw, my, ty;
-	client_t *c;
-
-	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
-	if (n == 0)
-		return;
-
-	if (n > m->nmaster)
-		mw = m->nmaster ? m->ww * m->mfact : 0;
-	else
-		mw = m->ww;
-	for (i = my = ty = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
-		if (i < m->nmaster) {
-			h = (m->wh - my) / (MIN(n, m->nmaster) - i);
-			resize(c, m->wx, m->wy + my, mw - (2*c->bw), h - (2*c->bw), 0);
-			if (my + HEIGHT(c) < m->wh)
-				my += HEIGHT(c);
-		} else {
-			h = (m->wh - ty) / (n - i);
-			resize(c, m->wx + mw, m->wy + ty, m->ww - mw - (2*c->bw), h - (2*c->bw), 0);
-			if (ty + HEIGHT(c) < m->wh)
-				ty += HEIGHT(c);
-		}
 }
 
 void unfocus(client_t *c, int setfocus){
