@@ -4,6 +4,10 @@
 #include <layout.h>
 
 
+/* local/static prototypes */
+static void arrangemon(monitor_t *m);
+
+
 /* global functions */
 client_t *nexttiled(client_t *c){
 	for (; c && (c->isfloating || !ISVISIBLE(c)); c = c->next);
@@ -22,10 +26,10 @@ void arrange(monitor_t *m){
 		arrangemon(m);
 }
 
-void arrangemon(monitor_t *m){
+
+/* local functions */
+static void arrangemon(monitor_t *m){
 	strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
 	if (m->lt[m->sellt]->arrange)
 		m->lt[m->sellt]->arrange(m);
 }
-
-

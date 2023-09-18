@@ -40,10 +40,7 @@ typedef enum{
 /* prototypes */
 void die(const char *fmt, ...);
 int getrootptr(int *x, int *y);
-int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 void grabkeys(void);
-void manage(Window w, XWindowAttributes *wa);
-void updateclientlist(void);
 int updategeom(void);
 void updatenumlockmask(void);
 
