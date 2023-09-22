@@ -8,8 +8,8 @@
 
 /* types */
 typedef struct layout_t{
-	const char *symbol;
-	void (*arrange)(monitor_t *);
+	char const *symbol;
+	void (*arrange)(monitor_t*);
 } layout_t;
 
 

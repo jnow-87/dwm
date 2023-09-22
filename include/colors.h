@@ -1,6 +1,7 @@
 #ifndef COLORS_H
 #define COLORS_H
 
+
 /* types */
 typedef enum{
 	SchemeNorm,

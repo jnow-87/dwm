@@ -1,22 +1,22 @@
-#include <config/config.h>
-#include <version.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <signal.h>
-#include <locale.h>
-#include <sys/wait.h>
 #include <X11/X.h>
-#include <X11/cursorfont.h>
 #include <X11/Xatom.h>
-#include <dwm.h>
+#include <X11/cursorfont.h>
 #include <client.h>
-#include <layout.h>
-#include <monitor.h>
-#include <statusbar.h>
-#include <utils.h>
-#include <events.h>
 #include <config.h>
+#include <config/config.h>
+#include <dwm.h>
+#include <events.h>
+#include <layout.h>
+#include <locale.h>
+#include <monitor.h>
+#include <signal.h>
+#include <statusbar.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <utils.h>
+#include <version.h>
 
 
 /* local/static prototypes */
@@ -30,12 +30,12 @@ static long getstate(Window w);
 
 /* global variables */
 monitor_t *mons,
-		  *selmon;
+	*selmon;
 Display *dpy;
 int screen;
-int sw, sh;           /* X display screen geometry width, height */
+int sw, sh; /* X display screen geometry width, height */
 drw_t *drw;
-int lrpad;            /* sum of left and right padding for text */
+int lrpad;	/* sum of left and right padding for text */
 Atom netatom[NetLast];
 color_t **scheme;
 Atom wmatom[WMLast];
@@ -43,7 +43,7 @@ Window root;
 cursor_t *cursor[CurLast];
 int running = 1;
 int bar_height;
-int (*xlib_xerror_hdlr)(Display *, XErrorEvent *);	// default error handler used by xlib
+int (*xlib_xerror_hdlr)(Display *, XErrorEvent *); // default error handler used by xlib
 unsigned int numlockmask = 0;
 
 
@@ -54,7 +54,7 @@ static Window wmcheckwin;
 /* global functions */
 int main(int argc, char *argv[]){
 	if(argc == 2 && !strcmp("-v", argv[1]))
-		die("dwm-"VERSION);
+		die("dwm-" VERSION);
 
 	if(argc != 1)
 		die("usage: dwm [-v]");
@@ -93,7 +93,7 @@ static void setup(void){
 	sigaction(SIGCHLD, &sa, NULL);
 
 	/* clean up any zombies (inherited from .xinitrc etc) immediately */
-	while (waitpid(-1, NULL, WNOHANG) > 0);
+	while(waitpid(-1, NULL, WNOHANG) > 0);
 
 	/* init screen */
 	screen = DefaultScreen(dpy);
@@ -125,10 +125,10 @@ static void setup(void){
 	cursor[CurMove] = drw_cur_create(drw, XC_fleur);
 
 	/* init appearance */
-	scheme = ecalloc(ncolors, sizeof(color_t *));
+	scheme = ecalloc(ncolors, sizeof(color_t*));
 
-	for (int i=0; i<ncolors; i++)
-	scheme[i] = drw_scm_create(drw, colors[i], 3);
+	for(int i=0; i<ncolors; i++)
+		scheme[i] = drw_scm_create(drw, colors[i], 3);
 
 	/* init bars */
 	updatebars();
@@ -136,25 +136,24 @@ static void setup(void){
 
 	/* supporting window for NetWMCheck */
 	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
-	XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *) &wmcheckwin, 1);
-	XChangeProperty(dpy, wmcheckwin, netatom[NetWMName], utf8string, 8, PropModeReplace, (unsigned char *) "dwm", 3);
-	XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *) &wmcheckwin, 1);
+	XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&wmcheckwin, 1);
+	XChangeProperty(dpy, wmcheckwin, netatom[NetWMName], utf8string, 8, PropModeReplace, (unsigned char *)"dwm", 3);
+	XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&wmcheckwin, 1);
 
 	/* EWMH support per view */
-	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
+	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32, PropModeReplace, (unsigned char *)netatom, NetLast);
 	XDeleteProperty(dpy, root, netatom[NetClientList]);
 
 	/* select events */
 	wa.cursor = cursor[CurNormal]->cursor;
 	wa.event_mask = SubstructureRedirectMask
 				  | SubstructureNotifyMask
-				  | ButtonPressMask|PointerMotionMask
+				  | ButtonPressMask | PointerMotionMask
 				  | LeaveWindowMask
 				  | StructureNotifyMask
-				  | PropertyChangeMask
-				  ;
+				  | PropertyChangeMask;
 
-	XChangeWindowAttributes(dpy, root, CWEventMask|CWCursor, &wa);
+	XChangeWindowAttributes(dpy, root, CWEventMask | CWCursor, &wa);
 	XSelectInput(dpy, root, wa.event_mask);
 	grabkeys();
 
@@ -168,18 +167,25 @@ static void cleanup(void){
 	monitor_t *m;
 	size_t i;
 
+
 	action_view(&a);
 	selmon->lt[selmon->sellt] = &foo;
-	for (m = mons; m; m = m->next)
-		while (m->stack)
+	for(m=mons; m; m=m->next){
+		while(m->stack)
 			unmanage(m->stack, 0);
+	}
+
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
-	while (mons)
+
+	while(mons)
 		cleanupmon(mons);
-	for (i = 0; i < CurLast; i++)
+
+	for(i=0; i<CurLast; i++)
 		drw_cur_free(drw, cursor[i]);
-	for (i = 0; i < ncolors; i++)
+
+	for(i=0; i<ncolors; i++)
 		free(scheme[i]);
+
 	free(scheme);
 	XDestroyWindow(dpy, wmcheckwin);
 	drw_free(drw);
@@ -194,31 +200,37 @@ static void scan(void){
 	Window d1, d2, *wins = NULL;
 	XWindowAttributes wa;
 
-	if (XQueryTree(dpy, root, &d1, &d2, &wins, &num)) {
-		for (i = 0; i < num; i++) {
-			if (!XGetWindowAttributes(dpy, wins[i], &wa)
-			|| wa.override_redirect || XGetTransientForHint(dpy, wins[i], &d1))
+
+	if(XQueryTree(dpy, root, &d1, &d2, &wins, &num)){
+		for(i=0; i<num; i++){
+			if(!XGetWindowAttributes(dpy, wins[i], &wa) || wa.override_redirect || XGetTransientForHint(dpy, wins[i], &d1))
 				continue;
-			if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState)
+
+			if(wa.map_state == IsViewable || getstate(wins[i]) == IconicState)
 				manage(wins[i], &wa);
 		}
-		for (i = 0; i < num; i++) { /* now the transients */
-			if (!XGetWindowAttributes(dpy, wins[i], &wa))
+
+		for(i=0; i<num; i++){ /* now the transients */
+			if(!XGetWindowAttributes(dpy, wins[i], &wa))
 				continue;
-			if (XGetTransientForHint(dpy, wins[i], &d1)
-			&& (wa.map_state == IsViewable || getstate(wins[i]) == IconicState))
+
+			if(XGetTransientForHint(dpy, wins[i], &d1) && (wa.map_state == IsViewable || getstate(wins[i]) == IconicState))
 				manage(wins[i], &wa);
 		}
-		if (wins)
+
+		if(wins)
 			XFree(wins);
 	}
 }
 
 static void run(void){
 	XEvent ev;
+
+
 	/* main event loop */
 	XSync(dpy, False);
-	while (running > 0 && !XNextEvent(dpy, &ev))
+
+	while(running > 0 && !XNextEvent(dpy, &ev))
 		handle_event(&ev);
 }
 
@@ -239,11 +251,14 @@ static long getstate(Window w){
 	unsigned long n, extra;
 	Atom real;
 
-	if (XGetWindowProperty(dpy, w, wmatom[WMState], 0L, 2L, False, wmatom[WMState],
-		&real, &format, &n, &extra, (unsigned char **)&p) != Success)
+
+	if(XGetWindowProperty(dpy, w, wmatom[WMState], 0L, 2L, False, wmatom[WMState], &real, &format, &n, &extra, (unsigned char **)&p) != Success)
 		return -1;
-	if (n != 0)
+
+	if(n != 0)
 		result = *p;
+
 	XFree(p);
+
 	return result;
 }

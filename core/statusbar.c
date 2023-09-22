@@ -1,7 +1,7 @@
 #include <X11/Xatom.h>
-#include <dwm.h>
 #include <client.h>
 #include <colors.h>
+#include <dwm.h>
 
 
 /* local/static prototypes */
@@ -20,54 +20,62 @@ void drawbar(monitor_t *m){
 	unsigned int i, occ = 0, urg = 0;
 	client_t *c;
 
-	if (!m->showbar)
+
+	if(!m->showbar)
 		return;
 
 	/* draw status first so it can be overdrawn by tags later */
-	if (m == selmon) { /* status is only drawn on selected monitor */
+	if(m == selmon){				   /* status is only drawn on selected monitor */
 		drw_setscheme(drw, scheme[SchemeNorm]);
 		tw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
 		drw_text(drw, m->ww - tw, 0, tw, bar_height, 0, stext, 0);
 	}
 
-	for (c = m->clients; c; c = c->next) {
+	for(c=m->clients; c; c=c->next){
 		occ |= c->tags;
-		if (c->isurgent)
+		if(c->isurgent)
 			urg |= c->tags;
 	}
+
 	x = 0;
-	for (i = 0; i < ntags; i++) {
+
+	for(i=0; i<ntags; i++){
 		w = TEXTW(tags[i]);
 		drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
 		drw_text(drw, x, 0, w, bar_height, lrpad / 2, tags[i], urg & 1 << i);
-		if (occ & 1 << i)
-			drw_rect(drw, x + boxs, boxs, boxw, boxw,
-				m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
-				urg & 1 << i);
+
+		if(occ & 1 << i)
+			drw_rect(drw, x + boxs, boxs, boxw, boxw, m == selmon && selmon->sel && selmon->sel->tags & 1 << i, urg & 1 << i);
+
 		x += w;
 	}
+
 	w = TEXTW(m->ltsymbol);
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	x = drw_text(drw, x, 0, w, bar_height, lrpad / 2, m->ltsymbol, 0);
 
-	if ((w = m->ww - tw - x) > bar_height) {
-		if (m->sel) {
+	if((w = m->ww - tw - x) > bar_height){
+		if(m->sel){
 			drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
 			drw_text(drw, x, 0, w, bar_height, lrpad / 2, m->sel->name, 0);
-			if (m->sel->isfloating)
+
+			if(m->sel->isfloating)
 				drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
-		} else {
+		}
+		else{
 			drw_setscheme(drw, scheme[SchemeNorm]);
 			drw_rect(drw, x, 0, w, bar_height, 1, 1);
 		}
 	}
+
 	drw_map(drw, m->barwin, 0, 0, m->ww, bar_height);
 }
 
 void drawbars(void){
 	monitor_t *m;
 
-	for (m = mons; m; m = m->next)
+
+	for(m=mons; m; m=m->next)
 		drawbar(m);
 }
 
@@ -76,15 +84,15 @@ void updatebars(void){
 	XSetWindowAttributes wa = {
 		.override_redirect = True,
 		.background_pixmap = ParentRelative,
-		.event_mask = ButtonPressMask|ExposureMask
-	};
+		.event_mask = ButtonPressMask | ExposureMask};
 	XClassHint ch = {"dwm", "dwm"};
-	for (m = mons; m; m = m->next) {
-		if (m->barwin)
+
+
+	for(m=mons; m; m=m->next){
+		if(m->barwin)
 			continue;
-		m->barwin = XCreateWindow(dpy, root, m->wx, m->by, m->ww, bar_height, 0, DefaultDepth(dpy, screen),
-				CopyFromParent, DefaultVisual(dpy, screen),
-				CWOverrideRedirect|CWBackPixmap|CWEventMask, &wa);
+
+		m->barwin = XCreateWindow(dpy, root, m->wx, m->by, m->ww, bar_height, 0, DefaultDepth(dpy, screen), CopyFromParent, DefaultVisual(dpy, screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
 		XDefineCursor(dpy, m->barwin, cursor[CurNormal]->cursor);
 		XMapRaised(dpy, m->barwin);
 		XSetClassHint(dpy, m->barwin, &ch);
@@ -94,11 +102,13 @@ void updatebars(void){
 void updatebarpos(monitor_t *m){
 	m->wy = m->my;
 	m->wh = m->mh;
-	if (m->showbar) {
+
+	if(m->showbar){
 		m->wh -= bar_height;
 		m->by = m->topbar ? m->wy : m->wy + m->wh;
 		m->wy = m->topbar ? m->wy + bar_height : m->wy;
-	} else
+	}
+	else
 		m->by = -bar_height;
 }
 
@@ -108,7 +118,7 @@ void updatestatus(void){
 }
 
 void updatetitle(client_t *c){
-	if (!gettextprop(c->win, netatom[NetWMName], c->name, sizeof c->name))
+	if(!gettextprop(c->win, netatom[NetWMName], c->name, sizeof c->name))
 		gettextprop(c->win, XA_WM_NAME, c->name, sizeof c->name);
 }
 
@@ -119,18 +129,25 @@ static int gettextprop(Window w, Atom atom, char *text, unsigned int size){
 	int n;
 	XTextProperty name;
 
-	if (!text || size == 0)
+
+	if(!text || size == 0)
 		return 0;
+
 	text[0] = '\0';
-	if (!XGetTextProperty(dpy, w, &name, atom) || !name.nitems)
+
+	if(!XGetTextProperty(dpy, w, &name, atom) || !name.nitems)
 		return 0;
-	if (name.encoding == XA_STRING) {
-		strncpy(text, (char *)name.value, size - 1);
-	} else if (XmbTextPropertyToTextList(dpy, &name, &list, &n) >= Success && n > 0 && *list) {
+
+	if(name.encoding == XA_STRING){
+		strncpy(text, (char*)name.value, size - 1);
+	}
+	else if(XmbTextPropertyToTextList(dpy, &name, &list, &n) >= Success && n > 0 && *list){
 		strncpy(text, *list, size - 1);
 		XFreeStringList(list);
 	}
+
 	text[size - 1] = '\0';
 	XFree(name.value);
+
 	return 1;
 }

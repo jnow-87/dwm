@@ -38,7 +38,7 @@ typedef enum{
 
 
 /* prototypes */
-void die(const char *fmt, ...);
+void die(char const *fmt, ...);
 int getrootptr(int *x, int *y);
 void grabkeys(void);
 int updategeom(void);
@@ -46,17 +46,17 @@ void updatenumlockmask(void);
 
 
 /* external variables */
-extern const int lockfullscreen;
+extern int const lockfullscreen;
 extern int running;
-extern const char *tags[];
-extern unsigned int ntags;	// TODO replace with LENGTH(tags)
-extern const char *dmenucmd[];
+extern char const *tags[];
+extern unsigned int ntags; // TODO replace with LENGTH(tags)
+extern char const *dmenucmd[];
 extern char dmenumon[];
 extern int bar_height;
-extern int (*xlib_xerror_hdlr)(Display *, XErrorEvent *);	// default error handler used by xlib
+extern int (*xlib_xerror_hdlr)(Display *, XErrorEvent *); // default error handler used by xlib
 extern int screen;
-extern int sw, sh;           /* X display screen geometry width, height */
-extern int lrpad;            /* sum of left and right padding for text */
+extern int sw, sh;										  /* X display screen geometry width, height */
+extern int lrpad;										  /* sum of left and right padding for text */
 extern unsigned int numlockmask;
 extern Atom netatom[NetLast];
 extern Atom wmatom[];

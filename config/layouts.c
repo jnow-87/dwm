@@ -1,13 +1,13 @@
-#include <utils.h>
 #include <layout.h>
+#include <utils.h>
 
 
 /* global variables */
-const layout_t layouts[] = {
+layout_t const layouts[] = {
 	/* symbol     arrange function */
-	{ "[]=",      tile },    /* first entry is default */
-	{ "><>",      NULL },    /* no layout function means floating behavior */
-	{ "[M]",      monocle },
+	{ "[]=", tile }, /* first entry is default */
+	{ "><>", NULL }, /* no layout function means floating behavior */
+	{ "[M]", monocle },
 };
 
-const unsigned int nlayouts = LENGTH(layouts);
+unsigned int const nlayouts = LENGTH(layouts);

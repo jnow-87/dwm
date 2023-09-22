@@ -16,9 +16,9 @@ typedef struct monitor_t{
 	float mfact;
 	int nmaster;
 	int num;
-	int by;               /* bar geometry */
-	int mx, my, mw, mh;   /* screen size */
-	int wx, wy, ww, wh;   /* window area  */
+	int by;				/* bar geometry */
+	int mx, my, mw, mh;	/* screen size */
+	int wx, wy, ww, wh;	/* window area  */
 	unsigned int seltags;
 	unsigned int sellt;
 	unsigned int tagset[2];

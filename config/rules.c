@@ -1,9 +1,9 @@
-#include <utils.h>
 #include <rule.h>
+#include <utils.h>
 
 
 /* global variables */
-const rule_t rules[] = {
+rule_t const rules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
@@ -12,4 +12,5 @@ const rule_t rules[] = {
 	{ "Gimp",     NULL,       NULL,       0,            1,           -1 },
 	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
 };
+
 unsigned int nrules = LENGTH(rules);

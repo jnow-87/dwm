@@ -12,7 +12,6 @@
 #define HEIGHT(X)		((X)->h + 2 * (X)->bw)
 
 
-
 /* types */
 typedef struct client_t{
 	char name[256];

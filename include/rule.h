@@ -3,10 +3,10 @@
 
 
 /* types */
-typedef struct {
-	const char *class;
-	const char *instance;
-	const char *title;
+typedef struct{
+	char const *class;
+	char const *instance;
+	char const *title;
 	unsigned int tags;
 	int isfloating;
 	int monitor;

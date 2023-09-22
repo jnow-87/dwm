@@ -52,10 +52,10 @@ void drw_resize(drw_t *drw, unsigned int w, unsigned int h);
 void drw_free(drw_t *drw);
 
 // font abstraction
-unsigned int drw_fontset_getwidth(drw_t *drw, const char *text);
+unsigned int drw_fontset_getwidth(drw_t *drw, char const *text);
 
 // color scheme abstraction
-color_t *drw_scm_create(drw_t *drw, const char *names[], size_t n);
+color_t *drw_scm_create(drw_t *drw, char const *names[], size_t n);
 
 // cursor abstraction
 cursor_t *drw_cur_create(drw_t *drw, int shape);
@@ -66,7 +66,7 @@ void drw_setscheme(drw_t *drw, color_t *scm);
 
 // drawing functions
 void drw_rect(drw_t *drw, int x, int y, unsigned int w, unsigned int h, int filled, int invert);
-int drw_text(drw_t *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text, int invert);
+int drw_text(drw_t *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, char const *text, int invert);
 
 // map functions
 void drw_map(drw_t *drw, Window win, int x, int y, unsigned int w, unsigned int h);

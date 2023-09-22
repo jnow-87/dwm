@@ -1,8 +1,8 @@
-#include <config/config.h>
-#include <limits.h>
 #include <X11/X.h>
 #include <X11/keysym.h>
 #include <action.h>
+#include <config/config.h>
+#include <limits.h>
 #include <utils.h>
 
 
@@ -16,7 +16,7 @@
 	// move window to tag
 	// toggle to view windows for tag
 	// toggle add window to tag
-#define TAGKEYS(KEY,TAG) \
+#define TAGKEYS(KEY, TAG) \
 	{ ControlMask,				KEY,	action_view,		{.ui = 1 << TAG} }, \
 	{ MODKEY,					KEY,	action_tag,			{.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask,		KEY,	action_toggleview,	{.ui = 1 << TAG} }, \
@@ -25,9 +25,9 @@
 
 /* global variables */
 char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", CONFIG_FONT, "-nb", CONFIG_COL_INACT_BG, "-nf", CONFIG_COL_INACT_FG, "-sb", CONFIG_COL_ACT_BG, "-sf", CONFIG_COL_ACT_FG, NULL };
+char const *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", CONFIG_FONT, "-nb", CONFIG_COL_INACT_BG, "-nf", CONFIG_COL_INACT_FG, "-sb", CONFIG_COL_ACT_BG, "-sf", CONFIG_COL_ACT_FG, NULL };
 
-const key_map_t keys[] = {
+key_map_t const keys[] = {
 	// tag control
 	TAGKEYS(					XK_F1,	0)
 	TAGKEYS(					XK_F2,	1)
@@ -101,10 +101,10 @@ const key_map_t keys[] = {
 //	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
 };
 
-const unsigned int nkeys = LENGTH(keys);
+unsigned int const nkeys = LENGTH(keys);
 
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
-const button_map_t buttons[] = {
+button_map_t const buttons[] = {
 	// window movement/size
 	{ ClkClientWin,	MODKEY,				Button1,	action_movemouse,	{0} },
 	{ ClkClientWin,	MODKEY | ShiftMask,	Button1,	action_resizemouse,	{0} },
@@ -119,4 +119,4 @@ const button_map_t buttons[] = {
 	{ ClkTagBar,	MODKEY,				Button3,	action_toggletag,	{0} },
 };
 
-const unsigned int nbuttons = LENGTH(buttons);
+unsigned int const nbuttons = LENGTH(buttons);

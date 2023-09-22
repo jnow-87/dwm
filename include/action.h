@@ -17,47 +17,47 @@ typedef union{
 	int i;
 	unsigned int ui;
 	float f;
-	const void *v;
+	void const *v;
 } action_arg_t;
 
 typedef struct{
 	unsigned int click;
 	unsigned int mask;
 	unsigned int button;
-	void (*func)(const action_arg_t *arg);
-	const action_arg_t arg;
+	void (*func)(action_arg_t const *arg);
+	action_arg_t const arg;
 } button_map_t;
 
 typedef struct{
 	unsigned int mod;
 	KeySym keysym;
-	void (*func)(const action_arg_t *);
-	const action_arg_t arg;
+	void (*func)(action_arg_t const *);
+	action_arg_t const arg;
 } key_map_t;
 
 
 /* prototypes */
-void action_focusmon(const action_arg_t *arg);
-void action_focusstack(const action_arg_t *arg);
-void action_incnmaster(const action_arg_t *arg);
-void action_killclient(const action_arg_t *arg);
-void action_movemouse(const action_arg_t *arg);
-void action_moveclient(const action_arg_t *arg);
-void action_reszclient(const action_arg_t *arg);
-void action_quit(const action_arg_t *arg);
-void action_restart(const action_arg_t *arg);
-void action_resizemouse(const action_arg_t *arg);
-void action_setlayout(const action_arg_t *arg);
-void action_setmfact(const action_arg_t *arg);
-void action_spawn(const action_arg_t *arg);
-void action_tag(const action_arg_t *arg);
-void action_tagmon(const action_arg_t *arg);
-void action_togglebar(const action_arg_t *arg);
-void action_togglefloating(const action_arg_t *arg);
-void action_toggletag(const action_arg_t *arg);
-void action_toggleview(const action_arg_t *arg);
-void action_view(const action_arg_t *arg);
-void action_zoom(const action_arg_t *arg);
+void action_focusmon(action_arg_t const *arg);
+void action_focusstack(action_arg_t const *arg);
+void action_incnmaster(action_arg_t const *arg);
+void action_killclient(action_arg_t const *arg);
+void action_movemouse(action_arg_t const *arg);
+void action_moveclient(action_arg_t const *arg);
+void action_reszclient(action_arg_t const *arg);
+void action_quit(action_arg_t const *arg);
+void action_restart(action_arg_t const *arg);
+void action_resizemouse(action_arg_t const *arg);
+void action_setlayout(action_arg_t const *arg);
+void action_setmfact(action_arg_t const *arg);
+void action_spawn(action_arg_t const *arg);
+void action_tag(action_arg_t const *arg);
+void action_tagmon(action_arg_t const *arg);
+void action_togglebar(action_arg_t const *arg);
+void action_togglefloating(action_arg_t const *arg);
+void action_toggletag(action_arg_t const *arg);
+void action_toggleview(action_arg_t const *arg);
+void action_view(action_arg_t const *arg);
+void action_zoom(action_arg_t const *arg);
 
 
 #endif // ACTION_H
