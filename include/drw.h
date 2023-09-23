@@ -9,7 +9,7 @@
 
 
 /* macros */
-#define TEXTW(X)	(drw_fontset_getwidth(drw, (X)) + lrpad)
+#define TEXTW(X)	(drw_fontset_getwidth(dwm.drw, (X)) + dwm.lrpad)
 
 
 /* types */

@@ -4,7 +4,10 @@
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/cursorfont.h>
 #include <drw.h>
+#include <monitor.h>
 
 
 /* types */
@@ -36,6 +39,29 @@ typedef enum{
 	WMLast
 } default_atoms_t;
 
+typedef struct{
+	monitor_t *mons,
+			  *selmon;
+	int screen_width,
+		screen_height;
+	int lrpad;	/* sum of left and right padding for text */
+	int running;
+	int statusbar_height;
+	unsigned int numlock_mask;
+	drw_t *drw;
+
+	Display *dpy;
+	int screen;
+	Atom netatom[NetLast];
+	Atom wmatom[WMLast];
+	Window root;
+
+	int (*xlib_xerror_hdlr)(Display *, XErrorEvent *); // default error handler used by xlib
+
+	color_t **scheme;
+	cursor_t *cursor[CurLast];
+} dwm_t;
+
 
 /* prototypes */
 void die(char const *fmt, ...);
@@ -46,25 +72,7 @@ void updatenumlockmask(void);
 
 
 /* external variables */
-extern int const lockfullscreen;
-extern int running;
-extern char const *tags[];
-extern unsigned int ntags; // TODO replace with LENGTH(tags)
-extern char const *dmenucmd[];
-extern char dmenumon[];
-extern int bar_height;
-extern int (*xlib_xerror_hdlr)(Display *, XErrorEvent *); // default error handler used by xlib
-extern int screen;
-extern int sw, sh;										  /* X display screen geometry width, height */
-extern int lrpad;										  /* sum of left and right padding for text */
-extern unsigned int numlockmask;
-extern Atom netatom[NetLast];
-extern Atom wmatom[];
-extern Display *dpy;
-extern Window root;
-extern color_t **scheme;
-extern cursor_t *cursor[];
-extern drw_t *drw;
+extern dwm_t dwm;
 
 
 #endif // DWM_H

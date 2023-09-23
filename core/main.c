@@ -1,6 +1,3 @@
-#include <X11/X.h>
-#include <X11/Xatom.h>
-#include <X11/cursorfont.h>
 #include <client.h>
 #include <config.h>
 #include <config/config.h>
@@ -29,22 +26,10 @@ static long getstate(Window w);
 
 
 /* global variables */
-monitor_t *mons,
-	*selmon;
-Display *dpy;
-int screen;
-int sw, sh; /* X display screen geometry width, height */
-drw_t *drw;
-int lrpad;	/* sum of left and right padding for text */
-Atom netatom[NetLast];
-color_t **scheme;
-Atom wmatom[WMLast];
-Window root;
-cursor_t *cursor[CurLast];
-int running = 1;
-int bar_height;
-int (*xlib_xerror_hdlr)(Display *, XErrorEvent *); // default error handler used by xlib
-unsigned int numlockmask = 0;
+dwm_t dwm = {
+	.running = 1,
+	.numlock_mask = 0,
+};
 
 
 /* static variables */
@@ -64,7 +49,7 @@ int main(int argc, char *argv[]){
 	cleanup();
 
 	// restart
-	if(running < 0)
+	if(dwm.running < 0)
 		execvp(argv[0], argv);
 
 	return EXIT_SUCCESS;
@@ -81,7 +66,7 @@ static void setup(void){
 	if(!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
 
-	if(!(dpy = XOpenDisplay(NULL)))
+	if(!(dwm.dpy = XOpenDisplay(NULL)))
 		die("dwm: cannot open display");
 
 	check_other_wm_running();
@@ -96,56 +81,56 @@ static void setup(void){
 	while(waitpid(-1, NULL, WNOHANG) > 0);
 
 	/* init screen */
-	screen = DefaultScreen(dpy);
-	sw = DisplayWidth(dpy, screen);
-	sh = DisplayHeight(dpy, screen);
-	root = RootWindow(dpy, screen);
-	drw = drw_create(dpy, screen, root, sw, sh);
+	dwm.screen = DefaultScreen(dwm.dpy);
+	dwm.screen_width = DisplayWidth(dwm.dpy, dwm.screen);
+	dwm.screen_height = DisplayHeight(dwm.dpy, dwm.screen);
+	dwm.root = RootWindow(dwm.dpy, dwm.screen);
+	dwm.drw = drw_create(dwm.dpy, dwm.screen, dwm.root, dwm.screen_width, dwm.screen_height);
 	updategeom();
 
 	/* init atoms */
-	utf8string = XInternAtom(dpy, "UTF8_STRING", False);
-	wmatom[WMProtocols] = XInternAtom(dpy, "WM_PROTOCOLS", False);
-	wmatom[WMDelete] = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
-	wmatom[WMState] = XInternAtom(dpy, "WM_STATE", False);
-	wmatom[WMTakeFocus] = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
-	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
-	netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
-	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
-	netatom[NetWMState] = XInternAtom(dpy, "_NET_WM_STATE", False);
-	netatom[NetWMCheck] = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
-	netatom[NetWMFullscreen] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
-	netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
-	netatom[NetWMWindowTypeDialog] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
-	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
+	utf8string = XInternAtom(dwm.dpy, "UTF8_STRING", False);
+	dwm.wmatom[WMProtocols] = XInternAtom(dwm.dpy, "WM_PROTOCOLS", False);
+	dwm.wmatom[WMDelete] = XInternAtom(dwm.dpy, "WM_DELETE_WINDOW", False);
+	dwm.wmatom[WMState] = XInternAtom(dwm.dpy, "WM_STATE", False);
+	dwm.wmatom[WMTakeFocus] = XInternAtom(dwm.dpy, "WM_TAKE_FOCUS", False);
+	dwm.netatom[NetActiveWindow] = XInternAtom(dwm.dpy, "_NET_ACTIVE_WINDOW", False);
+	dwm.netatom[NetSupported] = XInternAtom(dwm.dpy, "_NET_SUPPORTED", False);
+	dwm.netatom[NetWMName] = XInternAtom(dwm.dpy, "_NET_WM_NAME", False);
+	dwm.netatom[NetWMState] = XInternAtom(dwm.dpy, "_NET_WM_STATE", False);
+	dwm.netatom[NetWMCheck] = XInternAtom(dwm.dpy, "_NET_SUPPORTING_WM_CHECK", False);
+	dwm.netatom[NetWMFullscreen] = XInternAtom(dwm.dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	dwm.netatom[NetWMWindowType] = XInternAtom(dwm.dpy, "_NET_WM_WINDOW_TYPE", False);
+	dwm.netatom[NetWMWindowTypeDialog] = XInternAtom(dwm.dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
+	dwm.netatom[NetClientList] = XInternAtom(dwm.dpy, "_NET_CLIENT_LIST", False);
 
 	/* init cursors */
-	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
-	cursor[CurResize] = drw_cur_create(drw, XC_sizing);
-	cursor[CurMove] = drw_cur_create(drw, XC_fleur);
+	dwm.cursor[CurNormal] = drw_cur_create(dwm.drw, XC_left_ptr);
+	dwm.cursor[CurResize] = drw_cur_create(dwm.drw, XC_sizing);
+	dwm.cursor[CurMove] = drw_cur_create(dwm.drw, XC_fleur);
 
 	/* init appearance */
-	scheme = ecalloc(ncolors, sizeof(color_t*));
+	dwm.scheme = ecalloc(ncolors, sizeof(color_t*));
 
 	for(int i=0; i<ncolors; i++)
-		scheme[i] = drw_scm_create(drw, colors[i], 3);
+		dwm.scheme[i] = drw_scm_create(dwm.drw, colors[i], 3);
 
 	/* init bars */
 	updatebars();
 	updatestatus();
 
 	/* supporting window for NetWMCheck */
-	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
-	XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&wmcheckwin, 1);
-	XChangeProperty(dpy, wmcheckwin, netatom[NetWMName], utf8string, 8, PropModeReplace, (unsigned char *)"dwm", 3);
-	XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&wmcheckwin, 1);
+	wmcheckwin = XCreateSimpleWindow(dwm.dpy, dwm.root, 0, 0, 1, 1, 0, 0, 0);
+	XChangeProperty(dwm.dpy, wmcheckwin, dwm.netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&wmcheckwin, 1);
+	XChangeProperty(dwm.dpy, wmcheckwin, dwm.netatom[NetWMName], utf8string, 8, PropModeReplace, (unsigned char *)"dwm", 3);
+	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&wmcheckwin, 1);
 
 	/* EWMH support per view */
-	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32, PropModeReplace, (unsigned char *)netatom, NetLast);
-	XDeleteProperty(dpy, root, netatom[NetClientList]);
+	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetSupported], XA_ATOM, 32, PropModeReplace, (unsigned char *)dwm.netatom, NetLast);
+	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList]);
 
 	/* select events */
-	wa.cursor = cursor[CurNormal]->cursor;
+	wa.cursor = dwm.cursor[CurNormal]->cursor;
 	wa.event_mask = SubstructureRedirectMask
 				  | SubstructureNotifyMask
 				  | ButtonPressMask | PointerMotionMask
@@ -153,8 +138,8 @@ static void setup(void){
 				  | StructureNotifyMask
 				  | PropertyChangeMask;
 
-	XChangeWindowAttributes(dpy, root, CWEventMask | CWCursor, &wa);
-	XSelectInput(dpy, root, wa.event_mask);
+	XChangeWindowAttributes(dwm.dpy, dwm.root, CWEventMask | CWCursor, &wa);
+	XSelectInput(dwm.dpy, dwm.root, wa.event_mask);
 	grabkeys();
 
 	focus(NULL);
@@ -169,30 +154,30 @@ static void cleanup(void){
 
 
 	action_view(&a);
-	selmon->lt[selmon->sellt] = &foo;
-	for(m=mons; m; m=m->next){
+	dwm.selmon->lt[dwm.selmon->sellt] = &foo;
+	for(m=dwm.mons; m; m=m->next){
 		while(m->stack)
 			unmanage(m->stack, 0);
 	}
 
-	XUngrabKey(dpy, AnyKey, AnyModifier, root);
+	XUngrabKey(dwm.dpy, AnyKey, AnyModifier, dwm.root);
 
-	while(mons)
-		cleanupmon(mons);
+	while(dwm.mons)
+		cleanupmon(dwm.mons);
 
 	for(i=0; i<CurLast; i++)
-		drw_cur_free(drw, cursor[i]);
+		drw_cur_free(dwm.drw, dwm.cursor[i]);
 
 	for(i=0; i<ncolors; i++)
-		free(scheme[i]);
+		free(dwm.scheme[i]);
 
-	free(scheme);
-	XDestroyWindow(dpy, wmcheckwin);
-	drw_free(drw);
-	XSync(dpy, False);
-	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
-	XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
-	XCloseDisplay(dpy);
+	free(dwm.scheme);
+	XDestroyWindow(dwm.dpy, wmcheckwin);
+	drw_free(dwm.drw);
+	XSync(dwm.dpy, False);
+	XSetInputFocus(dwm.dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
+	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow]);
+	XCloseDisplay(dwm.dpy);
 }
 
 static void scan(void){
@@ -201,9 +186,9 @@ static void scan(void){
 	XWindowAttributes wa;
 
 
-	if(XQueryTree(dpy, root, &d1, &d2, &wins, &num)){
+	if(XQueryTree(dwm.dpy, dwm.root, &d1, &d2, &wins, &num)){
 		for(i=0; i<num; i++){
-			if(!XGetWindowAttributes(dpy, wins[i], &wa) || wa.override_redirect || XGetTransientForHint(dpy, wins[i], &d1))
+			if(!XGetWindowAttributes(dwm.dpy, wins[i], &wa) || wa.override_redirect || XGetTransientForHint(dwm.dpy, wins[i], &d1))
 				continue;
 
 			if(wa.map_state == IsViewable || getstate(wins[i]) == IconicState)
@@ -211,10 +196,10 @@ static void scan(void){
 		}
 
 		for(i=0; i<num; i++){ /* now the transients */
-			if(!XGetWindowAttributes(dpy, wins[i], &wa))
+			if(!XGetWindowAttributes(dwm.dpy, wins[i], &wa))
 				continue;
 
-			if(XGetTransientForHint(dpy, wins[i], &d1) && (wa.map_state == IsViewable || getstate(wins[i]) == IconicState))
+			if(XGetTransientForHint(dwm.dpy, wins[i], &d1) && (wa.map_state == IsViewable || getstate(wins[i]) == IconicState))
 				manage(wins[i], &wa);
 		}
 
@@ -228,20 +213,20 @@ static void run(void){
 
 
 	/* main event loop */
-	XSync(dpy, False);
+	XSync(dwm.dpy, False);
 
-	while(running > 0 && !XNextEvent(dpy, &ev))
+	while(dwm.running > 0 && !XNextEvent(dwm.dpy, &ev))
 		handle_event(&ev);
 }
 
 static void check_other_wm_running(void){
-	xlib_xerror_hdlr = XSetErrorHandler(startup_xerror_hdlr);
+	dwm.xlib_xerror_hdlr = XSetErrorHandler(startup_xerror_hdlr);
 
-	/* this causes an error if some other window manager is running */
-	XSelectInput(dpy, DefaultRootWindow(dpy), SubstructureRedirectMask);
-	XSync(dpy, False);
+	/* this causes an error if some other window manager is dwm.running */
+	XSelectInput(dwm.dpy, DefaultRootWindow(dwm.dpy), SubstructureRedirectMask);
+	XSync(dwm.dpy, False);
 	XSetErrorHandler(xerror_hdlr);
-	XSync(dpy, False);
+	XSync(dwm.dpy, False);
 }
 
 static long getstate(Window w){
@@ -252,7 +237,7 @@ static long getstate(Window w){
 	Atom real;
 
 
-	if(XGetWindowProperty(dpy, w, wmatom[WMState], 0L, 2L, False, wmatom[WMState], &real, &format, &n, &extra, (unsigned char **)&p) != Success)
+	if(XGetWindowProperty(dwm.dpy, w, dwm.wmatom[WMState], 0L, 2L, False, dwm.wmatom[WMState], &real, &format, &n, &extra, (unsigned char **)&p) != Success)
 		return -1;
 
 	if(n != 0)

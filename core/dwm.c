@@ -72,21 +72,21 @@ int getrootptr(int *x, int *y){
 	Window dummy;
 
 
-	return XQueryPointer(dpy, root, &dummy, &dummy, x, y, &di, &di, &dui);
+	return XQueryPointer(dwm.dpy, dwm.root, &dummy, &dummy, x, y, &di, &di, &dui);
 }
 
 void grabkeys(void){
 	updatenumlockmask();
 	{
 		unsigned int i, j, k;
-		unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask | LockMask };
+		unsigned int modifiers[] = { 0, LockMask, dwm.numlock_mask, dwm.numlock_mask | LockMask };
 		int start, end, skip;
 		KeySym *syms;
 
 
-		XUngrabKey(dpy, AnyKey, AnyModifier, root);
-		XDisplayKeycodes(dpy, &start, &end);
-		syms = XGetKeyboardMapping(dpy, start, end - start + 1, &skip);
+		XUngrabKey(dwm.dpy, AnyKey, AnyModifier, dwm.root);
+		XDisplayKeycodes(dwm.dpy, &start, &end);
+		syms = XGetKeyboardMapping(dwm.dpy, start, end - start + 1, &skip);
 		if(!syms)
 			return;
 		for(k=start; k<=end; k++)
@@ -94,7 +94,7 @@ void grabkeys(void){
 				/* skip modifier codes, we do that ourselves */
 				if(keys[i].keysym == syms[(k - start) * skip])
 					for(j=0; j<LENGTH(modifiers); j++)
-						XGrabKey(dpy, k, keys[i].mod | modifiers[j], root, True, GrabModeAsync, GrabModeAsync);
+						XGrabKey(dwm.dpy, k, keys[i].mod | modifiers[j], dwm.root, True, GrabModeAsync, GrabModeAsync);
 		XFree(syms);
 	}
 }
@@ -105,13 +105,13 @@ int updategeom(void){
 
 
 #ifdef CONFIG_XINERAMA
-	if(XineramaIsActive(dpy)){
+	if(XineramaIsActive(dwm.dpy)){
 		client_t *c;
 		monitor_t *m;
-		XineramaScreenInfo *info = XineramaQueryScreens(dpy, &nn);
+		XineramaScreenInfo *info = XineramaQueryScreens(dwm.dpy, &nn);
 		XineramaScreenInfo *unique = NULL;
 
-		for(n=0, m=mons; m; m=m->next, n++);
+		for(n=0, m=dwm.mons; m; m=m->next, n++);
 
 		/* only consider unique geometries as separate screens */
 		unique = ecalloc(nn, sizeof(XineramaScreenInfo));
@@ -126,13 +126,13 @@ int updategeom(void){
 
 		/* new monitors if nn > n */
 		for(i=n; i<nn; i++){
-			for(m=mons; m && m->next; m=m->next);
+			for(m=dwm.mons; m && m->next; m=m->next);
 
 			if(m)	m->next = createmon();
-			else	mons = createmon();
+			else	dwm.mons = createmon();
 		}
 
-		for(i=0, m=mons; i<nn && m; m=m->next, i++){
+		for(i=0, m=dwm.mons; i<nn && m; m=m->next, i++){
 			if(i >= n
 				|| unique[i].x_org != m->mx || unique[i].y_org != m->my
 				|| unique[i].width != m->mw || unique[i].height != m->mh){
@@ -148,19 +148,19 @@ int updategeom(void){
 
 		/* removed monitors if n > nn */
 		for(i=nn; i<n; i++){
-			for(m=mons; m && m->next; m=m->next);
+			for(m=dwm.mons; m && m->next; m=m->next);
 
 			while((c = m->clients)){
 				dirty = 1;
 				m->clients = c->next;
 				detachstack(c);
-				c->mon = mons;
+				c->mon = dwm.mons;
 				attach(c);
 				attachstack(c);
 			}
 
-			if(m == selmon)
-				selmon = mons;
+			if(m == dwm.selmon)
+				dwm.selmon = dwm.mons;
 
 			cleanupmon(m);
 		}
@@ -170,20 +170,20 @@ int updategeom(void){
 	else
 #endif /* CONFIG_XINERAMA */
 	{  /* default monitor setup */
-		if(!mons)
-			mons = createmon();
+		if(!dwm.mons)
+			dwm.mons = createmon();
 
-		if(mons->mw != sw || mons->mh != sh){
+		if(dwm.mons->mw != dwm.screen_width || dwm.mons->mh != dwm.screen_height){
 			dirty = 1;
-			mons->mw = mons->ww = sw;
-			mons->mh = mons->wh = sh;
-			updatebarpos(mons);
+			dwm.mons->mw = dwm.mons->ww = dwm.screen_width;
+			dwm.mons->mh = dwm.mons->wh = dwm.screen_height;
+			updatebarpos(dwm.mons);
 		}
 	}
 
 	if(dirty){
-		selmon = mons;
-		selmon = wintomon(root);
+		dwm.selmon = dwm.mons;
+		dwm.selmon = wintomon(dwm.root);
 	}
 
 	return dirty;
@@ -194,13 +194,13 @@ void updatenumlockmask(void){
 	XModifierKeymap *modmap;
 
 
-	numlockmask = 0;
-	modmap = XGetModifierMapping(dpy);
+	dwm.numlock_mask = 0;
+	modmap = XGetModifierMapping(dwm.dpy);
 
 	for(i=0; i<8; i++){
 		for(j=0; j<modmap->max_keypermod; j++){
-			if(modmap->modifiermap[i * modmap->max_keypermod + j] == XKeysymToKeycode(dpy, XK_Num_Lock))
-				numlockmask = (1 << i);
+			if(modmap->modifiermap[i * modmap->max_keypermod + j] == XKeysymToKeycode(dwm.dpy, XK_Num_Lock))
+				dwm.numlock_mask = (1 << i);
 		}
 	}
 

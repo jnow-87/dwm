@@ -42,9 +42,4 @@ void cleanupmon(monitor_t *mon);
 void restack(monitor_t *m);
 
 
-/* external variables */
-extern monitor_t *mons,
-				 *selmon;
-
-
 #endif // MONITOR_H

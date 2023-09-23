@@ -33,24 +33,24 @@ monitor_t *dirtomon(int dir){
 
 
 	if(dir > 0){
-		if(!(m = selmon->next))
-			m = mons;
+		if(!(m = dwm.selmon->next))
+			m = dwm.mons;
 	}
-	else if(selmon == mons){
-		for(m=mons; m->next; m=m->next);
+	else if(dwm.selmon == dwm.mons){
+		for(m=dwm.mons; m->next; m=m->next);
 	}
 	else
-		for(m=mons; m->next!=selmon; m=m->next);
+		for(m=dwm.mons; m->next!=dwm.selmon; m=m->next);
 
 	return m;
 }
 
 monitor_t *recttomon(int x, int y, int w, int h){
-	monitor_t *m, *r = selmon;
+	monitor_t *m, *r = dwm.selmon;
 	int a, area = 0;
 
 
-	for(m=mons; m; m=m->next){
+	for(m=dwm.mons; m; m=m->next){
 		if((a = INTERSECT(x, y, w, h, m)) > area){
 			area = a;
 			r = m;
@@ -66,10 +66,10 @@ monitor_t *wintomon(Window w){
 	monitor_t *m;
 
 
-	if(w == root && getrootptr(&x, &y))
+	if(w == dwm.root && getrootptr(&x, &y))
 		return recttomon(x, y, 1, 1);
 
-	for(m=mons; m; m=m->next){
+	for(m=dwm.mons; m; m=m->next){
 		if(w == m->barwin)
 			return m;
 	}
@@ -77,23 +77,23 @@ monitor_t *wintomon(Window w){
 	if((c = wintoclient(w)))
 		return c->mon;
 
-	return selmon;
+	return dwm.selmon;
 }
 
 void cleanupmon(monitor_t *mon){
 	monitor_t *m;
 
 
-	if(mon != mons){
-		for(m=mons; m && m->next!=mon; m=m->next);
+	if(mon != dwm.mons){
+		for(m=dwm.mons; m && m->next!=mon; m=m->next);
 
 		m->next = mon->next;
 	}
 	else
-		mons = mons->next;
+		dwm.mons = dwm.mons->next;
 
-	XUnmapWindow(dpy, mon->barwin);
-	XDestroyWindow(dpy, mon->barwin);
+	XUnmapWindow(dwm.dpy, mon->barwin);
+	XDestroyWindow(dwm.dpy, mon->barwin);
 	free(mon);
 }
 
@@ -109,7 +109,7 @@ void restack(monitor_t *m){
 		return;
 
 	if(m->sel->isfloating || !m->lt[m->sellt]->arrange)
-		XRaiseWindow(dpy, m->sel->win);
+		XRaiseWindow(dwm.dpy, m->sel->win);
 
 	if(m->lt[m->sellt]->arrange){
 		wc.stack_mode = Below;
@@ -117,13 +117,13 @@ void restack(monitor_t *m){
 
 		for(c=m->stack; c; c=c->snext){
 			if(!c->isfloating && ISVISIBLE(c)){
-				XConfigureWindow(dpy, c->win, CWSibling | CWStackMode, &wc);
+				XConfigureWindow(dwm.dpy, c->win, CWSibling | CWStackMode, &wc);
 				wc.sibling = c->win;
 			}
 		}
 	}
 
-	XSync(dpy, False);
+	XSync(dwm.dpy, False);
 
-	while(XCheckMaskEvent(dpy, EnterWindowMask, &ev));
+	while(XCheckMaskEvent(dwm.dpy, EnterWindowMask, &ev));
 }
