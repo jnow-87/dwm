@@ -63,6 +63,10 @@ config COL_INACT_BORDER
 config XINERAMA
 	bool "xinerama"
 
+config LOG_FILE
+	qstring "log file"
+	default "~/dwm.log"
+
 # build config
 choice
 	prompt "Build type"

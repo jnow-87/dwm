@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <utils.h>
 #include <version.h>
+#include <log.h>
 
 
 /* local/static prototypes */
@@ -62,6 +63,11 @@ static void setup(void){
 	Atom utf8string;
 	struct sigaction sa;
 
+
+	if(log_init(CONFIG_LOG_FILE, true) != 0)
+		die("dwm: cannot open log-file %s\n", CONFIG_LOG_FILE);
+
+	DEBUG("dwm hello\n");
 
 	if(!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
