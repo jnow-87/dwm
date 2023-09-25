@@ -29,9 +29,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#ifdef CONFIG_XINERAMA
-# include <X11/extensions/Xinerama.h>
-#endif /* CONFIG_XINERAMA */
 #include <client.h>
 #include <colors.h>
 #include <config.h>
@@ -39,12 +36,7 @@
 #include <monitor.h>
 #include <statusbar.h>
 #include <utils.h>
-
-
-/* local/static prototypes */
-#ifdef CONFIG_XINERAMA
-static int isuniquegeom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info);
-#endif // CONFIG_XINERAMA
+#include <xinerama.h>
 
 
 /* global functions */
@@ -100,76 +92,12 @@ void grabkeys(void){
 }
 
 int updategeom(void){
-	int dirty = 0;
-	int i, j, n, nn;
+	int dirty;
 
 
-#ifdef CONFIG_XINERAMA
-	if(XineramaIsActive(dwm.dpy)){
-		client_t *c;
-		monitor_t *m;
-		XineramaScreenInfo *info = XineramaQueryScreens(dwm.dpy, &nn);
-		XineramaScreenInfo *unique = NULL;
+	dirty = xinerama_discover_monitor();
 
-		for(n=0, m=dwm.mons; m; m=m->next, n++);
-
-		/* only consider unique geometries as separate screens */
-		unique = ecalloc(nn, sizeof(XineramaScreenInfo));
-
-		for(i=0, j=0; i<nn; i++){
-			if(isuniquegeom(unique, j, &info[i]))
-				memcpy(&unique[j++], &info[i], sizeof(XineramaScreenInfo));
-		}
-
-		XFree(info);
-		nn = j;
-
-		/* new monitors if nn > n */
-		for(i=n; i<nn; i++){
-			for(m=dwm.mons; m && m->next; m=m->next);
-
-			if(m)	m->next = createmon();
-			else	dwm.mons = createmon();
-		}
-
-		for(i=0, m=dwm.mons; i<nn && m; m=m->next, i++){
-			if(i >= n
-				|| unique[i].x_org != m->mx || unique[i].y_org != m->my
-				|| unique[i].width != m->mw || unique[i].height != m->mh){
-				dirty = 1;
-				m->num = i;
-				m->mx = m->wx = unique[i].x_org;
-				m->my = m->wy = unique[i].y_org;
-				m->mw = m->ww = unique[i].width;
-				m->mh = m->wh = unique[i].height;
-				updatebarpos(m);
-			}
-		}
-
-		/* removed monitors if n > nn */
-		for(i=nn; i<n; i++){
-			for(m=dwm.mons; m && m->next; m=m->next);
-
-			while((c = m->clients)){
-				dirty = 1;
-				m->clients = c->next;
-				detachstack(c);
-				c->mon = dwm.mons;
-				attach(c);
-				attachstack(c);
-			}
-
-			if(m == dwm.selmon)
-				dwm.selmon = dwm.mons;
-
-			cleanupmon(m);
-		}
-
-		free(unique);
-	}
-	else
-#endif /* CONFIG_XINERAMA */
-	{  /* default monitor setup */
+	if(dirty < 0){
 		if(!dwm.mons)
 			dwm.mons = createmon();
 
@@ -206,16 +134,3 @@ void updatenumlockmask(void){
 
 	XFreeModifiermap(modmap);
 }
-
-
-/* local functions */
-#ifdef CONFIG_XINERAMA
-static int isuniquegeom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info){
-	while(n--){
-		if(unique[n].x_org == info->x_org && unique[n].y_org == info->y_org && unique[n].width == info->width && unique[n].height == info->height)
-			return 0;
-	}
-
-	return 1;
-}
-#endif /* CONFIG_XINERAMA */

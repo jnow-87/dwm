@@ -11,6 +11,8 @@ dwm-y := \
 	common/ \
 	xlib/
 
+dwm-$(CONFIG_XINERAMA) += xinerama.o
+
 
 # flags
 dwm-cppflags := \
