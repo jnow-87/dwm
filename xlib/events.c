@@ -132,18 +132,17 @@ static void buttonpress(XEvent *e){
 	}
 
 	for(i=0; i<nbuttons; i++){
-		if(click == buttons[i].click && buttons[i].func && buttons[i].button == ev->button
-			&& CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state))
+		if(click == buttons[i].click && buttons[i].func && buttons[i].button == ev->button && CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state))
 			buttons[i].func(click == ClkTagBar && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
 	}
 }
 
 static void clientmessage(XEvent *e){
 	XClientMessageEvent *cme = &e->xclient;
-	client_t *c = wintoclient(cme->window);
+	client_t *c;
 
 
-	if(!c)
+	if((c = wintoclient(cme->window)) == 0x0)
 		return;
 
 	if(cme->message_type == dwm.netatom[NetWMState]){
@@ -163,29 +162,32 @@ static void configurenotify(XEvent *e){
 	int dirty;
 
 
-	/* TODO: updategeom handling sucks, needs to be simplified */
-	if(ev->window == dwm.root){
-		dirty = (dwm.screen_width != ev->width || dwm.screen_height != ev->height);
-		dwm.screen_width = ev->width;
-		dwm.screen_height = ev->height;
+	// TODO function doesn't seem necessary
+	/* TODO: monitor_discover handling sucks, needs to be simplified */
+	if(ev->window != dwm.root)
+		return;
 
-		if(updategeom() || dirty){
-			drw_resize(dwm.drw, dwm.screen_width, dwm.statusbar_height);
-			updatebars();
+	dirty = (dwm.screen_width != ev->width || dwm.screen_height != ev->height);
+	dwm.screen_width = ev->width;
+	dwm.screen_height = ev->height;
 
-			for(m=dwm.mons; m; m=m->next){
-				for(c=m->clients; c; c=c->next){
-					if(c->isfullscreen)
-						resizeclient(c, m->mx, m->my, m->mw, m->mh);
-				}
+	if(!monitor_discover() && dirty == 0)
+		return;
 
-				XMoveResizeWindow(dwm.dpy, m->barwin, m->wx, m->by, m->ww, dwm.statusbar_height);
-			}
+	drw_resize(dwm.drw, dwm.screen_width, dwm.statusbar_height);
+	updatebars();
 
-			focus(NULL);
-			arrange(NULL);
+	for(m=dwm.mons; m; m=m->next){
+		for(c=m->clients; c; c=c->next){
+			if(c->isfullscreen)
+				resizeclient(c, m->mx, m->my, m->mw, m->mh);
 		}
+
+		XMoveResizeWindow(dwm.dpy, m->barwin, m->wx, m->by, m->ww, dwm.statusbar_height);
 	}
+
+	focus(NULL);
+	arrange(NULL);
 }
 
 static void configurerequest(XEvent *e){
@@ -252,8 +254,8 @@ static void configurerequest(XEvent *e){
 }
 
 static void destroynotify(XEvent *e){
-	client_t *c;
 	XDestroyWindowEvent *ev = &e->xdestroywindow;
+	client_t *c;
 
 
 	if((c = wintoclient(ev->window)))
@@ -261,8 +263,8 @@ static void destroynotify(XEvent *e){
 }
 
 static void expose(XEvent *e){
-	monitor_t *m;
 	XExposeEvent *ev = &e->xexpose;
+	monitor_t *m;
 
 
 	if(ev->count == 0 && (m = wintomon(ev->window)))
@@ -279,14 +281,13 @@ static void focusin(XEvent *e){
 }
 
 static void keypress(XEvent *e){
-	unsigned int i;
+	XKeyEvent *ev = &e->xkey;
 	KeySym keysym;
-	XKeyEvent *ev;
 
 
-	ev = &e->xkey;
 	keysym = XKeycodeToKeysym(dwm.dpy, (KeyCode)ev->keycode, 0);
-	for(i=0; i<nkeys; i++){
+
+	for(unsigned int i=0; i<nkeys; i++){
 		if(keysym == keys[i].keysym && CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) && keys[i].func)
 			keys[i].func(&(keys[i].arg));
 	}
@@ -333,20 +334,19 @@ static void motionnotify(XEvent *e){
 }
 
 static void propertynotify(XEvent *e){
+	XPropertyEvent *ev = &e->xproperty;
 	client_t *c;
 	Window trans;
-	XPropertyEvent *ev = &e->xproperty;
 
+
+	if(ev->state == PropertyDelete)
+		return;
 
 	if((ev->window == dwm.root) && (ev->atom == XA_WM_NAME)){
 		updatestatus();
 	}
-	else if(ev->state == PropertyDelete){
-		return; /* ignore */
-	}
 	else if((c = wintoclient(ev->window))){
 		switch(ev->atom){
-		default: break;
 		case XA_WM_TRANSIENT_FOR:
 			if(!c->isfloating && (XGetTransientForHint(dwm.dpy, c->win, &trans)) && (c->isfloating = (wintoclient(trans)) != NULL))
 				arrange(c->mon);
@@ -360,7 +360,6 @@ static void propertynotify(XEvent *e){
 			updatewmhints(c);
 			drawbars();
 			break;
-
 		}
 
 		if(ev->atom == XA_WM_NAME || ev->atom == dwm.netatom[NetWMName]){
@@ -376,8 +375,8 @@ static void propertynotify(XEvent *e){
 }
 
 static void unmapnotify(XEvent *e){
-	client_t *c;
 	XUnmapEvent *ev = &e->xunmap;
+	client_t *c;
 
 
 	if((c = wintoclient(ev->window))){

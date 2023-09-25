@@ -92,7 +92,8 @@ static void setup(void){
 	dwm.screen_height = DisplayHeight(dwm.dpy, dwm.screen);
 	dwm.root = RootWindow(dwm.dpy, dwm.screen);
 	dwm.drw = drw_create(dwm.dpy, dwm.screen, dwm.root, dwm.screen_width, dwm.screen_height);
-	updategeom();
+
+	monitor_discover();
 
 	/* init atoms */
 	utf8string = XInternAtom(dwm.dpy, "UTF8_STRING", False);
@@ -100,6 +101,7 @@ static void setup(void){
 	dwm.wmatom[WMDelete] = XInternAtom(dwm.dpy, "WM_DELETE_WINDOW", False);
 	dwm.wmatom[WMState] = XInternAtom(dwm.dpy, "WM_STATE", False);
 	dwm.wmatom[WMTakeFocus] = XInternAtom(dwm.dpy, "WM_TAKE_FOCUS", False);
+
 	dwm.netatom[NetActiveWindow] = XInternAtom(dwm.dpy, "_NET_ACTIVE_WINDOW", False);
 	dwm.netatom[NetSupported] = XInternAtom(dwm.dpy, "_NET_SUPPORTED", False);
 	dwm.netatom[NetWMName] = XInternAtom(dwm.dpy, "_NET_WM_NAME", False);
@@ -126,23 +128,30 @@ static void setup(void){
 	updatestatus();
 
 	/* supporting window for NetWMCheck */
+	// this is a requirement to indicate a conforming window manager, cf.
+	// https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html#idm45771211439200
 	wmcheckwin = XCreateSimpleWindow(dwm.dpy, dwm.root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dwm.dpy, wmcheckwin, dwm.netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&wmcheckwin, 1);
 	XChangeProperty(dwm.dpy, wmcheckwin, dwm.netatom[NetWMName], utf8string, 8, PropModeReplace, (unsigned char *)"dwm", 3);
 	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&wmcheckwin, 1);
 
-	/* EWMH support per view */
+	/* extended window manager hints (EWMH) support per view */
 	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetSupported], XA_ATOM, 32, PropModeReplace, (unsigned char *)dwm.netatom, NetLast);
 	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList]);
 
 	/* select events */
 	wa.cursor = dwm.cursor[CurNormal]->cursor;
+
+	// TODO
+	// 	the list doesn't seem correct, cf. notes
 	wa.event_mask = SubstructureRedirectMask
 				  | SubstructureNotifyMask
-				  | ButtonPressMask | PointerMotionMask
+				  | ButtonPressMask
+				  | PointerMotionMask
 				  | LeaveWindowMask
 				  | StructureNotifyMask
-				  | PropertyChangeMask;
+				  | PropertyChangeMask
+				  ;
 
 	XChangeWindowAttributes(dwm.dpy, dwm.root, CWEventMask | CWCursor, &wa);
 	XSelectInput(dwm.dpy, dwm.root, wa.event_mask);
@@ -187,31 +196,32 @@ static void cleanup(void){
 }
 
 static void scan(void){
-	unsigned int i, num;
-	Window d1, d2, *wins = NULL;
+	unsigned int nchilds;
+	Window dummy;
+	Window *childs;
 	XWindowAttributes wa;
 
 
-	if(XQueryTree(dwm.dpy, dwm.root, &d1, &d2, &wins, &num)){
-		for(i=0; i<num; i++){
-			if(!XGetWindowAttributes(dwm.dpy, wins[i], &wa) || wa.override_redirect || XGetTransientForHint(dwm.dpy, wins[i], &d1))
-				continue;
+	if(!XQueryTree(dwm.dpy, dwm.root, &dummy, &dummy, &childs, &nchilds) || childs == 0x0)
+		return;
 
-			if(wa.map_state == IsViewable || getstate(wins[i]) == IconicState)
-				manage(wins[i], &wa);
-		}
+	for(unsigned int i=0; i<nchilds; i++){
+		if(!XGetWindowAttributes(dwm.dpy, childs[i], &wa) || wa.override_redirect || XGetTransientForHint(dwm.dpy, childs[i], &dummy))
+			continue;
 
-		for(i=0; i<num; i++){ /* now the transients */
-			if(!XGetWindowAttributes(dwm.dpy, wins[i], &wa))
-				continue;
-
-			if(XGetTransientForHint(dwm.dpy, wins[i], &d1) && (wa.map_state == IsViewable || getstate(wins[i]) == IconicState))
-				manage(wins[i], &wa);
-		}
-
-		if(wins)
-			XFree(wins);
+		if(wa.map_state == IsViewable || getstate(childs[i]) == IconicState)
+			manage(childs[i], &wa);
 	}
+
+	for(unsigned int i=0; i<nchilds; i++){ /* now the transients */
+		if(!XGetWindowAttributes(dwm.dpy, childs[i], &wa))
+			continue;
+
+		if(XGetTransientForHint(dwm.dpy, childs[i], &dummy) && (wa.map_state == IsViewable || getstate(childs[i]) == IconicState))
+			manage(childs[i], &wa);
+	}
+
+	XFree(childs);
 }
 
 static void run(void){

@@ -49,7 +49,7 @@ void manage(Window w, XWindowAttributes *wa){
 	c = ecalloc(1, sizeof(client_t));
 	c->win = w;
 
-	/* geometry */
+	/* init client struct and configure the xlib client accordingly */
 	c->x = c->oldx = wa->x;
 	c->y = c->oldy = wa->y;
 	c->w = c->oldw = wa->width;
@@ -88,14 +88,19 @@ void manage(Window w, XWindowAttributes *wa){
 	grabbuttons(c, 0);
 
 	if(!c->isfloating)
-		c->isfloating = c->oldstate = trans != None || c->isfixed;
+		c->isfloating = c->oldstate = (trans != None || c->isfixed);
 
 	if(c->isfloating)
 		XRaiseWindow(dwm.dpy, c->win);
 
+	/* add client to monitor lists */
 	attach(c);
 	attachstack(c);
+
+	// add client to xserver client list for the window manager
+	// TODO make this part of attach
 	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
+
 	XMoveResizeWindow(dwm.dpy, c->win, c->x + 2 * dwm.screen_width, c->y, c->w, c->h); /* some windows require this */
 	setclientstate(c, NormalState);
 
@@ -103,9 +108,11 @@ void manage(Window w, XWindowAttributes *wa){
 		unfocus(dwm.selmon->sel, 0);
 
 	c->mon->sel = c;
-	arrange(c->mon);
 	XMapWindow(dwm.dpy, c->win);
 	focus(NULL);
+
+	// TODO move arrange out of the function to avoid calling it multiple times during startup
+	arrange(c->mon);
 }
 
 void unmanage(client_t *c, int destroyed){
@@ -169,7 +176,7 @@ void attach(client_t *c){
 }
 
 void attachstack(client_t *c){
-	c->snext = c->mon->stack;
+	c->stack_next = c->mon->stack;
 	c->mon->stack = c;
 }
 
@@ -177,12 +184,12 @@ void detachstack(client_t *c){
 	client_t **tc, *t;
 
 
-	for(tc=&c->mon->stack; *tc && *tc!=c; tc=&(*tc)->snext);
+	for(tc=&c->mon->stack; *tc && *tc!=c; tc=&(*tc)->stack_next);
 
-	*tc = c->snext;
+	*tc = c->stack_next;
 
 	if(c == c->mon->sel){
-		for(t=c->mon->stack; t && !ISVISIBLE(t); t=t->snext);
+		for(t=c->mon->stack; t && !ISVISIBLE(t); t=t->stack_next);
 
 		c->mon->sel = t;
 	}
@@ -197,7 +204,7 @@ void pop(client_t *c){
 
 void focus(client_t *c){
 	if(!c || !ISVISIBLE(c))
-		for(c=dwm.selmon->stack; c && !ISVISIBLE(c); c=c->snext);
+		for(c=dwm.selmon->stack; c && !ISVISIBLE(c); c=c->stack_next);
 
 	if(dwm.selmon->sel && dwm.selmon->sel != c)
 		unfocus(dwm.selmon->sel, 0);
@@ -248,11 +255,11 @@ void showhide(client_t *c){
 		if((!c->mon->lt[c->mon->sellt]->arrange || c->isfloating) && !c->isfullscreen)
 			resize(c, c->x, c->y, c->w, c->h, 0);
 
-		showhide(c->snext);
+		showhide(c->stack_next);
 	}
 	else{
 		/* hide clients bottom up */
-		showhide(c->snext);
+		showhide(c->stack_next);
 		XMoveWindow(dwm.dpy, c->win, WIDTH(c) * -2, c->y);
 	}
 }
@@ -437,8 +444,8 @@ static void applyrules(client_t *c){
 	c->isfloating = 0;
 	c->tags = 0;
 	XGetClassHint(dwm.dpy, c->win, &ch);
-	class = ch.res_class ? ch.res_class : 0x0;
-	instance = ch.res_name ? ch.res_name : 0x0;
+	class = ch.res_class;
+	instance = ch.res_name;
 
 	for(i=0; i<nrules; i++){
 		r = &rules[i];
@@ -580,12 +587,16 @@ static void grabbuttons(client_t *c, int focused){
 
 
 		XUngrabButton(dwm.dpy, AnyButton, AnyModifier, c->win);
+
 		if(!focused)
 			XGrabButton(dwm.dpy, AnyButton, AnyModifier, c->win, False, BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
-		for(i=0; i<nbuttons; i++)
-			if(buttons[i].click == ClkClientWin)
+
+		for(i=0; i<nbuttons; i++){
+			if(buttons[i].click == ClkClientWin){
 				for(j=0; j<LENGTH(modifiers); j++)
 					XGrabButton(dwm.dpy, buttons[i].button, buttons[i].mask | modifiers[j], c->win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+			}
+		}
 	}
 }
 

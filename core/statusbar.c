@@ -1,3 +1,4 @@
+#include <config/config.h>
 #include <X11/Xatom.h>
 #include <client.h>
 #include <colors.h>
@@ -81,12 +82,13 @@ void drawbars(void){
 }
 
 void updatebars(void){
-	monitor_t *m;
 	XSetWindowAttributes wa = {
 		.override_redirect = True,
 		.background_pixmap = ParentRelative,
-		.event_mask = ButtonPressMask | ExposureMask};
+		.event_mask = ButtonPressMask | ExposureMask
+	};
 	XClassHint ch = {"dwm", "dwm"};
+	monitor_t *m;
 
 
 	for(m=dwm.mons; m; m=m->next){
@@ -106,8 +108,13 @@ void updatebarpos(monitor_t *m){
 
 	if(m->showbar){
 		m->wh -= dwm.statusbar_height;
-		m->by = m->topbar ? m->wy : m->wy + m->wh;
-		m->wy = m->topbar ? m->wy + dwm.statusbar_height : m->wy;
+
+		if(CONFIG_STATUSBAR_TOP){
+			m->by = m->wy;
+			m->wy += dwm.statusbar_height;
+		}
+		else
+			m->by = m->wy + m->wh;
 	}
 	else
 		m->by = -dwm.statusbar_height;

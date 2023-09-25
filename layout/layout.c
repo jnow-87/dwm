@@ -16,18 +16,15 @@ client_t *nexttiled(client_t *c){
 }
 
 void arrange(monitor_t *m){
-	if(!m){
-		for(m=dwm.mons; m; m=m->next)
-			showhide(m->stack);
-	}
-	else
+	if(m != 0x0){
 		showhide(m->stack);
-
-	if(m){
 		arrangemon(m);
 		restack(m);
 	}
 	else{
+		for(m=dwm.mons; m; m=m->next)
+			showhide(m->stack);
+
 		for(m=dwm.mons; m; m=m->next)
 			arrangemon(m);
 	}

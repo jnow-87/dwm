@@ -7,6 +7,12 @@
 #include <utils.h>
 
 
+/* macros */
+#define INTERSECT(x,y,w,h,m) \
+	  (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
+	* MAX(0, MIN((y)+(h),(m)->wy+(m)->wh) - MAX((y),(m)->wy)))
+
+
 /* global functions */
 monitor_t *createmon(void){
 	monitor_t *m;
@@ -19,7 +25,6 @@ monitor_t *createmon(void){
 	m->mfact = CONFIG_LAYOUT_MASTER_RATIO / 100.0;
 	m->nmaster = CONFIG_LAYOUT_MASTER_WINDOWS;
 	m->showbar = CONFIG_STATUSBAR_SHOW;
-	m->topbar = CONFIG_STATUSBAR_TOP;
 
 	m->lt[0] = &layouts[0];
 	m->lt[1] = &layouts[1 % nlayouts];
@@ -115,7 +120,7 @@ void restack(monitor_t *m){
 		wc.stack_mode = Below;
 		wc.sibling = m->barwin;
 
-		for(c=m->stack; c; c=c->snext){
+		for(c=m->stack; c; c=c->stack_next){
 			if(!c->isfloating && ISVISIBLE(c)){
 				XConfigureWindow(dwm.dpy, c->win, CWSibling | CWStackMode, &wc);
 				wc.sibling = c->win;

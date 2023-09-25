@@ -22,10 +22,11 @@ typedef struct client_t{
 	int bw, oldbw;
 	unsigned int tags;
 	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
-	struct client_t *next;
-	struct client_t *snext;
 	monitor_t *mon;
 	Window win;
+
+	struct client_t *next;			// client list per monitor
+	struct client_t *stack_next;	// client stack per monitor
 } client_t;
 
 

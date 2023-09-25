@@ -67,7 +67,7 @@ typedef struct{
 void die(char const *fmt, ...);
 int getrootptr(int *x, int *y);
 void grabkeys(void);
-int updategeom(void);
+int monitor_discover(void);
 void updatenumlockmask(void);
 
 

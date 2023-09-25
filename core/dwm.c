@@ -70,28 +70,33 @@ int getrootptr(int *x, int *y){
 void grabkeys(void){
 	updatenumlockmask();
 	{
-		unsigned int i, j, k;
 		unsigned int modifiers[] = { 0, LockMask, dwm.numlock_mask, dwm.numlock_mask | LockMask };
-		int start, end, skip;
+		int start, end, syms_per_keycode;
 		KeySym *syms;
 
 
 		XUngrabKey(dwm.dpy, AnyKey, AnyModifier, dwm.root);
 		XDisplayKeycodes(dwm.dpy, &start, &end);
-		syms = XGetKeyboardMapping(dwm.dpy, start, end - start + 1, &skip);
+		syms = XGetKeyboardMapping(dwm.dpy, start, end - start + 1, &syms_per_keycode);
+
 		if(!syms)
 			return;
-		for(k=start; k<=end; k++)
-			for(i=0; i<nkeys; i++)
+
+		for(int k=start; k<=end; k++){
+			for(int i=0; i<nkeys; i++){
 				/* skip modifier codes, we do that ourselves */
-				if(keys[i].keysym == syms[(k - start) * skip])
-					for(j=0; j<LENGTH(modifiers); j++)
+				if(keys[i].keysym == syms[(k - start) * syms_per_keycode]){
+					for(int j=0; j<LENGTH(modifiers); j++)
 						XGrabKey(dwm.dpy, k, keys[i].mod | modifiers[j], dwm.root, True, GrabModeAsync, GrabModeAsync);
+				}
+			}
+		}
+
 		XFree(syms);
 	}
 }
 
-int updategeom(void){
+int monitor_discover(void){
 	int dirty;
 
 

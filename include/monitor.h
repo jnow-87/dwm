@@ -17,13 +17,12 @@ typedef struct monitor_t{
 	int nmaster;
 	int num;
 	int by;				/* bar geometry */
-	int mx, my, mw, mh;	/* screen size */
-	int wx, wy, ww, wh;	/* window area  */
+	int mx, my, mw, mh;	/* screen size -- actual screen area*/
+	int wx, wy, ww, wh;	/* window area -- area available for windows, i.e. screen area - statusbar */
 	unsigned int seltags;
 	unsigned int sellt;
 	unsigned int tagset[2];
 	int showbar;
-	int topbar;
 	struct client_t *clients;
 	struct client_t *sel;
 	struct client_t *stack;
