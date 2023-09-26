@@ -4,13 +4,17 @@ config FONT
 	qstring "font"
 	default "monospace:size=10"
 
-config STATUSBAR_SHOW
-	bool "show statusbar"
-	default y
-
 config STATUSBAR_TOP
 	bool "show statusbar at the top"
 	default y
+
+config STATUSBAR_SPACER_LEFT
+	qstring "statusbar spacer (left)"
+	default ""
+
+config STATUSBAR_SPACER_RIGHT
+	qstring "statusbar spacer (right)"
+	default ""
 
 config BORDER_PIXEL
 	int "number of border pixels"

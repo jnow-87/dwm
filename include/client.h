@@ -62,5 +62,7 @@ int sendevent(client_t *c, Atom proto);
 void updatewindowtype(client_t *c);
 void updatewmhints(client_t *c);
 
+void updatetitle(client_t *c);
+
 
 #endif // CLIENT_H

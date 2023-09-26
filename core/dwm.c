@@ -110,7 +110,6 @@ int monitor_discover(void){
 			dirty = 1;
 			dwm.mons->mw = dwm.mons->ww = dwm.screen_width;
 			dwm.mons->mh = dwm.mons->wh = dwm.screen_height;
-			updatebarpos(dwm.mons);
 		}
 	}
 

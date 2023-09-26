@@ -4,6 +4,7 @@
 #include <config.h>
 #include <config/config.h>
 #include <dwm.h>
+#include <atoms.h>
 #include <events.h>
 #include <layout.h>
 #include <statusbar.h>
@@ -220,7 +221,7 @@ void focus(client_t *c){
 	}
 
 	dwm.mons->sel = c;
-	drawbars();
+	statusbar_draw();
 }
 
 void unfocus(client_t *c, int setfocus){
@@ -402,6 +403,11 @@ void updatewmhints(client_t *c){
 	}
 }
 
+void updatetitle(client_t *c){
+	if(!gettextprop(c->win, dwm.netatom[NetWMName], c->name, sizeof c->name))
+		gettextprop(c->win, XA_WM_NAME, c->name, sizeof c->name);
+}
+
 
 /* local functions */
 static void updateclientlist(){
@@ -452,11 +458,11 @@ static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int inter
 		if(*y + *h + 2 * c->bw <= m->wy)
 			*y = m->wy;
 	}
-	if(*h < dwm.statusbar_height)
-		*h = dwm.statusbar_height;
+	if(*h < dwm.statusbar.height)
+		*h = dwm.statusbar.height;
 
-	if(*w < dwm.statusbar_height)
-		*w = dwm.statusbar_height;
+	if(*w < dwm.statusbar.height)
+		*w = dwm.statusbar.height;
 
 	if(!c->hintsvalid)
 		updatesizehints(c);

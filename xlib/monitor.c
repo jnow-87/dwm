@@ -24,7 +24,6 @@ monitor_t *createmon(void){
 	// TODO the following values can prbably be hard-coded
 	m->mfact = CONFIG_LAYOUT_MASTER_RATIO / 100.0;
 	m->nmaster = CONFIG_LAYOUT_MASTER_WINDOWS;
-	m->showbar = CONFIG_STATUSBAR_SHOW;
 
 	m->lt[0] = &layouts[0];
 	m->lt[1] = &layouts[1 % nlayouts];
@@ -51,16 +50,13 @@ monitor_t *recttomon(int x, int y, int w, int h){
 monitor_t *wintomon(Window w){
 	int x, y;
 	client_t *c;
-	monitor_t *m;
 
 
 	if(w == dwm.root && getrootptr(&x, &y))
 		return recttomon(x, y, 1, 1);
 
-	for(m=dwm.mons; m; m=m->next){
-		if(w == m->barwin)
-			return m;
-	}
+	if(w == dwm.statusbar.win)
+		return dwm.mons;
 
 	if((c = wintoclient(w)))
 		return c->mon;
@@ -80,8 +76,7 @@ void cleanupmon(monitor_t *mon){
 	else
 		dwm.mons = dwm.mons->next;
 
-	XUnmapWindow(dwm.dpy, mon->barwin);
-	XDestroyWindow(dwm.dpy, mon->barwin);
+	statusbar_destroy();
 	free(mon);
 }
 
@@ -89,7 +84,7 @@ void restack(monitor_t *m){
 	XEvent ev;
 
 
-	drawbar(m);
+	statusbar_draw();
 
 	if(!m->sel)
 		return;

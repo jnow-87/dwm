@@ -16,18 +16,15 @@ typedef struct monitor_t{
 	float mfact;
 	int nmaster;
 	int num;
-	int by;				/* bar geometry */
 	int mx, my, mw, mh;	/* screen size -- actual screen area*/
 	int wx, wy, ww, wh;	/* window area -- area available for windows, i.e. screen area - statusbar */
 	unsigned int seltags;
 	unsigned int sellt;
 	unsigned int tagset[2];
-	int showbar;
 	struct client_t *clients;
 	struct client_t *sel;
 	struct client_t *stack;
 	struct monitor_t *next;
-	Window barwin;
 	const struct layout_t *lt[2];
 } monitor_t;
 

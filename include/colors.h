@@ -5,7 +5,8 @@
 /* types */
 typedef enum{
 	SchemeNorm,
-	SchemeSel
+	SchemeSel,
+	SchemeSpacer,
 } color_scheme_t;
 
 

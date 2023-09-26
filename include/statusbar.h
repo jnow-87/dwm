@@ -2,20 +2,28 @@
 #define STATUSBAR_H
 
 
-#include <dwm.h>
+#include <stdbool.h>
+#include <X11/X.h>
 
 
-/* external variables */
-extern char stext[];
+/* types */
+typedef struct{
+	char status[256];
+
+	Window win;
+	unsigned int height;
+	int y;
+} statusbar_t;
 
 
 /* prototypes */
-void drawbar(monitor_t *m);
-void drawbars(void);
-void updatebars(void);
-void updatebarpos(monitor_t *m);
-void updatestatus(void);
-void updatetitle(client_t *c);
+void statusbar_init(unsigned int height);
+void statusbar_destroy(void);
+
+void statusbar_update(void);
+
+void statusbar_draw(void);
+void statusbar_toggle(void);
 
 
 #endif // STATUSBAR_H

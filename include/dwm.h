@@ -8,6 +8,7 @@
 #include <X11/cursorfont.h>
 #include <drw.h>
 #include <monitor.h>
+#include <statusbar.h>
 
 
 /* types */
@@ -44,7 +45,6 @@ typedef struct{
 		screen_height;
 	int lrpad;	/* sum of left and right padding for text */
 	int running;
-	int statusbar_height;
 	unsigned int numlock_mask;
 	drw_t *drw;
 
@@ -58,6 +58,7 @@ typedef struct{
 
 	color_t **scheme;
 	cursor_t *cursor[CurLast];
+	statusbar_t statusbar;
 } dwm_t;
 
 

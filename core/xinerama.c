@@ -64,8 +64,6 @@ int xinerama_discover_monitor(void){
 			m->mw = m->ww = unique[i].width;
 			m->mh = m->wh = unique[i].height;
 
-			updatebarpos(m);
-
 			DEBUG("init monitor %d:\n", i);
 			DEBUG("  screen area: %dx%d+%d+%d\n", m->mx, m->my, m->mw, m->mh);
 			DEBUG("  window area: %dx%d+%d+%d\n", m->wx, m->wy, m->ww, m->wh);

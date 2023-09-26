@@ -1,1 +1,1 @@
-obj-y := client.o monitor.o events.o
+obj-y := atoms.o client.o monitor.o events.o

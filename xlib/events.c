@@ -95,7 +95,7 @@ static void buttonpress(XEvent *e){
 	click = ClkRootWin;
 
 	/* focus monitor if necessary */
-	if(ev->window == dwm.mons->barwin){
+	if(ev->window == dwm.statusbar.win){
 		i = x = 0;
 
 		do{
@@ -109,7 +109,7 @@ static void buttonpress(XEvent *e){
 		else if(ev->x < x + TEXTW(dwm.mons->ltsymbol)){
 			click = ClkLtSymbol;
 		}
-		else if(ev->x > dwm.mons->ww - (int)TEXTW(stext)){
+		else if(ev->x > dwm.mons->ww - (int)TEXTW(dwm.statusbar.status)){
 			click = ClkStatusText;
 		}
 		else
@@ -120,6 +120,7 @@ static void buttonpress(XEvent *e){
 		restack(dwm.mons);
 		XAllowEvents(dwm.dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
+		statusbar_draw();
 	}
 
 	for(i=0; i<nbuttons; i++){
@@ -222,7 +223,7 @@ static void expose(XEvent *e){
 
 
 	if(ev->count == 0 && (m = wintomon(ev->window)))
-		drawbar(m);
+		statusbar_draw();
 }
 
 static void focusin(XEvent *e){
@@ -279,7 +280,8 @@ static void propertynotify(XEvent *e){
 		return;
 
 	if((ev->window == dwm.root) && (ev->atom == XA_WM_NAME)){
-		updatestatus();
+		statusbar_update();
+		statusbar_draw();
 	}
 	else if((c = wintoclient(ev->window))){
 		switch(ev->atom){
@@ -295,7 +297,7 @@ static void propertynotify(XEvent *e){
 
 		case XA_WM_HINTS:
 			updatewmhints(c);
-			drawbars();
+			statusbar_draw();
 			break;
 		}
 
@@ -303,7 +305,7 @@ static void propertynotify(XEvent *e){
 			updatetitle(c);
 
 			if(c == c->mon->sel)
-				drawbar(c->mon);
+				statusbar_draw();
 		}
 
 		if(ev->atom == dwm.netatom[NetWMWindowType])

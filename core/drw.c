@@ -55,7 +55,6 @@ drw_t *drw_create(Display *dpy, int screen, Window root, unsigned int w, unsigne
 		die("no fonts could be loaded.");
 
 	dwm.lrpad = drw->fonts->h;
-	dwm.statusbar_height = drw->fonts->h + 2;
 
 	return drw;
 }

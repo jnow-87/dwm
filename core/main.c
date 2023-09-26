@@ -123,8 +123,8 @@ static void setup(void){
 		dwm.scheme[i] = drw_scm_create(dwm.drw, colors[i], 3);
 
 	/* init bars */
-	updatebars();
-	updatestatus();
+	statusbar_init(dwm.drw->fonts->h + 2);
+	statusbar_update();
 
 	/* supporting window for NetWMCheck */
 	// this is a requirement to indicate a conforming window manager, cf.

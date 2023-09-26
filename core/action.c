@@ -52,6 +52,8 @@ void action_focusstack(action_arg_t const *arg){
 		focus(c);
 		restack(dwm.mons);
 	}
+
+	statusbar_draw();
 }
 
 void action_killclient(action_arg_t const *arg){
@@ -285,8 +287,10 @@ void action_setlayout(action_arg_t const *arg){
 
 	strncpy(dwm.mons->ltsymbol, dwm.mons->lt[dwm.mons->sellt]->symbol, sizeof dwm.mons->ltsymbol);
 
-	if(dwm.mons->sel)	arrange(dwm.mons);
-	else			drawbar(dwm.mons);
+	if(dwm.mons->sel)
+		arrange(dwm.mons);
+
+	statusbar_draw();
 }
 
 void action_spawn(action_arg_t const *arg){
@@ -323,10 +327,7 @@ void action_tag(action_arg_t const *arg){
 }
 
 void action_togglebar(action_arg_t const *arg){
-	dwm.mons->showbar = !dwm.mons->showbar;
-	updatebarpos(dwm.mons);
-	XMoveResizeWindow(dwm.dpy, dwm.mons->barwin, dwm.mons->wx, dwm.mons->by, dwm.mons->ww, dwm.statusbar_height);
-	XMapRaised(dwm.dpy, dwm.mons->barwin);
+	statusbar_toggle();
 }
 
 void action_toggletag(action_arg_t const *arg){
@@ -367,4 +368,5 @@ void action_view(action_arg_t const *arg){
 
 	focus(NULL);
 	arrange(dwm.mons);
+	statusbar_draw();
 }
