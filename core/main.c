@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <utils.h>
 #include <version.h>
+#include <layout.h>
 #include <log.h>
 
 
@@ -28,6 +29,7 @@ static long getstate(Window w);
 
 /* global variables */
 dwm_t dwm = {
+	.layout = layouts + 0,
 	.running = 1,
 	.numlock_mask = 0,
 };
@@ -168,7 +170,8 @@ static void cleanup(void){
 
 
 	action_view(&a);
-	dwm.mons->lt[dwm.mons->sellt] = &foo;
+	dwm.layout = &foo;
+
 	for(m=dwm.mons; m; m=m->next){
 		while(m->stack)
 			unmanage(m->stack, 0);

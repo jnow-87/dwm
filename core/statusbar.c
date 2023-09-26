@@ -91,9 +91,9 @@ void statusbar_draw(void){
 	}
 
 	/* draw layout symbol */
-	w = TEXTW(m->ltsymbol);
+	w = TEXTW(dwm.layout->symbol);
 	drw_setscheme(dwm.drw, dwm.scheme[SchemeNorm]);
-	x = drw_text(dwm.drw, x, 0, w, bar->height, dwm.lrpad / 2, m->ltsymbol, 0);
+	x = drw_text(dwm.drw, x, 0, w, bar->height, dwm.lrpad / 2, dwm.layout->symbol, 0);
 
 	/* draw layout spacer */
 	w = TEXTW(CONFIG_STATUSBAR_SPACER_LEFT) - dwm.lrpad;

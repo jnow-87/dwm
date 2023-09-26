@@ -5,9 +5,9 @@
 /* global variables */
 layout_t const layouts[] = {
 	/* symbol     arrange function */
-	{ "[]=", tile }, /* first entry is default */
-	{ "><>", NULL }, /* no layout function means floating behavior */
-	{ "[M]", monocle },
+	{ "☯", NULL },
+	{ "⚏", tile },
+	{ "❍", monocle },
 };
 
 unsigned int const nlayouts = LENGTH(layouts);

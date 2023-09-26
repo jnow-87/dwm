@@ -88,10 +88,6 @@ key_map_t const keys[] = {
 //	{ MODKEY,                       XK_Return, zoom,           {0} },
 //	{ MODKEY,                       XK_Tab,    view,           {0} },
 //	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
-//	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
-//	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
-//	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
-//	{ MODKEY,                       XK_space,  setlayout,      {0} },
 //	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
 //	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
 //	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
@@ -111,7 +107,6 @@ button_map_t const buttons[] = {
 
 	// status bar actions
 	{ ClkLtSymbol,	0,					Button1,	action_setlayout,	{0} },
-//	{ ClkLtSymbol,	0,					Button3,	action_setlayout,	{.v = &layouts[2]} },
 	{ ClkTagBar,	0,					Button1,	action_view,		{0} },
 	{ ClkTagBar,	0,					Button3,	action_toggleview,	{0} },
 	{ ClkTagBar,	MODKEY,				Button1,	action_tag,			{0} },

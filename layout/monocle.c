@@ -15,9 +15,6 @@ void monocle(monitor_t *m){
 			n++;
 	}
 
-	if(n > 0) /* override layout symbol */
-		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
-
 	for(c=nexttiled(m->clients); c; c=nexttiled(c->next))
 		resize(c, m->x, m->y, m->width - 2 * c->bw, m->height - 2 * c->bw, 0);
 }

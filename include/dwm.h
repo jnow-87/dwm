@@ -9,6 +9,7 @@
 #include <drw.h>
 #include <monitor.h>
 #include <statusbar.h>
+#include <layout.h>
 
 
 /* types */
@@ -59,6 +60,7 @@ typedef struct{
 	color_t **scheme;
 	cursor_t *cursor[CurLast];
 	statusbar_t statusbar;
+	layout_t const *layout;
 } dwm_t;
 
 

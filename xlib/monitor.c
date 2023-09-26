@@ -25,10 +25,6 @@ monitor_t *createmon(void){
 	m->mfact = CONFIG_LAYOUT_MASTER_RATIO / 100.0;
 	m->nmaster = CONFIG_LAYOUT_MASTER_WINDOWS;
 
-	m->lt[0] = &layouts[0];
-	m->lt[1] = &layouts[1 % nlayouts];
-	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
-
 	return m;
 }
 

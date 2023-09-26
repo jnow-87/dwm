@@ -106,7 +106,7 @@ static void buttonpress(XEvent *e){
 			click = ClkTagBar;
 			arg.ui = 1 << i;
 		}
-		else if(ev->x < x + TEXTW(dwm.mons->ltsymbol)){
+		else if(ev->x < x + TEXTW(dwm.layout->symbol)){
 			click = ClkLtSymbol;
 		}
 		else if(ev->x > dwm.mons->width - (int)TEXTW(dwm.statusbar.status)){
