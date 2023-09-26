@@ -16,7 +16,6 @@
 /* local/static prototypes */
 static void buttonpress(XEvent *e);
 static void clientmessage(XEvent *e);
-static void configurenotify(XEvent *e);
 static void configurerequest(XEvent *e);
 static void destroynotify(XEvent *e);
 static void expose(XEvent *e);
@@ -24,7 +23,6 @@ static void focusin(XEvent *e);
 static void keypress(XEvent *e);
 static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
-static void motionnotify(XEvent *e);
 static void propertynotify(XEvent *e);
 static void unmapnotify(XEvent *e);
 
@@ -34,7 +32,7 @@ static void (*handler[LASTEvent])(XEvent*) = {
 	[ButtonPress] = buttonpress,
 	[ClientMessage] = clientmessage,
 	[ConfigureRequest] = configurerequest,
-	[ConfigureNotify] = configurenotify,
+	[ConfigureNotify] = 0x0,
 	[DestroyNotify] = destroynotify,
 	[EnterNotify] = 0x0,
 	[Expose] = expose,
@@ -42,7 +40,7 @@ static void (*handler[LASTEvent])(XEvent*) = {
 	[KeyPress] = keypress,
 	[MappingNotify] = mappingnotify,
 	[MapRequest] = maprequest,
-	[MotionNotify] = motionnotify,
+	[MotionNotify] = 0x0,
 	[PropertyNotify] = propertynotify,
 	[UnmapNotify] = unmapnotify
 };
@@ -153,41 +151,6 @@ static void clientmessage(XEvent *e){
 		if(c != dwm.selmon->sel && !c->isurgent)
 			seturgent(c, 1);
 	}
-}
-
-static void configurenotify(XEvent *e){
-	monitor_t *m;
-	client_t *c;
-	XConfigureEvent *ev = &e->xconfigure;
-	int dirty;
-
-
-	// TODO function doesn't seem necessary
-	/* TODO: monitor_discover handling sucks, needs to be simplified */
-	if(ev->window != dwm.root)
-		return;
-
-	dirty = (dwm.screen_width != ev->width || dwm.screen_height != ev->height);
-	dwm.screen_width = ev->width;
-	dwm.screen_height = ev->height;
-
-	if(!monitor_discover() && dirty == 0)
-		return;
-
-	drw_resize(dwm.drw, dwm.screen_width, dwm.statusbar_height);
-	updatebars();
-
-	for(m=dwm.mons; m; m=m->next){
-		for(c=m->clients; c; c=c->next){
-			if(c->isfullscreen)
-				resizeclient(c, m->mx, m->my, m->mw, m->mh);
-		}
-
-		XMoveResizeWindow(dwm.dpy, m->barwin, m->wx, m->by, m->ww, dwm.statusbar_height);
-	}
-
-	focus(NULL);
-	arrange(NULL);
 }
 
 static void configurerequest(XEvent *e){
@@ -313,24 +276,6 @@ static void maprequest(XEvent *e){
 
 	if(!wintoclient(ev->window))
 		manage(ev->window, &wa);
-}
-
-static void motionnotify(XEvent *e){
-	static monitor_t *mon = NULL;
-	monitor_t *m;
-	XMotionEvent *ev = &e->xmotion;
-
-
-	if(ev->window != dwm.root)
-		return;
-
-	if((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon && mon){
-		unfocus(dwm.selmon->sel, 1);
-		dwm.selmon = m;
-		focus(NULL);
-	}
-
-	mon = m;
 }
 
 static void propertynotify(XEvent *e){
