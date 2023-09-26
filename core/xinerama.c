@@ -89,9 +89,6 @@ int xinerama_discover_monitor(void){
 			attachstack(c);
 		}
 
-		if(m == dwm.selmon)
-			dwm.selmon = dwm.mons;
-
 		cleanupmon(m);
 	}
 

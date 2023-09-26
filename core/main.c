@@ -169,7 +169,7 @@ static void cleanup(void){
 
 
 	action_view(&a);
-	dwm.selmon->lt[dwm.selmon->sellt] = &foo;
+	dwm.mons->lt[dwm.mons->sellt] = &foo;
 	for(m=dwm.mons; m; m=m->next){
 		while(m->stack)
 			unmanage(m->stack, 0);

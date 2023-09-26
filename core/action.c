@@ -24,18 +24,18 @@ void action_focusstack(action_arg_t const *arg){
 	client_t *c = NULL, *i;
 
 
-	if(!dwm.selmon->sel || (dwm.selmon->sel->isfullscreen && CONFIG_LAYOUT_LOCK_FULLSCREEN))
+	if(!dwm.mons->sel || (dwm.mons->sel->isfullscreen && CONFIG_LAYOUT_LOCK_FULLSCREEN))
 		return;
 
 	if(arg->i > 0){
-		for(c=dwm.selmon->sel->next; c && !ISVISIBLE(c); c=c->next);
+		for(c=dwm.mons->sel->next; c && !ISVISIBLE(c); c=c->next);
 
 		if(!c){
-			for(c=dwm.selmon->clients; c && !ISVISIBLE(c); c=c->next);
+			for(c=dwm.mons->clients; c && !ISVISIBLE(c); c=c->next);
 		}
 	}
 	else{
-		for(i=dwm.selmon->clients; i!=dwm.selmon->sel; i=i->next){
+		for(i=dwm.mons->clients; i!=dwm.mons->sel; i=i->next){
 			if(ISVISIBLE(i))
 				c = i;
 		}
@@ -50,33 +50,32 @@ void action_focusstack(action_arg_t const *arg){
 
 	if(c){
 		focus(c);
-		restack(dwm.selmon);
+		restack(dwm.mons);
 	}
 }
 
 void action_killclient(action_arg_t const *arg){
-	if(!dwm.selmon->sel)
+	if(!dwm.mons->sel)
 		return;
 
-	if(!sendevent(dwm.selmon->sel, dwm.wmatom[WMDelete]))
-		killclient(dwm.selmon->sel->win);
+	if(!sendevent(dwm.mons->sel, dwm.wmatom[WMDelete]))
+		killclient(dwm.mons->sel->win);
 }
 
 void action_movemouse(action_arg_t const *arg){
 	int x, y, ocx, ocy, nx, ny;
 	client_t *c;
-	monitor_t *m;
 	XEvent ev;
 	Time lasttime = 0;
 
 
-	if(!(c = dwm.selmon->sel))
+	if(!(c = dwm.mons->sel))
 		return;
 
 	if(c->isfullscreen) /* no support moving fullscreen windows by mouse */
 		return;
 
-	restack(dwm.selmon);
+	restack(dwm.mons);
 	ocx = c->x;
 	ocy = c->y;
 
@@ -103,29 +102,23 @@ void action_movemouse(action_arg_t const *arg){
 
 			nx = ocx + (ev.xmotion.x - x);
 			ny = ocy + (ev.xmotion.y - y);
-			if(abs(dwm.selmon->wx - nx) < CONFIG_SNAP_PIXEL)
-				nx = dwm.selmon->wx;
-			else if(abs((dwm.selmon->wx + dwm.selmon->ww) - (nx + WIDTH(c))) < CONFIG_SNAP_PIXEL)
-				nx = dwm.selmon->wx + dwm.selmon->ww - WIDTH(c);
+			if(abs(dwm.mons->wx - nx) < CONFIG_SNAP_PIXEL)
+				nx = dwm.mons->wx;
+			else if(abs((dwm.mons->wx + dwm.mons->ww) - (nx + WIDTH(c))) < CONFIG_SNAP_PIXEL)
+				nx = dwm.mons->wx + dwm.mons->ww - WIDTH(c);
 
-			if(abs(dwm.selmon->wy - ny) < CONFIG_SNAP_PIXEL)
-				ny = dwm.selmon->wy;
-			else if(abs((dwm.selmon->wy + dwm.selmon->wh) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
-				ny = dwm.selmon->wy + dwm.selmon->wh - HEIGHT(c);
+			if(abs(dwm.mons->wy - ny) < CONFIG_SNAP_PIXEL)
+				ny = dwm.mons->wy;
+			else if(abs((dwm.mons->wy + dwm.mons->wh) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
+				ny = dwm.mons->wy + dwm.mons->wh - HEIGHT(c);
 
-			if(!dwm.selmon->lt[dwm.selmon->sellt]->arrange || c->isfloating)
+			if(!dwm.mons->lt[dwm.mons->sellt]->arrange || c->isfloating)
 				resize(c, nx, ny, c->w, c->h, 1);
 			break;
 		}
 	} while(ev.type != ButtonRelease);
 	
 	XUngrabPointer(dwm.dpy, CurrentTime);
-	
-	if((m = recttomon(c->x, c->y, c->w, c->h)) != dwm.selmon){
-		sendmon(c, m);
-		dwm.selmon = m;
-		focus(NULL);
-	}
 }
 
 void action_moveclient(action_arg_t const *arg){
@@ -133,26 +126,26 @@ void action_moveclient(action_arg_t const *arg){
 	client_t *c;
 
 
-	if(!(c = dwm.selmon->sel))
+	if(!(c = dwm.mons->sel))
 		return;
 
 	if(c->isfullscreen) /* no support moving fullscreen windows by mouse */
 		return;
 
-	restack(dwm.selmon);
+	restack(dwm.mons);
 
 	nx = ((int*)(arg->v))[0];
 	ny = ((int*)(arg->v))[1];
 
 	switch(nx){
-	case -INT_MAX:	nx = dwm.selmon->mx; break;
-	case INT_MAX:	nx = dwm.selmon->mx + dwm.selmon->mw - c->w - c->bw*2; break;
+	case -INT_MAX:	nx = dwm.mons->mx; break;
+	case INT_MAX:	nx = dwm.mons->mx + dwm.mons->mw - c->w - c->bw*2; break;
 	default:		nx += c->x; break;
 	}
 
 	switch(ny){
-	case -INT_MAX:	ny = dwm.selmon->my; break;
-	case INT_MAX:	ny = dwm.selmon->my + dwm.selmon->mh - c->h - c->bw*2; break;
+	case -INT_MAX:	ny = dwm.mons->my; break;
+	case INT_MAX:	ny = dwm.mons->my + dwm.mons->mh - c->h - c->bw*2; break;
 	default:		ny += c->y;
 	}
 
@@ -165,14 +158,6 @@ void action_moveclient(action_arg_t const *arg){
 	// 		=> focus moves to the other window
 	resizeclient(c, nx, ny, c->w, c->h);
 	focus(c);
-//	if (!dwm.selmon->lt[dwm.selmon->sellt]->arrange || c->isfloating)
-//		resize(c, nx, ny, c->w, c->h, 1);
-//
-//	if ((m = recttomon(c->x, c->y, c->w, c->h)) != dwm.selmon) {
-//		sendmon(c, m);
-//		dwm.selmon = m;
-//		focus(NULL);
-//	}
 }
 
 void action_reszclient(action_arg_t const *arg){
@@ -180,20 +165,20 @@ void action_reszclient(action_arg_t const *arg){
 	client_t *c;
 
 
-	if(!(c = dwm.selmon->sel))
+	if(!(c = dwm.mons->sel))
 		return;
 
 	if(c->isfullscreen) /* no support moving fullscreen windows by mouse */
 		return;
 
-	restack(dwm.selmon);
+	restack(dwm.mons);
 
 	nw = ((int*)(arg->v))[0];
 	nh = ((int*)(arg->v))[1];
 
 	if(nw == INT_MAX){
-		nx = dwm.selmon->mx;
-		nw = dwm.selmon->mw - c->bw * 2;
+		nx = dwm.mons->mx;
+		nw = dwm.mons->mw - c->bw * 2;
 
 		if(c->x == nx && c->w == nw){
 			nx = c->oldx;
@@ -206,8 +191,8 @@ void action_reszclient(action_arg_t const *arg){
 	}
 
 	if(nh == INT_MAX){
-		ny = dwm.selmon->my;
-		nh = dwm.selmon->mh - c->bw * 2;
+		ny = dwm.mons->my;
+		nh = dwm.mons->mh - c->bw * 2;
 
 		if(c->y == ny && c->h == nh){
 			ny = c->oldy;
@@ -243,18 +228,17 @@ void action_restart(action_arg_t const *arg){
 void action_resizemouse(action_arg_t const *arg){
 	int ocx, ocy, nw, nh;
 	client_t *c;
-	monitor_t *m;
 	XEvent ev;
 	Time lasttime = 0;
 
 
-	if(!(c = dwm.selmon->sel))
+	if(!(c = dwm.mons->sel))
 		return;
 
 	if(c->isfullscreen) /* no support resizing fullscreen windows by mouse */
 		return;
 
-	restack(dwm.selmon);
+	restack(dwm.mons);
 	ocx = c->x;
 	ocy = c->y;
 
@@ -281,7 +265,7 @@ void action_resizemouse(action_arg_t const *arg){
 			nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
 			nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
 
-			if(!dwm.selmon->lt[dwm.selmon->sellt]->arrange || c->isfloating)
+			if(!dwm.mons->lt[dwm.mons->sellt]->arrange || c->isfloating)
 				resize(c, c->x, c->y, nw, nh, 1);
 
 			break;
@@ -292,25 +276,19 @@ void action_resizemouse(action_arg_t const *arg){
 	XUngrabPointer(dwm.dpy, CurrentTime);
 
 	while(XCheckMaskEvent(dwm.dpy, EnterWindowMask, &ev));
-
-	if((m = recttomon(c->x, c->y, c->w, c->h)) != dwm.selmon){
-		sendmon(c, m);
-		dwm.selmon = m;
-		focus(NULL);
-	}
 }
 
 void action_setlayout(action_arg_t const *arg){
-	if(!arg || !arg->v || arg->v != dwm.selmon->lt[dwm.selmon->sellt])
-		dwm.selmon->sellt ^= 1;
+	if(!arg || !arg->v || arg->v != dwm.mons->lt[dwm.mons->sellt])
+		dwm.mons->sellt ^= 1;
 
 	if(arg && arg->v)
-		dwm.selmon->lt[dwm.selmon->sellt] = (layout_t*)arg->v;
+		dwm.mons->lt[dwm.mons->sellt] = (layout_t*)arg->v;
 
-	strncpy(dwm.selmon->ltsymbol, dwm.selmon->lt[dwm.selmon->sellt]->symbol, sizeof dwm.selmon->ltsymbol);
+	strncpy(dwm.mons->ltsymbol, dwm.mons->lt[dwm.mons->sellt]->symbol, sizeof dwm.mons->ltsymbol);
 
-	if(dwm.selmon->sel)	arrange(dwm.selmon);
-	else			drawbar(dwm.selmon);
+	if(dwm.mons->sel)	arrange(dwm.mons);
+	else			drawbar(dwm.mons);
 }
 
 void action_spawn(action_arg_t const *arg){
@@ -320,7 +298,7 @@ void action_spawn(action_arg_t const *arg){
 	// TODO
 	//	why is this needed
 //	if(arg->v == dmenucmd)
-//		dmenumon[0] = '0' + dwm.selmon->num;
+//		dmenumon[0] = '0' + dwm.mons->num;
 
 	if(fork() == 0){
 		if(dwm.dpy)
@@ -339,71 +317,71 @@ void action_spawn(action_arg_t const *arg){
 }
 
 void action_tag(action_arg_t const *arg){
-	if(dwm.selmon->sel && arg->ui & TAGMASK){
-		dwm.selmon->sel->tags = arg->ui & TAGMASK;
+	if(dwm.mons->sel && arg->ui & TAGMASK){
+		dwm.mons->sel->tags = arg->ui & TAGMASK;
 		focus(NULL);
-		arrange(dwm.selmon);
+		arrange(dwm.mons);
 	}
 }
 
 void action_togglebar(action_arg_t const *arg){
-	dwm.selmon->showbar = !dwm.selmon->showbar;
-	updatebarpos(dwm.selmon);
-	XMoveResizeWindow(dwm.dpy, dwm.selmon->barwin, dwm.selmon->wx, dwm.selmon->by, dwm.selmon->ww, dwm.statusbar_height);
-	XMapRaised(dwm.dpy, dwm.selmon->barwin);
+	dwm.mons->showbar = !dwm.mons->showbar;
+	updatebarpos(dwm.mons);
+	XMoveResizeWindow(dwm.dpy, dwm.mons->barwin, dwm.mons->wx, dwm.mons->by, dwm.mons->ww, dwm.statusbar_height);
+	XMapRaised(dwm.dpy, dwm.mons->barwin);
 }
 
 void action_togglefloating(action_arg_t const *arg){
-	if(!dwm.selmon->sel)
+	if(!dwm.mons->sel)
 		return;
 
-	if(dwm.selmon->sel->isfullscreen) /* no support for fullscreen windows */
+	if(dwm.mons->sel->isfullscreen) /* no support for fullscreen windows */
 		return;
 
-	dwm.selmon->sel->isfloating = !dwm.selmon->sel->isfloating || dwm.selmon->sel->isfixed;
+	dwm.mons->sel->isfloating = !dwm.mons->sel->isfloating || dwm.mons->sel->isfixed;
 
-	if(dwm.selmon->sel->isfloating)
-		resize(dwm.selmon->sel, dwm.selmon->sel->x, dwm.selmon->sel->y, dwm.selmon->sel->w, dwm.selmon->sel->h, 0);
+	if(dwm.mons->sel->isfloating)
+		resize(dwm.mons->sel, dwm.mons->sel->x, dwm.mons->sel->y, dwm.mons->sel->w, dwm.mons->sel->h, 0);
 
-	arrange(dwm.selmon);
+	arrange(dwm.mons);
 }
 
 void action_toggletag(action_arg_t const *arg){
 	unsigned int newtags;
 
 
-	if(!dwm.selmon->sel)
+	if(!dwm.mons->sel)
 		return;
 
-	newtags = dwm.selmon->sel->tags ^ (arg->ui & TAGMASK);
+	newtags = dwm.mons->sel->tags ^ (arg->ui & TAGMASK);
 
 	if(newtags){
-		dwm.selmon->sel->tags = newtags;
+		dwm.mons->sel->tags = newtags;
 		focus(NULL);
-		arrange(dwm.selmon);
+		arrange(dwm.mons);
 	}
 }
 
 void action_toggleview(action_arg_t const *arg){
-	unsigned int newtagset = dwm.selmon->tagset[dwm.selmon->seltags] ^ (arg->ui & TAGMASK);
+	unsigned int newtagset = dwm.mons->tagset[dwm.mons->seltags] ^ (arg->ui & TAGMASK);
 
 
 	if(newtagset){
-		dwm.selmon->tagset[dwm.selmon->seltags] = newtagset;
+		dwm.mons->tagset[dwm.mons->seltags] = newtagset;
 		focus(NULL);
-		arrange(dwm.selmon);
+		arrange(dwm.mons);
 	}
 }
 
 void action_view(action_arg_t const *arg){
-	if((arg->ui & TAGMASK) == dwm.selmon->tagset[dwm.selmon->seltags])
+	if((arg->ui & TAGMASK) == dwm.mons->tagset[dwm.mons->seltags])
 		return;
 
-	dwm.selmon->seltags ^= 1; /* toggle sel tagset */
+	dwm.mons->seltags ^= 1; /* toggle sel tagset */
 
 	if(arg->ui & TAGMASK)
-		dwm.selmon->tagset[dwm.selmon->seltags] = arg->ui & TAGMASK;
+		dwm.mons->tagset[dwm.mons->seltags] = arg->ui & TAGMASK;
 
 	focus(NULL);
-	arrange(dwm.selmon);
+	arrange(dwm.mons);
 }

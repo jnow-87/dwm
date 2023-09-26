@@ -27,11 +27,9 @@ void drawbar(monitor_t *m){
 		return;
 
 	/* draw status first so it can be overdrawn by tags later */
-	if(m == dwm.selmon){				   /* status is only drawn on selected monitor */
-		drw_setscheme(dwm.drw, dwm.scheme[SchemeNorm]);
-		tw = TEXTW(stext) - dwm.lrpad + 2; /* 2px right padding */
-		drw_text(dwm.drw, m->ww - tw, 0, tw, dwm.statusbar_height, 0, stext, 0);
-	}
+	drw_setscheme(dwm.drw, dwm.scheme[SchemeNorm]);
+	tw = TEXTW(stext) - dwm.lrpad + 2; /* 2px right padding */
+	drw_text(dwm.drw, m->ww - tw, 0, tw, dwm.statusbar_height, 0, stext, 0);
 
 	for(c=m->clients; c; c=c->next){
 		occ |= c->tags;
@@ -47,7 +45,7 @@ void drawbar(monitor_t *m){
 		drw_text(dwm.drw, x, 0, w, dwm.statusbar_height, dwm.lrpad / 2, tags[i], urg & 1 << i);
 
 		if(occ & 1 << i)
-			drw_rect(dwm.drw, x + boxs, boxs, boxw, boxw, m == dwm.selmon && dwm.selmon->sel && dwm.selmon->sel->tags & 1 << i, urg & 1 << i);
+			drw_rect(dwm.drw, x + boxs, boxs, boxw, boxw, m == dwm.mons && dwm.mons->sel && dwm.mons->sel->tags & 1 << i, urg & 1 << i);
 
 		x += w;
 	}
@@ -58,7 +56,7 @@ void drawbar(monitor_t *m){
 
 	if((w = m->ww - tw - x) > dwm.statusbar_height){
 		if(m->sel){
-			drw_setscheme(dwm.drw, dwm.scheme[m == dwm.selmon ? SchemeSel : SchemeNorm]);
+			drw_setscheme(dwm.drw, dwm.scheme[m == dwm.mons ? SchemeSel : SchemeNorm]);
 			drw_text(dwm.drw, x, 0, w, dwm.statusbar_height, dwm.lrpad / 2, m->sel->name, 0);
 
 			if(m->sel->isfloating)
@@ -122,7 +120,7 @@ void updatebarpos(monitor_t *m){
 
 void updatestatus(void){
 	gettextprop(dwm.root, XA_WM_NAME, stext, sizeof(stext));
-	drawbar(dwm.selmon);
+	drawbar(dwm.mons);
 }
 
 void updatetitle(client_t *c){

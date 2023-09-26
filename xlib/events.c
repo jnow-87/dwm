@@ -89,20 +89,13 @@ static void buttonpress(XEvent *e){
 	unsigned int i, x, click;
 	action_arg_t arg = {0};
 	client_t *c;
-	monitor_t *m;
 	XButtonPressedEvent *ev = &e->xbutton;
 
 
 	click = ClkRootWin;
 
 	/* focus monitor if necessary */
-	if((m = wintomon(ev->window)) && m != dwm.selmon){
-		unfocus(dwm.selmon->sel, 1);
-		dwm.selmon = m;
-		focus(NULL);
-	}
-
-	if(ev->window == dwm.selmon->barwin){
+	if(ev->window == dwm.mons->barwin){
 		i = x = 0;
 
 		do{
@@ -113,10 +106,10 @@ static void buttonpress(XEvent *e){
 			click = ClkTagBar;
 			arg.ui = 1 << i;
 		}
-		else if(ev->x < x + TEXTW(dwm.selmon->ltsymbol)){
+		else if(ev->x < x + TEXTW(dwm.mons->ltsymbol)){
 			click = ClkLtSymbol;
 		}
-		else if(ev->x > dwm.selmon->ww - (int)TEXTW(stext)){
+		else if(ev->x > dwm.mons->ww - (int)TEXTW(stext)){
 			click = ClkStatusText;
 		}
 		else
@@ -124,7 +117,7 @@ static void buttonpress(XEvent *e){
 	}
 	else if((c = wintoclient(ev->window))){
 		focus(c);
-		restack(dwm.selmon);
+		restack(dwm.mons);
 		XAllowEvents(dwm.dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
 	}
@@ -148,7 +141,7 @@ static void clientmessage(XEvent *e){
 			setfullscreen(c, (cme->data.l[0] == 1 /* _NET_WM_STATE_ADD    */ || (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */ && !c->isfullscreen)));
 	}
 	else if(cme->message_type == dwm.netatom[NetActiveWindow]){
-		if(c != dwm.selmon->sel && !c->isurgent)
+		if(c != dwm.mons->sel && !c->isurgent)
 			seturgent(c, 1);
 	}
 }
@@ -164,7 +157,7 @@ static void configurerequest(XEvent *e){
 		if(ev->value_mask & CWBorderWidth){
 			c->bw = ev->border_width;
 		}
-		else if(c->isfloating || !dwm.selmon->lt[dwm.selmon->sellt]->arrange){
+		else if(c->isfloating || !dwm.mons->lt[dwm.mons->sellt]->arrange){
 			m = c->mon;
 
 			if(ev->value_mask & CWX){
@@ -239,8 +232,8 @@ static void focusin(XEvent *e){
 	XFocusChangeEvent *ev = &e->xfocus;
 
 
-	if(dwm.selmon->sel && ev->window != dwm.selmon->sel->win)
-		setfocus(dwm.selmon->sel);
+	if(dwm.mons->sel && ev->window != dwm.mons->sel->win)
+		setfocus(dwm.mons->sel);
 }
 
 static void keypress(XEvent *e){

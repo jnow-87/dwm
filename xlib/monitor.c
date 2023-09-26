@@ -34,7 +34,7 @@ monitor_t *createmon(void){
 }
 
 monitor_t *recttomon(int x, int y, int w, int h){
-	monitor_t *m, *r = dwm.selmon;
+	monitor_t *m, *r = dwm.mons;
 	int a, area = 0;
 
 
@@ -65,7 +65,7 @@ monitor_t *wintomon(Window w){
 	if((c = wintoclient(w)))
 		return c->mon;
 
-	return dwm.selmon;
+	return dwm.mons;
 }
 
 void cleanupmon(monitor_t *mon){

@@ -114,11 +114,6 @@ int monitor_discover(void){
 		}
 	}
 
-	if(dirty){
-		dwm.selmon = dwm.mons;
-		dwm.selmon = wintomon(dwm.root);
-	}
-
 	return dirty;
 }
 

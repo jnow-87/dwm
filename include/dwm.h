@@ -40,8 +40,7 @@ typedef enum{
 } default_atoms_t;
 
 typedef struct{
-	monitor_t *mons,
-			  *selmon;
+	monitor_t *mons;
 	int screen_width,
 		screen_height;
 	int lrpad;	/* sum of left and right padding for text */

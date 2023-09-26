@@ -63,7 +63,7 @@ void manage(Window w, XWindowAttributes *wa){
 		c->tags = t->tags;
 	}
 	else{
-		c->mon = dwm.selmon;
+		c->mon = dwm.mons;
 		applyrules(c);
 	}
 
@@ -104,8 +104,8 @@ void manage(Window w, XWindowAttributes *wa){
 	XMoveResizeWindow(dwm.dpy, c->win, c->x + 2 * dwm.screen_width, c->y, c->w, c->h); /* some windows require this */
 	setclientstate(c, NormalState);
 
-	if(c->mon == dwm.selmon)
-		unfocus(dwm.selmon->sel, 0);
+	if(c->mon == dwm.mons)
+		unfocus(dwm.mons->sel, 0);
 
 	c->mon->sel = c;
 	XMapWindow(dwm.dpy, c->win);
@@ -146,7 +146,7 @@ void killclient(Window win){
 	XGrabServer(dwm.dpy);
 	XSetErrorHandler(dummy_xerror_hdlr);
 	XSetCloseDownMode(dwm.dpy, DestroyAll);
-	XKillClient(dwm.dpy, dwm.selmon->sel->win);
+	XKillClient(dwm.dpy, dwm.mons->sel->win);
 	XSync(dwm.dpy, False);
 	XSetErrorHandler(xerror_hdlr);
 	XUngrabServer(dwm.dpy);
@@ -204,15 +204,12 @@ void pop(client_t *c){
 
 void focus(client_t *c){
 	if(!c || !ISVISIBLE(c))
-		for(c=dwm.selmon->stack; c && !ISVISIBLE(c); c=c->stack_next);
+		for(c=dwm.mons->stack; c && !ISVISIBLE(c); c=c->stack_next);
 
-	if(dwm.selmon->sel && dwm.selmon->sel != c)
-		unfocus(dwm.selmon->sel, 0);
+	if(dwm.mons->sel && dwm.mons->sel != c)
+		unfocus(dwm.mons->sel, 0);
 
 	if(c){
-		if(c->mon != dwm.selmon)
-			dwm.selmon = c->mon;
-
 		if(c->isurgent)
 			seturgent(c, 0);
 
@@ -227,7 +224,7 @@ void focus(client_t *c){
 		XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow]);
 	}
 
-	dwm.selmon->sel = c;
+	dwm.mons->sel = c;
 	drawbars();
 }
 
@@ -403,7 +400,7 @@ void updatewmhints(client_t *c){
 
 
 	if((wmh = XGetWMHints(dwm.dpy, c->win))){
-		if(c == dwm.selmon->sel && wmh->flags & XUrgencyHint){
+		if(c == dwm.mons->sel && wmh->flags & XUrgencyHint){
 			wmh->flags &= ~XUrgencyHint;
 			XSetWMHints(dwm.dpy, c->win, wmh);
 		}
