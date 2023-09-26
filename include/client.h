@@ -21,7 +21,7 @@ typedef struct client_t{
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
 	int bw, oldbw;
 	unsigned int tags;
-	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
+	int isfixed, isurgent, neverfocus, isfullscreen;
 	monitor_t *mon;
 	Window win;
 

@@ -10,7 +10,7 @@ static void arrangemon(monitor_t *m);
 
 /* global functions */
 client_t *nexttiled(client_t *c){
-	for(; c && (c->isfloating || !ISVISIBLE(c)); c=c->next);
+	for(; c && !ISVISIBLE(c); c=c->next);
 
 	return c;
 }

@@ -86,11 +86,7 @@ void manage(Window w, XWindowAttributes *wa){
 	XSelectInput(dwm.dpy, w, FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
 	grabbuttons(c, 0);
 
-	if(!c->isfloating)
-		c->isfloating = c->oldstate = (trans != None || c->isfixed);
-
-	if(c->isfloating)
-		XRaiseWindow(dwm.dpy, c->win);
+	XRaiseWindow(dwm.dpy, c->win);
 
 	/* add client to monitor lists */
 	attach(c);
@@ -248,7 +244,7 @@ void showhide(client_t *c){
 		/* show clients top down */
 		XMoveWindow(dwm.dpy, c->win, c->x, c->y);
 
-		if((!c->mon->lt[c->mon->sellt]->arrange || c->isfloating) && !c->isfullscreen)
+		if(!c->isfullscreen)
 			resize(c, c->x, c->y, c->w, c->h, 0);
 
 		showhide(c->stack_next);
@@ -321,17 +317,14 @@ void setfullscreen(client_t *c, int fullscreen){
 	if(fullscreen && !c->isfullscreen){
 		XChangeProperty(dwm.dpy, c->win, dwm.netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)&dwm.netatom[NetWMFullscreen], 1);
 		c->isfullscreen = 1;
-		c->oldstate = c->isfloating;
 		c->oldbw = c->bw;
 		c->bw = 0;
-		c->isfloating = 1;
 		resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 		XRaiseWindow(dwm.dpy, c->win);
 	}
 	else if(!fullscreen && c->isfullscreen){
 		XChangeProperty(dwm.dpy, c->win, dwm.netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)0, 0);
 		c->isfullscreen = 0;
-		c->isfloating = c->oldstate;
 		c->bw = c->oldbw;
 		c->x = c->oldx;
 		c->y = c->oldy;
@@ -384,14 +377,10 @@ int sendevent(client_t *c, Atom proto){
 
 void updatewindowtype(client_t *c){
 	Atom state = getatomprop(c, dwm.netatom[NetWMState]);
-	Atom wtype = getatomprop(c, dwm.netatom[NetWMWindowType]);
 
 
 	if(state == dwm.netatom[NetWMFullscreen])
 		setfullscreen(c, 1);
-
-	if(wtype == dwm.netatom[NetWMWindowTypeDialog])
-		c->isfloating = 1;
 }
 
 void updatewmhints(client_t *c){
@@ -469,46 +458,44 @@ static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int inter
 	if(*w < dwm.statusbar_height)
 		*w = dwm.statusbar_height;
 
-	if(CONFIG_LAYOUT_RESPECT_SIZE_HINTS || c->isfloating || !c->mon->lt[c->mon->sellt]->arrange){
-		if(!c->hintsvalid)
-			updatesizehints(c);
+	if(!c->hintsvalid)
+		updatesizehints(c);
 
-		/* see last two sentences in ICCCM 4.1.2.3 */
-		baseismin = c->basew == c->minw && c->baseh == c->minh;
+	/* see last two sentences in ICCCM 4.1.2.3 */
+	baseismin = c->basew == c->minw && c->baseh == c->minh;
 
-		if(!baseismin){ /* temporarily remove base dimensions */
-			*w -= c->basew;
-			*h -= c->baseh;
-		}
-
-		/* adjust for aspect limits */
-		if(c->mina > 0 && c->maxa > 0){
-			if(c->maxa < (float)*w / *h)		*w = *h * c->maxa + 0.5;
-			else if(c->mina < (float)*h / *w)	*h = *w * c->mina + 0.5;
-		}
-
-		if(baseismin){ /* increment calculation requires this */
-			*w -= c->basew;
-			*h -= c->baseh;
-		}
-
-		/* adjust for increment value */
-		if(c->incw)
-			*w -= *w % c->incw;
-
-		if(c->inch)
-			*h -= *h % c->inch;
-
-		/* restore base dimensions */
-		*w = MAX(*w + c->basew, c->minw);
-		*h = MAX(*h + c->baseh, c->minh);
-
-		if(c->maxw)
-			*w = MIN(*w, c->maxw);
-
-		if(c->maxh)
-			*h = MIN(*h, c->maxh);
+	if(!baseismin){ /* temporarily remove base dimensions */
+		*w -= c->basew;
+		*h -= c->baseh;
 	}
+
+	/* adjust for aspect limits */
+	if(c->mina > 0 && c->maxa > 0){
+		if(c->maxa < (float)*w / *h)		*w = *h * c->maxa + 0.5;
+		else if(c->mina < (float)*h / *w)	*h = *w * c->mina + 0.5;
+	}
+
+	if(baseismin){ /* increment calculation requires this */
+		*w -= c->basew;
+		*h -= c->baseh;
+	}
+
+	/* adjust for increment value */
+	if(c->incw)
+		*w -= *w % c->incw;
+
+	if(c->inch)
+		*h -= *h % c->inch;
+
+	/* restore base dimensions */
+	*w = MAX(*w + c->basew, c->minw);
+	*h = MAX(*h + c->baseh, c->minh);
+
+	if(c->maxw)
+		*w = MIN(*w, c->maxw);
+
+	if(c->maxh)
+		*h = MIN(*h, c->maxh);
 
 	return *x != c->x || *y != c->y || *w != c->w || *h != c->h;
 }

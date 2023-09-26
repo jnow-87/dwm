@@ -157,7 +157,7 @@ static void configurerequest(XEvent *e){
 		if(ev->value_mask & CWBorderWidth){
 			c->bw = ev->border_width;
 		}
-		else if(c->isfloating || !dwm.mons->lt[dwm.mons->sellt]->arrange){
+		else{
 			m = c->mon;
 
 			if(ev->value_mask & CWX){
@@ -180,10 +180,10 @@ static void configurerequest(XEvent *e){
 				c->h = ev->height;
 			}
 
-			if((c->x + c->w) > m->mx + m->mw && c->isfloating)
+			if((c->x + c->w) > m->mx + m->mw)
 				c->x = m->mx + (m->mw / 2 - WIDTH(c) / 2);	/* center in x direction */
 
-			if((c->y + c->h) > m->my + m->mh && c->isfloating)
+			if((c->y + c->h) > m->my + m->mh)
 				c->y = m->my + (m->mh / 2 - HEIGHT(c) / 2); /* center in y direction */
 
 			if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
@@ -192,8 +192,6 @@ static void configurerequest(XEvent *e){
 			if(ISVISIBLE(c))
 				XMoveResizeWindow(dwm.dpy, c->win, c->x, c->y, c->w, c->h);
 		}
-		else
-			configure(c);
 	}
 	else{
 		wc.x = ev->x;
@@ -274,7 +272,7 @@ static void maprequest(XEvent *e){
 static void propertynotify(XEvent *e){
 	XPropertyEvent *ev = &e->xproperty;
 	client_t *c;
-	Window trans;
+//	Window trans;
 
 
 	if(ev->state == PropertyDelete)
@@ -285,10 +283,11 @@ static void propertynotify(XEvent *e){
 	}
 	else if((c = wintoclient(ev->window))){
 		switch(ev->atom){
-		case XA_WM_TRANSIENT_FOR:
-			if(!c->isfloating && (XGetTransientForHint(dwm.dpy, c->win, &trans)) && (c->isfloating = (wintoclient(trans)) != NULL))
-				arrange(c->mon);
-			break;
+		// TODO check if the following is still needed with isfloating being removed
+//		case XA_WM_TRANSIENT_FOR:
+//			if(!c->isfloating && (XGetTransientForHint(dwm.dpy, c->win, &trans)) && (c->isfloating = (wintoclient(trans)) != NULL))
+//				arrange(c->mon);
+//			break;
 
 		case XA_WM_NORMAL_HINTS:
 			c->hintsvalid = 0;

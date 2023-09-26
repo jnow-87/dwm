@@ -26,7 +26,6 @@ typedef enum{
 	NetWMFullscreen,
 	NetActiveWindow,
 	NetWMWindowType,
-	NetWMWindowTypeDialog,
 	NetClientList,
 	NetLast
 } net_atom_t;

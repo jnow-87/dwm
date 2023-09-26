@@ -86,9 +86,7 @@ void cleanupmon(monitor_t *mon){
 }
 
 void restack(monitor_t *m){
-	client_t *c;
 	XEvent ev;
-	XWindowChanges wc;
 
 
 	drawbar(m);
@@ -96,21 +94,7 @@ void restack(monitor_t *m){
 	if(!m->sel)
 		return;
 
-	if(m->sel->isfloating || !m->lt[m->sellt]->arrange)
-		XRaiseWindow(dwm.dpy, m->sel->win);
-
-	if(m->lt[m->sellt]->arrange){
-		wc.stack_mode = Below;
-		wc.sibling = m->barwin;
-
-		for(c=m->stack; c; c=c->stack_next){
-			if(!c->isfloating && ISVISIBLE(c)){
-				XConfigureWindow(dwm.dpy, c->win, CWSibling | CWStackMode, &wc);
-				wc.sibling = c->win;
-			}
-		}
-	}
-
+	XRaiseWindow(dwm.dpy, m->sel->win);
 	XSync(dwm.dpy, False);
 
 	while(XCheckMaskEvent(dwm.dpy, EnterWindowMask, &ev));

@@ -112,8 +112,7 @@ void action_movemouse(action_arg_t const *arg){
 			else if(abs((dwm.mons->wy + dwm.mons->wh) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
 				ny = dwm.mons->wy + dwm.mons->wh - HEIGHT(c);
 
-			if(!dwm.mons->lt[dwm.mons->sellt]->arrange || c->isfloating)
-				resize(c, nx, ny, c->w, c->h, 1);
+			resize(c, nx, ny, c->w, c->h, 1);
 			break;
 		}
 	} while(ev.type != ButtonRelease);
@@ -265,8 +264,7 @@ void action_resizemouse(action_arg_t const *arg){
 			nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
 			nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
 
-			if(!dwm.mons->lt[dwm.mons->sellt]->arrange || c->isfloating)
-				resize(c, c->x, c->y, nw, nh, 1);
+			resize(c, c->x, c->y, nw, nh, 1);
 
 			break;
 		}
@@ -329,21 +327,6 @@ void action_togglebar(action_arg_t const *arg){
 	updatebarpos(dwm.mons);
 	XMoveResizeWindow(dwm.dpy, dwm.mons->barwin, dwm.mons->wx, dwm.mons->by, dwm.mons->ww, dwm.statusbar_height);
 	XMapRaised(dwm.dpy, dwm.mons->barwin);
-}
-
-void action_togglefloating(action_arg_t const *arg){
-	if(!dwm.mons->sel)
-		return;
-
-	if(dwm.mons->sel->isfullscreen) /* no support for fullscreen windows */
-		return;
-
-	dwm.mons->sel->isfloating = !dwm.mons->sel->isfloating || dwm.mons->sel->isfixed;
-
-	if(dwm.mons->sel->isfloating)
-		resize(dwm.mons->sel, dwm.mons->sel->x, dwm.mons->sel->y, dwm.mons->sel->w, dwm.mons->sel->h, 0);
-
-	arrange(dwm.mons);
 }
 
 void action_toggletag(action_arg_t const *arg){

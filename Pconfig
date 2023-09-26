@@ -28,10 +28,6 @@ config LAYOUT_MASTER_WINDOWS
 	int "number of windows in master area"
 	default 1
 
-config LAYOUT_RESPECT_SIZE_HINTS
-	bool "respect size hints in tiled resizals"
-	default y
-
 config LAYOUT_LOCK_FULLSCREEN
 	bool "force focus on the fullscreen window"
 	default y

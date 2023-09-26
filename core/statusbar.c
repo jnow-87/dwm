@@ -58,9 +58,7 @@ void drawbar(monitor_t *m){
 		if(m->sel){
 			drw_setscheme(dwm.drw, dwm.scheme[m == dwm.mons ? SchemeSel : SchemeNorm]);
 			drw_text(dwm.drw, x, 0, w, dwm.statusbar_height, dwm.lrpad / 2, m->sel->name, 0);
-
-			if(m->sel->isfloating)
-				drw_rect(dwm.drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
+			drw_rect(dwm.drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
 		}
 		else{
 			drw_setscheme(dwm.drw, dwm.scheme[SchemeNorm]);
