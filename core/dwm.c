@@ -106,10 +106,10 @@ int monitor_discover(void){
 		if(!dwm.mons)
 			dwm.mons = createmon();
 
-		if(dwm.mons->mw != dwm.screen_width || dwm.mons->mh != dwm.screen_height){
+		if(dwm.mons->width != dwm.screen_width || dwm.mons->height != dwm.screen_height){
 			dirty = 1;
-			dwm.mons->mw = dwm.mons->ww = dwm.screen_width;
-			dwm.mons->mh = dwm.mons->wh = dwm.screen_height;
+			dwm.mons->width = dwm.screen_width;
+			dwm.mons->height = dwm.screen_height;
 		}
 	}
 

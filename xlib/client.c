@@ -67,14 +67,14 @@ void manage(Window w, XWindowAttributes *wa){
 		c->tags = c->mon->tagset[c->mon->seltags];
 	}
 
-	if(c->x + WIDTH(c) > c->mon->wx + c->mon->ww)
-		c->x = c->mon->wx + c->mon->ww - WIDTH(c);
+	if(c->x + WIDTH(c) > c->mon->x + c->mon->width)
+		c->x = c->mon->x + c->mon->width - WIDTH(c);
 
-	if(c->y + HEIGHT(c) > c->mon->wy + c->mon->wh)
-		c->y = c->mon->wy + c->mon->wh - HEIGHT(c);
+	if(c->y + HEIGHT(c) > c->mon->y + c->mon->height)
+		c->y = c->mon->y + c->mon->height - HEIGHT(c);
 
-	c->x = MAX(c->x, c->mon->wx);
-	c->y = MAX(c->y, c->mon->wy);
+	c->x = MAX(c->x, c->mon->x);
+	c->y = MAX(c->y, c->mon->y);
 	c->bw = CONFIG_BORDER_PIXEL;
 
 	wc.border_width = c->bw;
@@ -320,7 +320,7 @@ void setfullscreen(client_t *c, int fullscreen){
 		c->isfullscreen = 1;
 		c->oldbw = c->bw;
 		c->bw = 0;
-		resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
+		resizeclient(c, c->mon->x, c->mon->y, c->mon->width, c->mon->height);
 		XRaiseWindow(dwm.dpy, c->win);
 	}
 	else if(!fullscreen && c->isfullscreen){
@@ -446,17 +446,17 @@ static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int inter
 			*y = 0;
 	}
 	else{
-		if(*x >= m->wx + m->ww)
-			*x = m->wx + m->ww - WIDTH(c);
+		if(*x >= m->x + m->width)
+			*x = m->x + m->width - WIDTH(c);
 
-		if(*y >= m->wy + m->wh)
-			*y = m->wy + m->wh - HEIGHT(c);
+		if(*y >= m->y + m->height)
+			*y = m->y + m->height - HEIGHT(c);
 
-		if(*x + *w + 2 * c->bw <= m->wx)
-			*x = m->wx;
+		if(*x + *w + 2 * c->bw <= m->x)
+			*x = m->x;
 
-		if(*y + *h + 2 * c->bw <= m->wy)
-			*y = m->wy;
+		if(*y + *h + 2 * c->bw <= m->y)
+			*y = m->y;
 	}
 	if(*h < dwm.statusbar.height)
 		*h = dwm.statusbar.height;

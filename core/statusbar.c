@@ -17,14 +17,14 @@ void statusbar_init(unsigned int height){
 
 
 	bar->height = height;
-	bar->y = CONFIG_STATUSBAR_TOP ? m->wy : m->wy + m->wh - height;
+	bar->y = CONFIG_STATUSBAR_TOP ? m->y : m->y + m->height - height;
 	bar->status[0] = 0;
 	bar->win = XCreateWindow(
 		dwm.dpy,
 		dwm.root,
-		m->wx,
+		m->x,
 		bar->y,
-		m->ww,
+		m->width,
 		height,
 		0,
 		DefaultDepth(dwm.dpy, dwm.screen),
@@ -71,7 +71,7 @@ void statusbar_draw(void){
 	/* draw status spacer */
 	w = TEXTW(CONFIG_STATUSBAR_SPACER_RIGHT) - dwm.lrpad;
 	drw_setscheme(dwm.drw, dwm.scheme[SchemeSpacer]);
-	x = drw_text(dwm.drw, m->ww - status_width - w, 0, w, bar->height, 0, CONFIG_STATUSBAR_SPACER_RIGHT, 0);
+	x = drw_text(dwm.drw, m->width - status_width - w, 0, w, bar->height, 0, CONFIG_STATUSBAR_SPACER_RIGHT, 0);
 
 	/* draw status text */
 	// draw status first so it can be overdrawn by tags later
@@ -101,12 +101,12 @@ void statusbar_draw(void){
 	x = drw_text(dwm.drw, x, 0, w, bar->height, 0, CONFIG_STATUSBAR_SPACER_LEFT, 0);
 
 	/* draw space */
-	if((w = m->ww - status_width - x) > bar->height){
+	if((w = m->width - status_width - x) > bar->height){
 		drw_setscheme(dwm.drw, dwm.scheme[SchemeSel]);
 		drw_rect(dwm.drw, x, 0, w, bar->height, 1, 1);
 	}
 
-	drw_map(dwm.drw, bar->win, 0, 0, m->ww, bar->height);
+	drw_map(dwm.drw, bar->win, 0, 0, m->width, bar->height);
 
 	/* raise */
 	// ensure the statusbar is on top of other windows
@@ -118,7 +118,7 @@ void statusbar_toggle(void){
 
 
 	if(!visible()){
-		XMoveResizeWindow(dwm.dpy, bar->win, dwm.mons->wx, bar->y, dwm.mons->ww, bar->height);
+		XMoveResizeWindow(dwm.dpy, bar->win, dwm.mons->x, bar->y, dwm.mons->width, bar->height);
 		XMapRaised(dwm.dpy, bar->win);
 	}
 	else

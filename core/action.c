@@ -104,15 +104,15 @@ void action_movemouse(action_arg_t const *arg){
 
 			nx = ocx + (ev.xmotion.x - x);
 			ny = ocy + (ev.xmotion.y - y);
-			if(abs(dwm.mons->wx - nx) < CONFIG_SNAP_PIXEL)
-				nx = dwm.mons->wx;
-			else if(abs((dwm.mons->wx + dwm.mons->ww) - (nx + WIDTH(c))) < CONFIG_SNAP_PIXEL)
-				nx = dwm.mons->wx + dwm.mons->ww - WIDTH(c);
+			if(abs(dwm.mons->x - nx) < CONFIG_SNAP_PIXEL)
+				nx = dwm.mons->x;
+			else if(abs((dwm.mons->x + dwm.mons->width) - (nx + WIDTH(c))) < CONFIG_SNAP_PIXEL)
+				nx = dwm.mons->x + dwm.mons->width - WIDTH(c);
 
-			if(abs(dwm.mons->wy - ny) < CONFIG_SNAP_PIXEL)
-				ny = dwm.mons->wy;
-			else if(abs((dwm.mons->wy + dwm.mons->wh) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
-				ny = dwm.mons->wy + dwm.mons->wh - HEIGHT(c);
+			if(abs(dwm.mons->y - ny) < CONFIG_SNAP_PIXEL)
+				ny = dwm.mons->y;
+			else if(abs((dwm.mons->y + dwm.mons->height) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
+				ny = dwm.mons->y + dwm.mons->height - HEIGHT(c);
 
 			resize(c, nx, ny, c->w, c->h, 1);
 			break;
@@ -139,14 +139,14 @@ void action_moveclient(action_arg_t const *arg){
 	ny = ((int*)(arg->v))[1];
 
 	switch(nx){
-	case -INT_MAX:	nx = dwm.mons->mx; break;
-	case INT_MAX:	nx = dwm.mons->mx + dwm.mons->mw - c->w - c->bw*2; break;
+	case -INT_MAX:	nx = dwm.mons->x; break;
+	case INT_MAX:	nx = dwm.mons->x + dwm.mons->width - c->w - c->bw*2; break;
 	default:		nx += c->x; break;
 	}
 
 	switch(ny){
-	case -INT_MAX:	ny = dwm.mons->my; break;
-	case INT_MAX:	ny = dwm.mons->my + dwm.mons->mh - c->h - c->bw*2; break;
+	case -INT_MAX:	ny = dwm.mons->y; break;
+	case INT_MAX:	ny = dwm.mons->y + dwm.mons->height - c->h - c->bw*2; break;
 	default:		ny += c->y;
 	}
 
@@ -178,8 +178,8 @@ void action_reszclient(action_arg_t const *arg){
 	nh = ((int*)(arg->v))[1];
 
 	if(nw == INT_MAX){
-		nx = dwm.mons->mx;
-		nw = dwm.mons->mw - c->bw * 2;
+		nx = dwm.mons->x;
+		nw = dwm.mons->width - c->bw * 2;
 
 		if(c->x == nx && c->w == nw){
 			nx = c->oldx;
@@ -192,8 +192,8 @@ void action_reszclient(action_arg_t const *arg){
 	}
 
 	if(nh == INT_MAX){
-		ny = dwm.mons->my;
-		nh = dwm.mons->mh - c->bw * 2;
+		ny = dwm.mons->y;
+		nh = dwm.mons->height - c->bw * 2;
 
 		if(c->y == ny && c->h == nh){
 			ny = c->oldy;

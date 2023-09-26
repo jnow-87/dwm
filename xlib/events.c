@@ -109,7 +109,7 @@ static void buttonpress(XEvent *e){
 		else if(ev->x < x + TEXTW(dwm.mons->ltsymbol)){
 			click = ClkLtSymbol;
 		}
-		else if(ev->x > dwm.mons->ww - (int)TEXTW(dwm.statusbar.status)){
+		else if(ev->x > dwm.mons->width - (int)TEXTW(dwm.statusbar.status)){
 			click = ClkStatusText;
 		}
 		else
@@ -163,12 +163,12 @@ static void configurerequest(XEvent *e){
 
 			if(ev->value_mask & CWX){
 				c->oldx = c->x;
-				c->x = m->mx + ev->x;
+				c->x = m->x + ev->x;
 			}
 
 			if(ev->value_mask & CWY){
 				c->oldy = c->y;
-				c->y = m->my + ev->y;
+				c->y = m->y + ev->y;
 			}
 
 			if(ev->value_mask & CWWidth){
@@ -181,11 +181,11 @@ static void configurerequest(XEvent *e){
 				c->h = ev->height;
 			}
 
-			if((c->x + c->w) > m->mx + m->mw)
-				c->x = m->mx + (m->mw / 2 - WIDTH(c) / 2);	/* center in x direction */
+			if((c->x + c->w) > m->x + m->width)
+				c->x = m->x + (m->width / 2 - WIDTH(c) / 2);	/* center in x direction */
 
-			if((c->y + c->h) > m->my + m->mh)
-				c->y = m->my + (m->mh / 2 - HEIGHT(c) / 2); /* center in y direction */
+			if((c->y + c->h) > m->y + m->height)
+				c->y = m->y + (m->height / 2 - HEIGHT(c) / 2); /* center in y direction */
 
 			if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
 				configure(c);

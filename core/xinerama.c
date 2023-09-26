@@ -55,18 +55,18 @@ int xinerama_discover_monitor(void){
 	}
 
 	for(i=0, m=dwm.mons; i<ninfo && m; m=m->next, i++){
-		if(i >= nmon || unique[i].x_org != m->mx || unique[i].y_org != m->my || unique[i].width != m->mw || unique[i].height != m->mh){
+		if(i >= nmon || unique[i].x_org != m->x || unique[i].y_org != m->y || unique[i].width != m->width || unique[i].height != m->height){
 			dirty = true;
 
 			m->num = i;
-			m->mx = m->wx = unique[i].x_org;
-			m->my = m->wy = unique[i].y_org;
-			m->mw = m->ww = unique[i].width;
-			m->mh = m->wh = unique[i].height;
+			m->x = unique[i].x_org;
+			m->y = unique[i].y_org;
+			m->width = unique[i].width;
+			m->height = unique[i].height;
 
 			DEBUG("init monitor %d:\n", i);
-			DEBUG("  screen area: %dx%d+%d+%d\n", m->mx, m->my, m->mw, m->mh);
-			DEBUG("  window area: %dx%d+%d+%d\n", m->wx, m->wy, m->ww, m->wh);
+			DEBUG("  screen area: %dx%d+%d+%d\n", m->x, m->y, m->width, m->height);
+			DEBUG("  window area: %dx%d+%d+%d\n", m->x, m->y, m->width, m->height);
 		}
 	}
 

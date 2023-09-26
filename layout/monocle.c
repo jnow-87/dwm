@@ -19,5 +19,5 @@ void monocle(monitor_t *m){
 		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
 
 	for(c=nexttiled(m->clients); c; c=nexttiled(c->next))
-		resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
+		resize(c, m->x, m->y, m->width - 2 * c->bw, m->height - 2 * c->bw, 0);
 }
