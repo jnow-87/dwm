@@ -1,1 +1,1 @@
-obj-y := mappings.o tags.o rules.o layouts.o colors.o
+obj-y := mappings.o tags.o layouts.o colors.o

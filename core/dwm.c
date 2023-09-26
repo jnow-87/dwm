@@ -16,7 +16,7 @@
  * on each monitor. Each client contains a bit array to indicate the tags of a
  * client.
  *
- * Keys and tagging rules are organized as arrays and defined in config.h.
+ * Keys mappings and other configurations are defined in config.h.
  *
  * To understand everything else, start reading main().
  */

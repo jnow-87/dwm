@@ -16,7 +16,6 @@
 
 /* local/static prototypes */
 static void updateclientlist();
-static void applyrules(client_t *c);
 static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int interact);
 static void detach(client_t *c);
 static Atom getatomprop(client_t *c, Atom prop);
@@ -64,7 +63,7 @@ void manage(Window w, XWindowAttributes *wa){
 	}
 	else{
 		c->mon = dwm.mons;
-		applyrules(c);
+		c->tags = c->mon->tagset[c->mon->seltags];
 	}
 
 	if(c->x + WIDTH(c) > c->mon->wx + c->mon->ww)
@@ -427,44 +426,6 @@ static void updateclientlist(){
 		for(c=m->clients; c; c=c->next)
 			XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
 	}
-}
-
-static void applyrules(client_t *c){
-	char const *class, *instance;
-	unsigned int i;
-	rule_t const *r;
-	monitor_t *m;
-	XClassHint ch = {NULL, NULL};
-
-
-	/* rule matching */
-	c->isfloating = 0;
-	c->tags = 0;
-	XGetClassHint(dwm.dpy, c->win, &ch);
-	class = ch.res_class;
-	instance = ch.res_name;
-
-	for(i=0; i<nrules; i++){
-		r = &rules[i];
-
-		if((!r->title || strstr(c->name, r->title)) && (!r->class || (class && strstr(class, r->class))) && (!r->instance || (instance && strstr(instance, r->instance)))){
-			c->isfloating = r->isfloating;
-			c->tags |= r->tags;
-
-			for(m=dwm.mons; m && m->num!=r->monitor; m=m->next);
-
-			if(m)
-				c->mon = m;
-		}
-	}
-
-	if(ch.res_class)
-		XFree(ch.res_class);
-
-	if(ch.res_name)
-		XFree(ch.res_name);
-
-	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : c->mon->tagset[c->mon->seltags];
 }
 
 static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int interact){
