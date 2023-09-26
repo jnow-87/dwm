@@ -11,9 +11,6 @@ struct client_t;
 
 /* types */
 typedef struct monitor_t{
-	float mfact;
-	int nmaster;
-	int num;
 	int x,
 		y,
 		width,

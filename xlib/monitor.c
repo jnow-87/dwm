@@ -21,10 +21,6 @@ monitor_t *createmon(void){
 	m = ecalloc(1, sizeof(monitor_t));
 	m->tagset[0] = m->tagset[1] = 1;
 
-	// TODO the following values can prbably be hard-coded
-	m->mfact = CONFIG_LAYOUT_MASTER_RATIO / 100.0;
-	m->nmaster = CONFIG_LAYOUT_MASTER_WINDOWS;
-
 	return m;
 }
 

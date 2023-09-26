@@ -1,7 +1,12 @@
+#include <config/config.h>
 #include <client.h>
 #include <dwm.h>
 #include <layout.h>
 #include <utils.h>
+
+
+/* macros */
+#define NMASTER	CONFIG_LAYOUT_MASTER_WINDOWS
 
 
 /* global functions */
@@ -15,12 +20,12 @@ void tile(monitor_t *m){
 	if(n == 0)
 		return;
 
-	if(n > m->nmaster)	w = m->nmaster ? m->width * m->mfact : 0;
-	else				w = m->width;
+	if(n > NMASTER)	w = NMASTER ? m->width * (CONFIG_LAYOUT_MASTER_RATIO / 100.0) : 0;
+	else			w = m->width;
 
 	for(i=y=ty=0, c=nexttiled(m->clients); c; c=nexttiled(c->next), i++){
-		if(i < m->nmaster){
-			h = (m->height - y) / (MIN(n, m->nmaster) - i);
+		if(i < NMASTER){
+			h = (m->height - y) / (MIN(n, NMASTER) - i);
 			resize(c, m->x, m->y + y, w - (2 * c->bw), h - (2 * c->bw), 0);
 
 			if(y + HEIGHT(c) < m->height)

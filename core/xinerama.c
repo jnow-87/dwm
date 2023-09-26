@@ -58,7 +58,6 @@ int xinerama_discover_monitor(void){
 		if(i >= nmon || unique[i].x_org != m->x || unique[i].y_org != m->y || unique[i].width != m->width || unique[i].height != m->height){
 			dirty = true;
 
-			m->num = i;
 			m->x = unique[i].x_org;
 			m->y = unique[i].y_org;
 			m->width = unique[i].width;
@@ -74,7 +73,7 @@ int xinerama_discover_monitor(void){
 	for(i=ninfo; i<nmon; i++){
 		for(m=dwm.mons; m && m->next; m=m->next);
 
-		DEBUG("remove monitor %d\n", m->num);
+		DEBUG("remove monitor\n");
 
 		while((c = m->clients)){
 //			DEBUG("detach client %s\n", c->name);
