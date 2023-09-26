@@ -20,21 +20,6 @@
 
 
 /* global functions */
-void action_focusmon(action_arg_t const *arg){
-	monitor_t *m;
-
-
-	if(!dwm.mons->next)
-		return;
-
-	if((m = dirtomon(arg->i)) == dwm.selmon)
-		return;
-
-	unfocus(dwm.selmon->sel, 0);
-	dwm.selmon = m;
-	focus(NULL);
-}
-
 void action_focusstack(action_arg_t const *arg){
 	client_t *c = NULL, *i;
 
@@ -67,11 +52,6 @@ void action_focusstack(action_arg_t const *arg){
 		focus(c);
 		restack(dwm.selmon);
 	}
-}
-
-void action_incnmaster(action_arg_t const *arg){
-	dwm.selmon->nmaster = MAX(dwm.selmon->nmaster + arg->i, 0);
-	arrange(dwm.selmon);
 }
 
 void action_killclient(action_arg_t const *arg){
@@ -133,9 +113,6 @@ void action_movemouse(action_arg_t const *arg){
 			else if(abs((dwm.selmon->wy + dwm.selmon->wh) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
 				ny = dwm.selmon->wy + dwm.selmon->wh - HEIGHT(c);
 
-			if(!c->isfloating && dwm.selmon->lt[dwm.selmon->sellt]->arrange && (abs(nx - c->x) > CONFIG_SNAP_PIXEL || abs(ny - c->y) > CONFIG_SNAP_PIXEL))
-				action_togglefloating(NULL);
-
 			if(!dwm.selmon->lt[dwm.selmon->sellt]->arrange || c->isfloating)
 				resize(c, nx, ny, c->w, c->h, 1);
 			break;
@@ -178,9 +155,6 @@ void action_moveclient(action_arg_t const *arg){
 	case INT_MAX:	ny = dwm.selmon->my + dwm.selmon->mh - c->h - c->bw*2; break;
 	default:		ny += c->y;
 	}
-
-	if(!c->isfloating)
-		action_togglefloating(NULL);
 
 	// TODO why do the following two lines not lead to the following glitch
 	// 	- tiling mode with two windows
@@ -245,9 +219,6 @@ void action_reszclient(action_arg_t const *arg){
 		nh += c->h;
 	}
 
-	if(!c->isfloating)
-		action_togglefloating(NULL);
-
 	nw = MAX(nw, 32);
 	nh = MAX(nh, 32);
 
@@ -310,12 +281,6 @@ void action_resizemouse(action_arg_t const *arg){
 			nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
 			nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
 
-			if(c->mon->wx + nw >= dwm.selmon->wx && c->mon->wx + nw <= dwm.selmon->wx + dwm.selmon->ww && c->mon->wy + nh >= dwm.selmon->wy && c->mon->wy + nh <= dwm.selmon->wy + dwm.selmon->wh){
-				if(!c->isfloating && dwm.selmon->lt[dwm.selmon->sellt]->arrange
-					&& (abs(nw - c->w) > CONFIG_SNAP_PIXEL || abs(nh - c->h) > CONFIG_SNAP_PIXEL))
-					action_togglefloating(NULL);
-			}
-
 			if(!dwm.selmon->lt[dwm.selmon->sellt]->arrange || c->isfloating)
 				resize(c, c->x, c->y, nw, nh, 1);
 
@@ -346,23 +311,6 @@ void action_setlayout(action_arg_t const *arg){
 
 	if(dwm.selmon->sel)	arrange(dwm.selmon);
 	else			drawbar(dwm.selmon);
-}
-
-void action_setmfact(action_arg_t const *arg){
-	float f;
-
-
-	if(!arg || !dwm.selmon->lt[dwm.selmon->sellt]->arrange)
-		return;
-
-	/* arg > 1.0 will set mfact absolutely */
-	f = arg->f < 1.0 ? arg->f + dwm.selmon->mfact : arg->f - 1.0;
-
-	if(f < 0.05 || f > 0.95)
-		return;
-
-	dwm.selmon->mfact = f;
-	arrange(dwm.selmon);
 }
 
 void action_spawn(action_arg_t const *arg){
@@ -396,13 +344,6 @@ void action_tag(action_arg_t const *arg){
 		focus(NULL);
 		arrange(dwm.selmon);
 	}
-}
-
-void action_tagmon(action_arg_t const *arg){
-	if(!dwm.selmon->sel || !dwm.mons->next)
-		return;
-
-	sendmon(dwm.selmon->sel, dirtomon(arg->i));
 }
 
 void action_togglebar(action_arg_t const *arg){
@@ -465,17 +406,4 @@ void action_view(action_arg_t const *arg){
 
 	focus(NULL);
 	arrange(dwm.selmon);
-}
-
-void action_zoom(action_arg_t const *arg){
-	client_t *c = dwm.selmon->sel;
-
-
-	if(!dwm.selmon->lt[dwm.selmon->sellt]->arrange || !c || c->isfloating)
-		return;
-
-	if(c == nexttiled(dwm.selmon->clients) && !(c = nexttiled(c->next)))
-		return;
-
-	pop(c);
 }

@@ -34,7 +34,6 @@ typedef struct monitor_t{
 
 /* prototypes */
 monitor_t *createmon(void);
-monitor_t *dirtomon(int dir);
 monitor_t *recttomon(int x, int y, int w, int h);
 monitor_t *wintomon(Window w);
 void cleanupmon(monitor_t *mon);

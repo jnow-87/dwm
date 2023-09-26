@@ -112,7 +112,6 @@ button_map_t const buttons[] = {
 	// status bar actions
 	{ ClkLtSymbol,	0,					Button1,	action_setlayout,	{0} },
 //	{ ClkLtSymbol,	0,					Button3,	action_setlayout,	{.v = &layouts[2]} },
-	{ ClkWinTitle,	0,					Button2,	action_zoom,		{0} },
 	{ ClkTagBar,	0,					Button1,	action_view,		{0} },
 	{ ClkTagBar,	0,					Button3,	action_toggleview,	{0} },
 	{ ClkTagBar,	MODKEY,				Button1,	action_tag,			{0} },

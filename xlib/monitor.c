@@ -33,23 +33,6 @@ monitor_t *createmon(void){
 	return m;
 }
 
-monitor_t *dirtomon(int dir){
-	monitor_t *m = NULL;
-
-
-	if(dir > 0){
-		if(!(m = dwm.selmon->next))
-			m = dwm.mons;
-	}
-	else if(dwm.selmon == dwm.mons){
-		for(m=dwm.mons; m->next; m=m->next);
-	}
-	else
-		for(m=dwm.mons; m->next!=dwm.selmon; m=m->next);
-
-	return m;
-}
-
 monitor_t *recttomon(int x, int y, int w, int h){
 	monitor_t *m, *r = dwm.selmon;
 	int a, area = 0;
