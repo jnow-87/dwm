@@ -304,7 +304,7 @@ static void mappingnotify(XEvent *e){
 }
 
 static void maprequest(XEvent *e){
-	static XWindowAttributes wa;
+	XWindowAttributes wa;
 	XMapRequestEvent *ev = &e->xmaprequest;
 
 
