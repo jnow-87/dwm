@@ -15,7 +15,6 @@
 
 /* local/static prototypes */
 static void buttonpress(XEvent *e);
-static void clientmessage(XEvent *e);
 static void configurerequest(XEvent *e);
 static void destroynotify(XEvent *e);
 static void expose(XEvent *e);
@@ -30,7 +29,7 @@ static void unmapnotify(XEvent *e);
 /* static variables */
 static void (*handler[LASTEvent])(XEvent*) = {
 	[ButtonPress] = buttonpress,
-	[ClientMessage] = clientmessage,
+	[ClientMessage] = 0x0,
 	[ConfigureRequest] = configurerequest,
 	[ConfigureNotify] = 0x0,
 	[DestroyNotify] = destroynotify,
@@ -126,20 +125,6 @@ static void buttonpress(XEvent *e){
 	for(i=0; i<nbuttons; i++){
 		if(click == buttons[i].click && buttons[i].func && buttons[i].button == ev->button && CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state))
 			buttons[i].func(click == ClkTagBar && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
-	}
-}
-
-static void clientmessage(XEvent *e){
-	XClientMessageEvent *cme = &e->xclient;
-	client_t *c;
-
-
-	if((c = wintoclient(cme->window)) == 0x0)
-		return;
-
-	if(cme->message_type == dwm.netatom[NetActiveWindow]){
-		if(c != dwm.mons->sel && !c->isurgent)
-			seturgent(c, 1);
 	}
 }
 

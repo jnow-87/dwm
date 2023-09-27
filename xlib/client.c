@@ -203,9 +203,6 @@ void focus(client_t *c){
 		unfocus(dwm.mons->sel, 0);
 
 	if(c){
-		if(c->isurgent)
-			seturgent(c, 0);
-
 		detachstack(c);
 		attachstack(c);
 		grabbuttons(c, 1);
@@ -308,20 +305,6 @@ void setfocus(client_t *c){
 	sendevent(c, dwm.wmatom[WMTakeFocus]);
 }
 
-void seturgent(client_t *c, int urg){
-	XWMHints *wmh;
-
-
-	c->isurgent = urg;
-
-	if(!(wmh = XGetWMHints(dwm.dpy, c->win)))
-		return;
-
-	wmh->flags = urg ? (wmh->flags | XUrgencyHint) : (wmh->flags & ~XUrgencyHint);
-	XSetWMHints(dwm.dpy, c->win, wmh);
-	XFree(wmh);
-}
-
 int sendevent(client_t *c, Atom proto){
 	int n;
 	Atom *protocols;
@@ -357,8 +340,6 @@ void updatewmhints(client_t *c){
 			wmh->flags &= ~XUrgencyHint;
 			XSetWMHints(dwm.dpy, c->win, wmh);
 		}
-		else
-			c->isurgent = (wmh->flags & XUrgencyHint) ? 1 : 0;
 
 		if(wmh->flags & InputHint)	c->neverfocus = !wmh->input;
 		else						c->neverfocus = 0;
@@ -563,6 +544,5 @@ static void updatesizehints(client_t *c){
 	else
 		c->maxa = c->mina = 0.0;
 
-	c->isfixed = (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh);
 	c->hintsvalid = 1;
 }
