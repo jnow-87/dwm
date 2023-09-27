@@ -21,7 +21,6 @@ static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int inter
 static void detach(client_t *c);
 static Atom getatomprop(client_t *c, Atom prop);
 static void grabbuttons(client_t *c, int focused);
-static void updatesizehints(client_t *c);
 
 
 /* global functions */
@@ -43,18 +42,22 @@ client_t *wintoclient(Window w){
 void manage(Window w, XWindowAttributes *wa){
 	client_t *c, *t = NULL;
 	Window trans = None;
+	client_geom_t *geom;
 	XWindowChanges wc;
 
 
 	c = ecalloc(1, sizeof(client_t));
 	c->win = w;
+	geom = &c->geom;
 
 	/* init client struct and configure the xlib client accordingly */
-	c->x = c->oldx = wa->x;
-	c->y = c->oldy = wa->y;
-	c->w = c->oldw = wa->width;
-	c->h = c->oldh = wa->height;
-	c->oldbw = wa->border_width;
+	geom->x = wa->x;
+	geom->y = wa->y;
+	geom->width = wa->width;
+	geom->height = wa->height;
+	geom->border_width = wa->border_width;
+
+	c->geom_store = *geom;
 
 	if(XGetTransientForHint(dwm.dpy, w, &trans) && (t = wintoclient(trans))){
 		c->mon = t->mon;
@@ -65,17 +68,17 @@ void manage(Window w, XWindowAttributes *wa){
 		c->tags = c->mon->tagset[c->mon->seltags];
 	}
 
-	if(c->x + WIDTH(c) > c->mon->x + c->mon->width)
-		c->x = c->mon->x + c->mon->width - WIDTH(c);
+	if(geom->x + WIDTH(c) > c->mon->x + c->mon->width)
+		geom->x = c->mon->x + c->mon->width - WIDTH(c);
 
-	if(c->y + HEIGHT(c) > c->mon->y + c->mon->height)
-		c->y = c->mon->y + c->mon->height - HEIGHT(c);
+	if(geom->y + HEIGHT(c) > c->mon->y + c->mon->height)
+		geom->y = c->mon->y + c->mon->height - HEIGHT(c);
 
-	c->x = MAX(c->x, c->mon->x);
-	c->y = MAX(c->y, c->mon->y);
-	c->bw = CONFIG_BORDER_PIXEL;
+	geom->x = MAX(geom->x, c->mon->x);
+	geom->y = MAX(geom->y, c->mon->y);
+	geom->border_width = CONFIG_BORDER_PIXEL;
 
-	wc.border_width = c->bw;
+	wc.border_width = geom->border_width;
 	XConfigureWindow(dwm.dpy, w, CWBorderWidth, &wc);
 	XSetWindowBorder(dwm.dpy, w, dwm.scheme[SchemeNorm][ColBorder].pixel);
 	configure(c); /* propagates border_width, if size doesn't change */
@@ -94,7 +97,7 @@ void manage(Window w, XWindowAttributes *wa){
 	// TODO make this part of attach
 	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
 
-	XMoveResizeWindow(dwm.dpy, c->win, c->x + 2 * dwm.screen_width, c->y, c->w, c->h); /* some windows require this */
+	XMoveResizeWindow(dwm.dpy, c->win, geom->x + 2 * dwm.screen_width, geom->y, geom->width, geom->height); /* some windows require this */
 	setclientstate(c, NormalState);
 
 	if(c->mon == dwm.mons)
@@ -117,7 +120,7 @@ void unmanage(client_t *c, int destroyed){
 	detachstack(c);
 
 	if(!destroyed){
-		wc.border_width = c->oldbw;
+		wc.border_width = c->geom_store.border_width;
 		XGrabServer(dwm.dpy); /* avoid race conditions */
 		XSetErrorHandler(dummy_xerror_hdlr);
 		XSelectInput(dwm.dpy, c->win, NoEventMask);
@@ -146,6 +149,7 @@ void killclient(Window win){
 }
 
 void configure(client_t *c){
+	client_geom_t *geom = &c->geom;
 	XConfigureEvent ce;
 
 
@@ -153,11 +157,11 @@ void configure(client_t *c){
 	ce.display = dwm.dpy;
 	ce.event = c->win;
 	ce.window = c->win;
-	ce.x = c->x;
-	ce.y = c->y;
-	ce.width = c->w;
-	ce.height = c->h;
-	ce.border_width = c->bw;
+	ce.x = geom->x;
+	ce.y = geom->y;
+	ce.width = geom->width;
+	ce.height = geom->height;
+	ce.border_width = geom->border_width;
 	ce.above = None;
 	ce.override_redirect = False;
 	XSendEvent(dwm.dpy, c->win, False, StructureNotifyMask, (XEvent*)&ce);
@@ -232,19 +236,24 @@ void unfocus(client_t *c, int setfocus){
 }
 
 void showhide(client_t *c){
+	client_geom_t *geom;
+
+
 	if(!c)
 		return;
 
+	geom = &c->geom;
+
 	if(ISVISIBLE(c)){
 		/* show clients top down */
-		XMoveWindow(dwm.dpy, c->win, c->x, c->y);
-		resize(c, c->x, c->y, c->w, c->h, 0);
+		XMoveWindow(dwm.dpy, c->win, geom->x, geom->y);
+		resize(c, geom->x, geom->y, geom->width, geom->height, 0);
 		showhide(c->stack_next);
 	}
 	else{
 		/* hide clients bottom up */
 		showhide(c->stack_next);
-		XMoveWindow(dwm.dpy, c->win, WIDTH(c) * -2, c->y);
+		XMoveWindow(dwm.dpy, c->win, WIDTH(c) * -2, geom->y);
 	}
 }
 
@@ -271,18 +280,17 @@ void resize(client_t *c, int x, int y, int w, int h, int interact){
 }
 
 void resizeclient(client_t *c, int x, int y, int w, int h){
+	client_geom_t *geom = &c->geom;
 	XWindowChanges wc;
 
 
-	c->oldx = c->x;
-	c->x = wc.x = x;
-	c->oldy = c->y;
-	c->y = wc.y = y;
-	c->oldw = c->w;
-	c->w = wc.width = w;
-	c->oldh = c->h;
-	c->h = wc.height = h;
-	wc.border_width = c->bw;
+	c->geom_store = *geom;
+	geom->x = wc.x = x;
+	geom->y = wc.y = y;
+	geom->width = wc.width = w;
+	geom->height = wc.height = h;
+
+	wc.border_width = geom->border_width;
 
 	XConfigureWindow(dwm.dpy, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
 	configure(c);
@@ -297,7 +305,7 @@ void setclientstate(client_t *c, long state){
 }
 
 void setfocus(client_t *c){
-	if(!c->neverfocus){
+	if(!c->hints.never_focus){
 		XSetInputFocus(dwm.dpy, c->win, RevertToPointerRoot, CurrentTime);
 		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(c->win), 1);
 	}
@@ -341,11 +349,65 @@ void updatewmhints(client_t *c){
 			XSetWMHints(dwm.dpy, c->win, wmh);
 		}
 
-		if(wmh->flags & InputHint)	c->neverfocus = !wmh->input;
-		else						c->neverfocus = 0;
+		if(wmh->flags & InputHint)	c->hints.never_focus = !wmh->input;
+		else						c->hints.never_focus = 0;
 
 		XFree(wmh);
 	}
+}
+
+void updatesizehints(client_t *c){
+	long msize;
+	XSizeHints size;
+
+
+	if(!XGetWMNormalHints(dwm.dpy, c->win, &size, &msize)){
+		/* size is uninitialized, ensure that size.flags aren't used */
+		size.flags = PSize;
+	}
+
+	if(size.flags & PBaseSize){
+		c->hints.width_base = size.base_width;
+		c->hints.height_base = size.base_height;
+	}
+	else if(size.flags & PMinSize){
+		c->hints.width_base = size.min_width;
+		c->hints.height_base = size.min_height;
+	}
+	else
+		c->hints.width_base = c->hints.height_base = 0;
+
+	if(size.flags & PResizeInc){
+		c->hints.width_inc = size.width_inc;
+		c->hints.height_inc = size.height_inc;
+	}
+	else
+		c->hints.width_inc = c->hints.height_inc = 0;
+
+	if(size.flags & PMaxSize){
+		c->hints.width_max = size.max_width;
+		c->hints.height_max = size.max_height;
+	}
+	else
+		c->hints.width_max = c->hints.height_max = 0;
+
+	if(size.flags & PMinSize){
+		c->hints.width_min = size.min_width;
+		c->hints.height_min = size.min_height;
+	}
+	else if(size.flags & PBaseSize){
+		c->hints.width_min = size.base_width;
+		c->hints.height_min = size.base_height;
+	}
+	else
+		c->hints.width_min = c->hints.height_min = 0;
+
+	if(size.flags & PAspect){
+		c->hints.aspect_min = (float)size.min_aspect.y / size.min_aspect.x;
+		c->hints.aspect_max = (float)size.max_aspect.x / size.max_aspect.y;
+	}
+	else
+		c->hints.aspect_max = c->hints.aspect_min = 0.0;
 }
 
 
@@ -364,8 +426,9 @@ static void updateclientlist(){
 }
 
 static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int interact){
-	int baseismin;
 	monitor_t *m = c->mon;
+	client_geom_t *geom = &c->geom;
+	int baseismin;
 
 
 	/* set minimum possible */
@@ -379,10 +442,10 @@ static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int inter
 		if(*y > dwm.screen_height)
 			*y = dwm.screen_height - HEIGHT(c);
 
-		if(*x + *w + 2 * c->bw < 0)
+		if(*x + *w + 2 * geom->border_width < 0)
 			*x = 0;
 
-		if(*y + *h + 2 * c->bw < 0)
+		if(*y + *h + 2 * geom->border_width < 0)
 			*y = 0;
 	}
 	else{
@@ -392,10 +455,10 @@ static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int inter
 		if(*y >= m->y + m->height)
 			*y = m->y + m->height - HEIGHT(c);
 
-		if(*x + *w + 2 * c->bw <= m->x)
+		if(*x + *w + 2 * geom->border_width <= m->x)
 			*x = m->x;
 
-		if(*y + *h + 2 * c->bw <= m->y)
+		if(*y + *h + 2 * geom->border_width <= m->y)
 			*y = m->y;
 	}
 	if(*h < dwm.statusbar.height)
@@ -404,46 +467,43 @@ static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int inter
 	if(*w < dwm.statusbar.height)
 		*w = dwm.statusbar.height;
 
-	if(!c->hintsvalid)
-		updatesizehints(c);
-
 	/* see last two sentences in ICCCM 4.1.2.3 */
-	baseismin = c->basew == c->minw && c->baseh == c->minh;
+	baseismin = c->hints.width_base == c->hints.width_min && c->hints.height_base == c->hints.height_min;
 
 	if(!baseismin){ /* temporarily remove base dimensions */
-		*w -= c->basew;
-		*h -= c->baseh;
+		*w -= c->hints.width_base;
+		*h -= c->hints.height_base;
 	}
 
 	/* adjust for aspect limits */
-	if(c->mina > 0 && c->maxa > 0){
-		if(c->maxa < (float)*w / *h)		*w = *h * c->maxa + 0.5;
-		else if(c->mina < (float)*h / *w)	*h = *w * c->mina + 0.5;
+	if(c->hints.aspect_min > 0 && c->hints.aspect_max > 0){
+		if(c->hints.aspect_max < (float)*w / *h)		*w = *h * c->hints.aspect_max + 0.5;
+		else if(c->hints.aspect_min < (float)*h / *w)	*h = *w * c->hints.aspect_min + 0.5;
 	}
 
 	if(baseismin){ /* increment calculation requires this */
-		*w -= c->basew;
-		*h -= c->baseh;
+		*w -= c->hints.width_base;
+		*h -= c->hints.height_base;
 	}
 
 	/* adjust for increment value */
-	if(c->incw)
-		*w -= *w % c->incw;
+	if(c->hints.width_inc)
+		*w -= *w % c->hints.width_inc;
 
-	if(c->inch)
-		*h -= *h % c->inch;
+	if(c->hints.height_inc)
+		*h -= *h % c->hints.height_inc;
 
 	/* restore base dimensions */
-	*w = MAX(*w + c->basew, c->minw);
-	*h = MAX(*h + c->baseh, c->minh);
+	*w = MAX(*w + c->hints.width_base, c->hints.width_min);
+	*h = MAX(*h + c->hints.height_base, c->hints.height_min);
 
-	if(c->maxw)
-		*w = MIN(*w, c->maxw);
+	if(c->hints.width_max)
+		*w = MIN(*w, c->hints.width_max);
 
-	if(c->maxh)
-		*h = MIN(*h, c->maxh);
+	if(c->hints.height_max)
+		*h = MIN(*h, c->hints.height_max);
 
-	return *x != c->x || *y != c->y || *w != c->w || *h != c->h;
+	return *x != geom->x || *y != geom->y || *w != geom->width || *h != geom->height;
 }
 
 static void detach(client_t *c){
@@ -489,60 +549,4 @@ static void grabbuttons(client_t *c, int focused){
 			}
 		}
 	}
-}
-
-static void updatesizehints(client_t *c){
-	long msize;
-	XSizeHints size;
-
-
-	if(!XGetWMNormalHints(dwm.dpy, c->win, &size, &msize)){
-		/* size is uninitialized, ensure that size.flags aren't used */
-		size.flags = PSize;
-	}
-
-	if(size.flags & PBaseSize){
-		c->basew = size.base_width;
-		c->baseh = size.base_height;
-	}
-	else if(size.flags & PMinSize){
-		c->basew = size.min_width;
-		c->baseh = size.min_height;
-	}
-	else
-		c->basew = c->baseh = 0;
-
-	if(size.flags & PResizeInc){
-		c->incw = size.width_inc;
-		c->inch = size.height_inc;
-	}
-	else
-		c->incw = c->inch = 0;
-
-	if(size.flags & PMaxSize){
-		c->maxw = size.max_width;
-		c->maxh = size.max_height;
-	}
-	else
-		c->maxw = c->maxh = 0;
-
-	if(size.flags & PMinSize){
-		c->minw = size.min_width;
-		c->minh = size.min_height;
-	}
-	else if(size.flags & PBaseSize){
-		c->minw = size.base_width;
-		c->minh = size.base_height;
-	}
-	else
-		c->minw = c->minh = 0;
-
-	if(size.flags & PAspect){
-		c->mina = (float)size.min_aspect.y / size.min_aspect.x;
-		c->maxa = (float)size.max_aspect.x / size.max_aspect.y;
-	}
-	else
-		c->maxa = c->mina = 0.0;
-
-	c->hintsvalid = 1;
 }

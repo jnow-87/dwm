@@ -75,8 +75,8 @@ void action_movemouse(action_arg_t const *arg){
 		return;
 
 	restack(dwm.mons);
-	ocx = c->x;
-	ocy = c->y;
+	ocx = c->geom.x;
+	ocy = c->geom.y;
 
 	if(XGrabPointer(dwm.dpy, dwm.root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, dwm.cursor[CurMove]->cursor, CurrentTime) != GrabSuccess)
 		return;
@@ -101,6 +101,7 @@ void action_movemouse(action_arg_t const *arg){
 
 			nx = ocx + (ev.xmotion.x - x);
 			ny = ocy + (ev.xmotion.y - y);
+
 			if(abs(dwm.mons->x - nx) < CONFIG_SNAP_PIXEL)
 				nx = dwm.mons->x;
 			else if(abs((dwm.mons->x + dwm.mons->width) - (nx + WIDTH(c))) < CONFIG_SNAP_PIXEL)
@@ -111,7 +112,7 @@ void action_movemouse(action_arg_t const *arg){
 			else if(abs((dwm.mons->y + dwm.mons->height) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
 				ny = dwm.mons->y + dwm.mons->height - HEIGHT(c);
 
-			resize(c, nx, ny, c->w, c->h, 1);
+			resize(c, nx, ny, c->geom.width, c->geom.height, 1);
 			break;
 		}
 	} while(ev.type != ButtonRelease);
@@ -122,11 +123,13 @@ void action_movemouse(action_arg_t const *arg){
 void action_moveclient(action_arg_t const *arg){
 	int nx, ny;
 	client_t *c;
+	client_geom_t *geom;
 
 
 	if(!(c = dwm.mons->sel))
 		return;
 
+	geom = &c->geom;
 	restack(dwm.mons);
 
 	nx = ((int*)(arg->v))[0];
@@ -134,14 +137,14 @@ void action_moveclient(action_arg_t const *arg){
 
 	switch(nx){
 	case -INT_MAX:	nx = dwm.mons->x; break;
-	case INT_MAX:	nx = dwm.mons->x + dwm.mons->width - c->w - c->bw*2; break;
-	default:		nx += c->x; break;
+	case INT_MAX:	nx = dwm.mons->x + dwm.mons->width - geom->width - geom->border_width*2; break;
+	default:		nx += geom->x; break;
 	}
 
 	switch(ny){
 	case -INT_MAX:	ny = dwm.mons->y; break;
-	case INT_MAX:	ny = dwm.mons->y + dwm.mons->height - c->h - c->bw*2; break;
-	default:		ny += c->y;
+	case INT_MAX:	ny = dwm.mons->y + dwm.mons->height - geom->height - geom->border_width*2; break;
+	default:		ny += geom->y;
 	}
 
 	// TODO why do the following two lines not lead to the following glitch
@@ -151,18 +154,20 @@ void action_moveclient(action_arg_t const *arg){
 	// 	- move it to top-left
 	// 	- move it bottom-left
 	// 		=> focus moves to the other window
-	resizeclient(c, nx, ny, c->w, c->h);
+	resizeclient(c, nx, ny, geom->width, geom->height);
 	focus(c);
 }
 
 void action_reszclient(action_arg_t const *arg){
 	int nx, ny, nw, nh;
 	client_t *c;
+	client_geom_t *geom;
 
 
 	if(!(c = dwm.mons->sel))
 		return;
 
+	geom = &c->geom;
 	restack(dwm.mons);
 
 	nw = ((int*)(arg->v))[0];
@@ -170,40 +175,40 @@ void action_reszclient(action_arg_t const *arg){
 
 	if(nw == INT_MAX){
 		nx = dwm.mons->x;
-		nw = dwm.mons->width - c->bw * 2;
+		nw = dwm.mons->width - geom->border_width * 2;
 
-		if(c->x == nx && c->w == nw){
-			nx = c->oldx;
-			nw = c->oldw;
+		if(geom->x == nx && geom->width == nw){
+			nx = c->geom_store.x;
+			nw = c->geom_store.width;
 		}
 	}
 	else{
-		nx = c->x - nw / 2;
-		nw += c->w;
+		nx = geom->x - nw / 2;
+		nw += geom->width;
 	}
 
 	if(nh == INT_MAX){
 		ny = dwm.mons->y;
-		nh = dwm.mons->height - c->bw * 2;
+		nh = dwm.mons->height - geom->border_width * 2;
 
-		if(c->y == ny && c->h == nh){
-			ny = c->oldy;
-			nh = c->oldh;
+		if(geom->y == ny && geom->height == nh){
+			ny = c->geom_store.y;
+			nh = c->geom_store.height;
 		}
 	}
 	else{
-		ny = c->y - nh / 2;
-		nh += c->h;
+		ny = geom->y - nh / 2;
+		nh += geom->height;
 	}
 
 	nw = MAX(nw, 32);
 	nh = MAX(nh, 32);
 
-	if(nw == c->w)
-		nx = c->x;
+	if(nw == geom->width)
+		nx = geom->x;
 
-	if(nh == c->h)
-		ny = c->y;
+	if(nh == geom->height)
+		ny = geom->y;
 
 	resizeclient(c, nx, ny, nw, nh);
 	focus(c);
@@ -220,6 +225,7 @@ void action_restart(action_arg_t const *arg){
 void action_resizemouse(action_arg_t const *arg){
 	int ocx, ocy, nw, nh;
 	client_t *c;
+	client_geom_t *geom;
 	XEvent ev;
 	Time lasttime = 0;
 
@@ -227,14 +233,15 @@ void action_resizemouse(action_arg_t const *arg){
 	if(!(c = dwm.mons->sel))
 		return;
 
+	geom = &c->geom;
+	ocx = c->geom.x;
+	ocy = c->geom.y;
 	restack(dwm.mons);
-	ocx = c->x;
-	ocy = c->y;
 
 	if(XGrabPointer(dwm.dpy, dwm.root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, dwm.cursor[CurResize]->cursor, CurrentTime) != GrabSuccess)
 		return;
 
-	XWarpPointer(dwm.dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1, c->h + c->bw - 1);
+	XWarpPointer(dwm.dpy, None, c->win, 0, 0, 0, 0, geom->width + geom->border_width - 1, geom->height + geom->border_width - 1);
 
 	do{
 		XMaskEvent(dwm.dpy, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
@@ -251,16 +258,16 @@ void action_resizemouse(action_arg_t const *arg){
 
 			lasttime = ev.xmotion.time;
 
-			nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
-			nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
+			nw = MAX(ev.xmotion.x - ocx - 2 * geom->border_width + 1, 1);
+			nh = MAX(ev.xmotion.y - ocy - 2 * geom->border_width + 1, 1);
 
-			resize(c, c->x, c->y, nw, nh, 1);
+			resize(c, geom->x, geom->y, nw, nh, 1);
 
 			break;
 		}
 	} while(ev.type != ButtonRelease);
 
-	XWarpPointer(dwm.dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1, c->h + c->bw - 1);
+	XWarpPointer(dwm.dpy, None, c->win, 0, 0, 0, 0, geom->width + geom->border_width - 1, geom->height + geom->border_width - 1);
 	XUngrabPointer(dwm.dpy, CurrentTime);
 
 	while(XCheckMaskEvent(dwm.dpy, EnterWindowMask, &ev));

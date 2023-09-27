@@ -16,5 +16,5 @@ void monocle(monitor_t *m){
 	}
 
 	for(c=nexttiled(m->clients); c; c=nexttiled(c->next))
-		resize(c, m->x, m->y, m->width - 2 * c->bw, m->height - 2 * c->bw, 0);
+		resize(c, m->x, m->y, m->width - 2 * c->geom.border_width, m->height - 2 * c->geom.border_width, 0);
 }

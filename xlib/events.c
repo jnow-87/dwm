@@ -7,6 +7,7 @@
 #include <layout.h>
 #include <monitor.h>
 #include <statusbar.h>
+#include <log.h>
 
 
 /* macros */
@@ -130,49 +131,52 @@ static void buttonpress(XEvent *e){
 
 static void configurerequest(XEvent *e){
 	client_t *c;
+	client_geom_t *geom;
 	monitor_t *m;
 	XConfigureRequestEvent *ev = &e->xconfigurerequest;
 	XWindowChanges wc;
 
 
 	if((c = wintoclient(ev->window))){
+		geom = &c->geom;
+
 		if(ev->value_mask & CWBorderWidth){
-			c->bw = ev->border_width;
+			geom->border_width = ev->border_width;
 		}
 		else{
 			m = c->mon;
 
 			if(ev->value_mask & CWX){
-				c->oldx = c->x;
-				c->x = m->x + ev->x;
+				c->geom_store.x = geom->x;
+				geom->x = m->x + ev->x;
 			}
 
 			if(ev->value_mask & CWY){
-				c->oldy = c->y;
-				c->y = m->y + ev->y;
+				c->geom_store.y = geom->y;
+				geom->y = m->y + ev->y;
 			}
 
 			if(ev->value_mask & CWWidth){
-				c->oldw = c->w;
-				c->w = ev->width;
+				c->geom_store.width = geom->width;
+				geom->width = ev->width;
 			}
 
 			if(ev->value_mask & CWHeight){
-				c->oldh = c->h;
-				c->h = ev->height;
+				c->geom_store.height = geom->height;
+				geom->height = ev->height;
 			}
 
-			if((c->x + c->w) > m->x + m->width)
-				c->x = m->x + (m->width / 2 - WIDTH(c) / 2);	/* center in x direction */
+			if((geom->x + geom->width) > m->x + m->width)
+				geom->x = m->x + (m->width / 2 - WIDTH(c) / 2);	/* center in x direction */
 
-			if((c->y + c->h) > m->y + m->height)
-				c->y = m->y + (m->height / 2 - HEIGHT(c) / 2); /* center in y direction */
+			if((geom->y + geom->height) > m->y + m->height)
+				geom->y = m->y + (m->height / 2 - HEIGHT(c) / 2); /* center in y direction */
 
 			if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
 				configure(c);
 
 			if(ISVISIBLE(c))
-				XMoveResizeWindow(dwm.dpy, c->win, c->x, c->y, c->w, c->h);
+				XMoveResizeWindow(dwm.dpy, c->win, geom->x, geom->y, geom->width, geom->height);
 		}
 	}
 	else{
@@ -273,7 +277,7 @@ static void propertynotify(XEvent *e){
 //			break;
 
 		case XA_WM_NORMAL_HINTS:
-			c->hintsvalid = 0;
+			updatesizehints(c);
 			break;
 
 		case XA_WM_HINTS:

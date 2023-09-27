@@ -13,6 +13,7 @@
 void tile(monitor_t *m){
 	unsigned int i, n, h, w, y, ty;
 	client_t *c;
+	client_geom_t *geom;
 
 
 	for(n=0, c=nexttiled(m->clients); c; c=nexttiled(c->next), n++);
@@ -24,16 +25,18 @@ void tile(monitor_t *m){
 	else			w = m->width;
 
 	for(i=y=ty=0, c=nexttiled(m->clients); c; c=nexttiled(c->next), i++){
+		geom = &c->geom;
+
 		if(i < NMASTER){
 			h = (m->height - y) / (MIN(n, NMASTER) - i);
-			resize(c, m->x, m->y + y, w - (2 * c->bw), h - (2 * c->bw), 0);
+			resize(c, m->x, m->y + y, w - (2 * geom->border_width), h - (2 * geom->border_width), 0);
 
 			if(y + HEIGHT(c) < m->height)
 				y += HEIGHT(c);
 		}
 		else{
 			h = (m->height - ty) / (n - i);
-			resize(c, m->x + w, m->y + ty, m->width - w - (2 * c->bw), h - (2 * c->bw), 0);
+			resize(c, m->x + w, m->y + ty, m->width - w - (2 * geom->border_width), h - (2 * geom->border_width), 0);
 
 			if(ty + HEIGHT(c) < m->height)
 				ty += HEIGHT(c);
