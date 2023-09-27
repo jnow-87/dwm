@@ -21,7 +21,7 @@ typedef struct client_t{
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
 	int bw, oldbw;
 	unsigned int tags;
-	int isfixed, isurgent, neverfocus, isfullscreen;
+	int isfixed, isurgent, neverfocus;
 	monitor_t *mon;
 	Window win;
 
@@ -54,12 +54,10 @@ void resize(client_t *c, int x, int y, int w, int h, int interact);
 void resizeclient(client_t *c, int x, int y, int w, int h);
 void setclientstate(client_t *c, long state);
 void setfocus(client_t *c);
-void setfullscreen(client_t *c, int fullscreen);
 void seturgent(client_t *c, int urg);
 
 int sendevent(client_t *c, Atom proto);
 
-void updatewindowtype(client_t *c);
 void updatewmhints(client_t *c);
 
 void updatetitle(client_t *c);

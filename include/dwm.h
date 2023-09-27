@@ -23,11 +23,8 @@ typedef enum{
 typedef enum{
 	NetSupported,
 	NetWMName,
-	NetWMState,
 	NetWMCheck,
-	NetWMFullscreen,
 	NetActiveWindow,
-	NetWMWindowType,
 	NetClientList,
 	NetLast
 } net_atom_t;

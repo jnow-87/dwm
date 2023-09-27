@@ -81,7 +81,6 @@ void manage(Window w, XWindowAttributes *wa){
 	XConfigureWindow(dwm.dpy, w, CWBorderWidth, &wc);
 	XSetWindowBorder(dwm.dpy, w, dwm.scheme[SchemeNorm][ColBorder].pixel);
 	configure(c); /* propagates border_width, if size doesn't change */
-	updatewindowtype(c);
 	updatesizehints(c);
 	updatewmhints(c);
 	XSelectInput(dwm.dpy, w, FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
@@ -244,10 +243,7 @@ void showhide(client_t *c){
 	if(ISVISIBLE(c)){
 		/* show clients top down */
 		XMoveWindow(dwm.dpy, c->win, c->x, c->y);
-
-		if(!c->isfullscreen)
-			resize(c, c->x, c->y, c->w, c->h, 0);
-
+		resize(c, c->x, c->y, c->w, c->h, 0);
 		showhide(c->stack_next);
 	}
 	else{
@@ -314,28 +310,6 @@ void setfocus(client_t *c){
 	sendevent(c, dwm.wmatom[WMTakeFocus]);
 }
 
-void setfullscreen(client_t *c, int fullscreen){
-	if(fullscreen && !c->isfullscreen){
-		XChangeProperty(dwm.dpy, c->win, dwm.netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)&dwm.netatom[NetWMFullscreen], 1);
-		c->isfullscreen = 1;
-		c->oldbw = c->bw;
-		c->bw = 0;
-		resizeclient(c, c->mon->x, c->mon->y, c->mon->width, c->mon->height);
-		XRaiseWindow(dwm.dpy, c->win);
-	}
-	else if(!fullscreen && c->isfullscreen){
-		XChangeProperty(dwm.dpy, c->win, dwm.netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)0, 0);
-		c->isfullscreen = 0;
-		c->bw = c->oldbw;
-		c->x = c->oldx;
-		c->y = c->oldy;
-		c->w = c->oldw;
-		c->h = c->oldh;
-		resizeclient(c, c->x, c->y, c->w, c->h);
-		arrange(c->mon);
-	}
-}
-
 void seturgent(client_t *c, int urg){
 	XWMHints *wmh;
 
@@ -374,14 +348,6 @@ int sendevent(client_t *c, Atom proto){
 	}
 
 	return exists;
-}
-
-void updatewindowtype(client_t *c){
-	Atom state = getatomprop(c, dwm.netatom[NetWMState]);
-
-
-	if(state == dwm.netatom[NetWMFullscreen])
-		setfullscreen(c, 1);
 }
 
 void updatewmhints(client_t *c){

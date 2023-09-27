@@ -32,10 +32,6 @@ config LAYOUT_MASTER_WINDOWS
 	int "number of windows in master area"
 	default 1
 
-config LAYOUT_LOCK_FULLSCREEN
-	bool "force focus on the fullscreen window"
-	default y
-
 config COL_ACT_FG
 	qstring "active foreground color"
 	default "#eeeeee"

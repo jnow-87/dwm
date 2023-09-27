@@ -24,7 +24,7 @@ void action_focusstack(action_arg_t const *arg){
 	client_t *c = NULL, *i;
 
 
-	if(!dwm.mons->sel || (dwm.mons->sel->isfullscreen && CONFIG_LAYOUT_LOCK_FULLSCREEN))
+	if(!dwm.mons->sel)
 		return;
 
 	if(arg->i > 0){
@@ -72,9 +72,6 @@ void action_movemouse(action_arg_t const *arg){
 
 
 	if(!(c = dwm.mons->sel))
-		return;
-
-	if(c->isfullscreen) /* no support moving fullscreen windows by mouse */
 		return;
 
 	restack(dwm.mons);
@@ -130,9 +127,6 @@ void action_moveclient(action_arg_t const *arg){
 	if(!(c = dwm.mons->sel))
 		return;
 
-	if(c->isfullscreen) /* no support moving fullscreen windows by mouse */
-		return;
-
 	restack(dwm.mons);
 
 	nx = ((int*)(arg->v))[0];
@@ -167,9 +161,6 @@ void action_reszclient(action_arg_t const *arg){
 
 
 	if(!(c = dwm.mons->sel))
-		return;
-
-	if(c->isfullscreen) /* no support moving fullscreen windows by mouse */
 		return;
 
 	restack(dwm.mons);
@@ -234,9 +225,6 @@ void action_resizemouse(action_arg_t const *arg){
 
 
 	if(!(c = dwm.mons->sel))
-		return;
-
-	if(c->isfullscreen) /* no support resizing fullscreen windows by mouse */
 		return;
 
 	restack(dwm.mons);

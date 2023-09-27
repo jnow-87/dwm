@@ -107,10 +107,7 @@ static void setup(void){
 	dwm.netatom[NetActiveWindow] = XInternAtom(dwm.dpy, "_NET_ACTIVE_WINDOW", False);
 	dwm.netatom[NetSupported] = XInternAtom(dwm.dpy, "_NET_SUPPORTED", False);
 	dwm.netatom[NetWMName] = XInternAtom(dwm.dpy, "_NET_WM_NAME", False);
-	dwm.netatom[NetWMState] = XInternAtom(dwm.dpy, "_NET_WM_STATE", False);
 	dwm.netatom[NetWMCheck] = XInternAtom(dwm.dpy, "_NET_SUPPORTING_WM_CHECK", False);
-	dwm.netatom[NetWMFullscreen] = XInternAtom(dwm.dpy, "_NET_WM_STATE_FULLSCREEN", False);
-	dwm.netatom[NetWMWindowType] = XInternAtom(dwm.dpy, "_NET_WM_WINDOW_TYPE", False);
 	dwm.netatom[NetClientList] = XInternAtom(dwm.dpy, "_NET_CLIENT_LIST", False);
 
 	/* init cursors */

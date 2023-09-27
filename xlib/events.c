@@ -137,11 +137,7 @@ static void clientmessage(XEvent *e){
 	if((c = wintoclient(cme->window)) == 0x0)
 		return;
 
-	if(cme->message_type == dwm.netatom[NetWMState]){
-		if(cme->data.l[1] == dwm.netatom[NetWMFullscreen] || cme->data.l[2] == dwm.netatom[NetWMFullscreen])
-			setfullscreen(c, (cme->data.l[0] == 1 /* _NET_WM_STATE_ADD    */ || (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */ && !c->isfullscreen)));
-	}
-	else if(cme->message_type == dwm.netatom[NetActiveWindow]){
+	if(cme->message_type == dwm.netatom[NetActiveWindow]){
 		if(c != dwm.mons->sel && !c->isurgent)
 			seturgent(c, 1);
 	}
@@ -307,9 +303,6 @@ static void propertynotify(XEvent *e){
 			if(c == c->mon->sel)
 				statusbar_draw();
 		}
-
-		if(ev->atom == dwm.netatom[NetWMWindowType])
-			updatewindowtype(c);
 	}
 }
 
