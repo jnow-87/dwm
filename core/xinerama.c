@@ -76,8 +76,6 @@ int xinerama_discover_monitor(void){
 		DEBUG("remove monitor\n");
 
 		while((c = m->clients)){
-//			DEBUG("detach client %s\n", c->name);
-
 			dirty = true;
 			m->clients = c->next;
 			detachstack(c);

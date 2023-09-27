@@ -14,7 +14,6 @@
 
 /* types */
 typedef struct client_t{
-	char name[256];
 	float mina, maxa;
 	int x, y, w, h;
 	int oldx, oldy, oldw, oldh;
@@ -59,8 +58,6 @@ void seturgent(client_t *c, int urg);
 int sendevent(client_t *c, Atom proto);
 
 void updatewmhints(client_t *c);
-
-void updatetitle(client_t *c);
 
 
 #endif // CLIENT_H

@@ -56,8 +56,6 @@ void manage(Window w, XWindowAttributes *wa){
 	c->h = c->oldh = wa->height;
 	c->oldbw = wa->border_width;
 
-	updatetitle(c);
-
 	if(XGetTransientForHint(dwm.dpy, w, &trans) && (t = wintoclient(trans))){
 		c->mon = t->mon;
 		c->tags = t->tags;
@@ -367,11 +365,6 @@ void updatewmhints(client_t *c){
 
 		XFree(wmh);
 	}
-}
-
-void updatetitle(client_t *c){
-	if(!gettextprop(c->win, dwm.netatom[NetWMName], c->name, sizeof c->name))
-		gettextprop(c->win, XA_WM_NAME, c->name, sizeof c->name);
 }
 
 

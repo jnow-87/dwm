@@ -296,13 +296,6 @@ static void propertynotify(XEvent *e){
 			statusbar_draw();
 			break;
 		}
-
-		if(ev->atom == XA_WM_NAME || ev->atom == dwm.netatom[NetWMName]){
-			updatetitle(c);
-
-			if(c == c->mon->sel)
-				statusbar_draw();
-		}
 	}
 }
 
