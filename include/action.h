@@ -37,7 +37,6 @@ typedef struct{
 
 
 /* prototypes */
-void action_focusmon(action_arg_t const *arg);
 void action_focusstack(action_arg_t const *arg);
 void action_killclient(action_arg_t const *arg);
 void action_movemouse(action_arg_t const *arg);
@@ -49,9 +48,6 @@ void action_resizemouse(action_arg_t const *arg);
 void action_setlayout(action_arg_t const *arg);
 void action_spawn(action_arg_t const *arg);
 void action_togglebar(action_arg_t const *arg);
-void action_togglefloating(action_arg_t const *arg);
-void action_toggleview(action_arg_t const *arg);
-void action_zoom(action_arg_t const *arg);
 void action_tags_view(action_arg_t const *arg);
 void action_tags_toggle(action_arg_t const *arg);
 void action_client_tags_set(action_arg_t const *arg);

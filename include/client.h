@@ -67,7 +67,6 @@ void attach(client_t *c);
 void attachstack(client_t *c);
 // TODO detach
 void detachstack(client_t *c);
-void pop(client_t *c);
 
 void focus(client_t *c);
 void unfocus(client_t *c, int setfocus);

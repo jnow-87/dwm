@@ -192,13 +192,6 @@ void detachstack(client_t *c){
 	}
 }
 
-void pop(client_t *c){
-	detach(c);
-	attach(c);
-	focus(c);
-	arrange(c->mon);
-}
-
 void focus(client_t *c){
 	if(!c || !ISVISIBLE(c))
 		for(c=dwm.mons->stack; c && !ISVISIBLE(c); c=c->stack_next);
