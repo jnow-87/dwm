@@ -7,7 +7,7 @@
 
 
 /* macros */
-#define ISVISIBLE(c)	((c->tags & c->mon->tagset[c->mon->seltags]))
+#define ISVISIBLE(c)	((c->tags & dwm.tag_mask))
 #define WIDTH(c)		((c)->geom.width + 2 * (c)->geom.border_width)
 #define HEIGHT(c)		((c)->geom.height + 2 * (c)->geom.border_width)
 

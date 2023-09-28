@@ -15,8 +15,6 @@ typedef struct monitor_t{
 		y,
 		width,
 		height;
-	unsigned int seltags;
-	unsigned int tagset[2];
 	struct client_t *clients;
 	struct client_t *sel;
 	struct client_t *stack;

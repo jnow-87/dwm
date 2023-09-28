@@ -19,7 +19,6 @@ monitor_t *createmon(void){
 
 
 	m = ecalloc(1, sizeof(monitor_t));
-	m->tagset[0] = m->tagset[1] = 1;
 
 	return m;
 }

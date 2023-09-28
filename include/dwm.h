@@ -58,6 +58,7 @@ typedef struct{
 	cursor_t *cursor[CurLast];
 	statusbar_t statusbar;
 	layout_t const *layout;
+	unsigned int tag_mask;
 } dwm_t;
 
 

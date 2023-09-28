@@ -15,6 +15,7 @@
 #include <utils.h>
 #include <version.h>
 #include <layout.h>
+#include <tags.h>
 #include <log.h>
 
 
@@ -32,6 +33,7 @@ dwm_t dwm = {
 	.layout = layouts + 0,
 	.running = 1,
 	.numlock_mask = 0,
+	.tag_mask = 1,
 };
 
 
@@ -160,13 +162,12 @@ static void setup(void){
 }
 
 static void cleanup(void){
-	action_arg_t a = {.ui = ~0};
 	layout_t foo = { "", NULL };
 	monitor_t *m;
 	size_t i;
 
 
-	action_view(&a);
+	tags_set(&dwm.tag_mask, ~0);
 	dwm.layout = &foo;
 
 	for(m=dwm.mons; m; m=m->next){

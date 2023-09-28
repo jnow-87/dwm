@@ -17,10 +17,10 @@
 	// toggle to view windows for tag
 	// toggle add window to tag
 #define TAGKEYS(KEY, TAG) \
-	{ ControlMask,				KEY,	action_view,		{.ui = 1 << TAG} }, \
-	{ MODKEY,					KEY,	action_tag,			{.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask,		KEY,	action_toggleview,	{.ui = 1 << TAG} }, \
-	{ ControlMask|ShiftMask,	KEY,	action_toggletag,	{.ui = 1 << TAG} },
+	{ ControlMask,				KEY,	action_tags_view,			{.ui = 1 << TAG} }, \
+	{ ControlMask | ShiftMask,	KEY,	action_tags_toggle,			{.ui = 1 << TAG} }, \
+	{ MODKEY,					KEY,	action_client_tags_set,		{.ui = 1 << TAG} }, \
+	{ MODKEY | ShiftMask,		KEY,	action_client_tags_toggle,	{.ui = 1 << TAG} },
 
 
 /* global variables */
@@ -103,10 +103,8 @@ button_map_t const buttons[] = {
 
 	// status bar actions
 	{ ClkLtSymbol,	0,					Button1,	action_setlayout,	{0} },
-	{ ClkTagBar,	0,					Button1,	action_view,		{0} },
-	{ ClkTagBar,	0,					Button3,	action_toggleview,	{0} },
-	{ ClkTagBar,	MODKEY,				Button1,	action_tag,			{0} },
-	{ ClkTagBar,	MODKEY,				Button3,	action_toggletag,	{0} },
+	{ ClkTagBar,	0,					Button1,	action_tags_view,	{0} },
+	{ ClkTagBar,	ShiftMask,			Button1,	action_tags_toggle,	{0} },
 };
 
 unsigned int const nbuttons = LENGTH(buttons);

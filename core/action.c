@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <utils.h>
+#include <tags.h>
 
 
 /* macros */
@@ -317,55 +318,34 @@ void action_spawn(action_arg_t const *arg){
 	}
 }
 
-void action_tag(action_arg_t const *arg){
-	if(dwm.mons->sel && arg->ui & TAGMASK){
-		dwm.mons->sel->tags = arg->ui & TAGMASK;
-		focus(NULL);
-		arrange(dwm.mons);
-	}
-}
-
 void action_togglebar(action_arg_t const *arg){
 	statusbar_toggle();
 }
 
-void action_toggletag(action_arg_t const *arg){
-	unsigned int newtags;
-
-
-	if(!dwm.mons->sel)
-		return;
-
-	newtags = dwm.mons->sel->tags ^ (arg->ui & TAGMASK);
-
-	if(newtags){
-		dwm.mons->sel->tags = newtags;
-		focus(NULL);
-		arrange(dwm.mons);
-	}
+void action_tags_view(action_arg_t const *arg){
+	tags_set(&dwm.tag_mask, arg->ui);
 }
 
-void action_toggleview(action_arg_t const *arg){
-	unsigned int newtagset = dwm.mons->tagset[dwm.mons->seltags] ^ (arg->ui & TAGMASK);
-
-
-	if(newtagset){
-		dwm.mons->tagset[dwm.mons->seltags] = newtagset;
-		focus(NULL);
-		arrange(dwm.mons);
-	}
+void action_tags_toggle(action_arg_t const *arg){
+	tags_toggle(&dwm.tag_mask, arg->ui);
 }
 
-void action_view(action_arg_t const *arg){
-	if((arg->ui & TAGMASK) == dwm.mons->tagset[dwm.mons->seltags])
+void action_client_tags_set(action_arg_t const *arg){
+	client_t *c = dwm.mons->sel;
+
+
+	if(c == 0x0)
 		return;
 
-	dwm.mons->seltags ^= 1; /* toggle sel tagset */
+	tags_set(&c->tags, arg->ui);
+}
 
-	if(arg->ui & TAGMASK)
-		dwm.mons->tagset[dwm.mons->seltags] = arg->ui & TAGMASK;
+void action_client_tags_toggle(action_arg_t const *arg){
+	client_t *c = dwm.mons->sel;
 
-	focus(NULL);
-	arrange(dwm.mons);
-	statusbar_draw();
+
+	if(c == 0x0)
+		return;
+
+	tags_toggle(&c->tags, arg->ui);
 }

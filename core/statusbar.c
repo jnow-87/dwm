@@ -84,7 +84,7 @@ void statusbar_draw(void){
 
 	for(unsigned int i=0; i<ntags; i++){
 		w = TEXTW(tags[i]);
-		drw_setscheme(dwm.drw, dwm.scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
+		drw_setscheme(dwm.drw, dwm.scheme[(dwm.tag_mask & (1 << i)) ? SchemeSel : SchemeNorm]);
 		drw_text(dwm.drw, x, 0, w, bar->height, dwm.lrpad / 2, tags[i], 0);
 
 		x += w;

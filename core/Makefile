@@ -5,6 +5,7 @@ dwm-y := \
 	action.o \
 	drw.o \
 	dwm.o \
+	tags.o \
 	statusbar.o \
 	config/ \
 	layout/ \

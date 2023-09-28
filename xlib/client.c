@@ -65,7 +65,7 @@ void manage(Window w, XWindowAttributes *wa){
 	}
 	else{
 		c->mon = dwm.mons;
-		c->tags = c->mon->tagset[c->mon->seltags];
+		c->tags = dwm.tag_mask;
 	}
 
 	if(geom->x + WIDTH(c) > c->mon->x + c->mon->width)
@@ -266,7 +266,6 @@ void sendmon(client_t *c, monitor_t *m){
 	detachstack(c);
 
 	c->mon = m;
-	c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
 
 	attach(c);
 	attachstack(c);
