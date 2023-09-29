@@ -5,16 +5,20 @@
 
 
 /* global functions */
-void monocle(monitor_t *m){
+void monocle(void){
 	unsigned int n = 0;
+	monitor_t *m;
 	client_t *c;
 
 
-	for(c=m->clients; c; c=c->next){
+	for(c=dwm.clients; c; c=c->next){
 		if(ISVISIBLE(c))
 			n++;
 	}
 
-	for(c=nexttiled(m->clients); c; c=nexttiled(c->next))
+	for(c=nexttiled(dwm.clients); c; c=nexttiled(c->next)){
+		m = client_to_monitor(c);
+
 		resize(c, m->x, m->y, m->width - 2 * c->geom.border_width, m->height - 2 * c->geom.border_width, 0);
+	}
 }

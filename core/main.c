@@ -30,6 +30,7 @@ static long getstate(Window w);
 
 /* global variables */
 dwm_t dwm = {
+	.clients = 0x0,
 	.layout = layouts + 0,
 	.running = 1,
 	.numlock_mask = 0,
@@ -163,17 +164,14 @@ static void setup(void){
 
 static void cleanup(void){
 	layout_t foo = { "", NULL };
-	monitor_t *m;
 	size_t i;
 
 
 	tags_set(&dwm.tag_mask, ~0);
 	dwm.layout = &foo;
 
-	for(m=dwm.mons; m; m=m->next){
-		while(m->stack)
-			unmanage(m->stack, 0);
-	}
+	while(dwm.stack)
+		unmanage(dwm.stack, 0);
 
 	XUngrabKey(dwm.dpy, AnyKey, AnyModifier, dwm.root);
 

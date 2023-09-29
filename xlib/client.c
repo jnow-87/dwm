@@ -26,20 +26,18 @@ static void grabbuttons(client_t *c, int focused);
 /* global functions */
 client_t *wintoclient(Window w){
 	client_t *c;
-	monitor_t *m;
 
 
-	for(m=dwm.mons; m; m=m->next){
-		for(c=m->clients; c; c=c->next){
-			if(c->win == w)
-				return c;
-		}
+	for(c=dwm.clients; c; c=c->next){
+		if(c->win == w)
+			return c;
 	}
 
 	return NULL;
 }
 
 void manage(Window w, XWindowAttributes *wa){
+	monitor_t *mon = dwm.mons;
 	client_t *c, *t = NULL;
 	Window trans = None;
 	client_geom_t *geom;
@@ -58,24 +56,19 @@ void manage(Window w, XWindowAttributes *wa){
 	geom->border_width = wa->border_width;
 
 	c->geom_store = *geom;
+	c->tags = dwm.tag_mask;
 
-	if(XGetTransientForHint(dwm.dpy, w, &trans) && (t = wintoclient(trans))){
-		c->mon = t->mon;
+	if(XGetTransientForHint(dwm.dpy, w, &trans) && (t = wintoclient(trans)))
 		c->tags = t->tags;
-	}
-	else{
-		c->mon = dwm.mons;
-		c->tags = dwm.tag_mask;
-	}
 
-	if(geom->x + WIDTH(c) > c->mon->x + c->mon->width)
-		geom->x = c->mon->x + c->mon->width - WIDTH(c);
+	if(geom->x + WIDTH(c) > mon->x + mon->width)
+		geom->x = mon->x + mon->width - WIDTH(c);
 
-	if(geom->y + HEIGHT(c) > c->mon->y + c->mon->height)
-		geom->y = c->mon->y + c->mon->height - HEIGHT(c);
+	if(geom->y + HEIGHT(c) > mon->y + mon->height)
+		geom->y = mon->y + mon->height - HEIGHT(c);
 
-	geom->x = MAX(geom->x, c->mon->x);
-	geom->y = MAX(geom->y, c->mon->y);
+	geom->x = MAX(geom->x, mon->x);
+	geom->y = MAX(geom->y, mon->y);
 	geom->border_width = CONFIG_BORDER_PIXEL;
 
 	wc.border_width = geom->border_width;
@@ -100,19 +93,18 @@ void manage(Window w, XWindowAttributes *wa){
 	XMoveResizeWindow(dwm.dpy, c->win, geom->x + 2 * dwm.screen_width, geom->y, geom->width, geom->height); /* some windows require this */
 	setclientstate(c, NormalState);
 
-	if(c->mon == dwm.mons)
-		unfocus(dwm.mons->sel, 0);
+	if(mon == dwm.mons)
+		unfocus(dwm.focused, 0);
 
-	c->mon->sel = c;
+	dwm.focused = c;
 	XMapWindow(dwm.dpy, c->win);
 	focus(NULL);
 
 	// TODO move arrange out of the function to avoid calling it multiple times during startup
-	arrange(c->mon);
+	arrange();
 }
 
 void unmanage(client_t *c, int destroyed){
-	monitor_t *m = c->mon;
 	XWindowChanges wc;
 
 
@@ -135,14 +127,14 @@ void unmanage(client_t *c, int destroyed){
 	free(c);
 	focus(NULL);
 	updateclientlist();
-	arrange(m);
+	arrange();
 }
 
 void killclient(Window win){
 	XGrabServer(dwm.dpy);
 	XSetErrorHandler(dummy_xerror_hdlr);
 	XSetCloseDownMode(dwm.dpy, DestroyAll);
-	XKillClient(dwm.dpy, dwm.mons->sel->win);
+	XKillClient(dwm.dpy, dwm.focused->win);
 	XSync(dwm.dpy, False);
 	XSetErrorHandler(xerror_hdlr);
 	XUngrabServer(dwm.dpy);
@@ -168,36 +160,36 @@ void configure(client_t *c){
 }
 
 void attach(client_t *c){
-	c->next = c->mon->clients;
-	c->mon->clients = c;
+	c->next = dwm.clients;
+	dwm.clients = c;
 }
 
 void attachstack(client_t *c){
-	c->stack_next = c->mon->stack;
-	c->mon->stack = c;
+	c->stack_next = dwm.stack;
+	dwm.stack = c;
 }
 
 void detachstack(client_t *c){
 	client_t **tc, *t;
 
 
-	for(tc=&c->mon->stack; *tc && *tc!=c; tc=&(*tc)->stack_next);
+	for(tc=&dwm.stack; *tc && *tc!=c; tc=&(*tc)->stack_next);
 
 	*tc = c->stack_next;
 
-	if(c == c->mon->sel){
-		for(t=c->mon->stack; t && !ISVISIBLE(t); t=t->stack_next);
+	if(c == dwm.focused){
+		for(t=dwm.stack; t && !ISVISIBLE(t); t=t->stack_next);
 
-		c->mon->sel = t;
+		dwm.focused = t;
 	}
 }
 
 void focus(client_t *c){
 	if(!c || !ISVISIBLE(c))
-		for(c=dwm.mons->stack; c && !ISVISIBLE(c); c=c->stack_next);
+		for(c=dwm.stack; c && !ISVISIBLE(c); c=c->stack_next);
 
-	if(dwm.mons->sel && dwm.mons->sel != c)
-		unfocus(dwm.mons->sel, 0);
+	if(dwm.focused && dwm.focused != c)
+		unfocus(dwm.focused, 0);
 
 	if(c){
 		detachstack(c);
@@ -211,7 +203,7 @@ void focus(client_t *c){
 		XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow]);
 	}
 
-	dwm.mons->sel = c;
+	dwm.focused = c;
 	statusbar_draw();
 }
 
@@ -248,22 +240,6 @@ void showhide(client_t *c){
 		showhide(c->stack_next);
 		XMoveWindow(dwm.dpy, c->win, WIDTH(c) * -2, geom->y);
 	}
-}
-
-void sendmon(client_t *c, monitor_t *m){
-	if(c->mon == m)
-		return;
-
-	unfocus(c, 1);
-	detach(c);
-	detachstack(c);
-
-	c->mon = m;
-
-	attach(c);
-	attachstack(c);
-	focus(NULL);
-	arrange(NULL);
 }
 
 void resize(client_t *c, int x, int y, int w, int h, int interact){
@@ -336,7 +312,7 @@ void updatewmhints(client_t *c){
 
 
 	if((wmh = XGetWMHints(dwm.dpy, c->win))){
-		if(c == dwm.mons->sel && wmh->flags & XUrgencyHint){
+		if(c == dwm.focused && wmh->flags & XUrgencyHint){
 			wmh->flags &= ~XUrgencyHint;
 			XSetWMHints(dwm.dpy, c->win, wmh);
 		}
@@ -406,19 +382,16 @@ void updatesizehints(client_t *c){
 /* local functions */
 static void updateclientlist(){
 	client_t *c;
-	monitor_t *m;
 
 
 	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList]);
 
-	for(m=dwm.mons; m; m=m->next){
-		for(c=m->clients; c; c=c->next)
-			XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
-	}
+	for(c=dwm.clients; c; c=c->next)
+		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
 }
 
 static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int interact){
-	monitor_t *m = c->mon;
+	monitor_t *m = client_to_monitor(c);
 	client_geom_t *geom = &c->geom;
 	int baseismin;
 
@@ -502,7 +475,7 @@ static void detach(client_t *c){
 	client_t **tc;
 
 
-	for(tc=&c->mon->clients; *tc && *tc!=c; tc=&(*tc)->next);
+	for(tc=&dwm.clients; *tc && *tc!=c; tc=&(*tc)->next);
 
 	*tc = c->next;
 }

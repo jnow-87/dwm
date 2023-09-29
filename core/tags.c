@@ -13,7 +13,7 @@ void tags_set(unsigned int *tags, unsigned int v){
 
 	// TODO this should be moved to dwm level
 	focus(NULL);
-	arrange(dwm.mons);
+	arrange();
 	statusbar_draw();
 }
 

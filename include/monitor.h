@@ -15,19 +15,16 @@ typedef struct monitor_t{
 		y,
 		width,
 		height;
-	struct client_t *clients;
-	struct client_t *sel;
-	struct client_t *stack;
+
 	struct monitor_t *next;
 } monitor_t;
 
 
 /* prototypes */
 monitor_t *createmon(void);
-monitor_t *recttomon(int x, int y, int w, int h);
-monitor_t *wintomon(Window w);
+monitor_t *client_to_monitor(struct client_t *c);
 void cleanupmon(monitor_t *mon);
-void restack(monitor_t *m);
+void restack(void);
 
 
 #endif // MONITOR_H

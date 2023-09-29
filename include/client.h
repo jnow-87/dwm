@@ -3,7 +3,6 @@
 
 
 #include <X11/Xlib.h>
-#include <monitor.h>
 
 
 /* macros */
@@ -41,7 +40,6 @@ typedef struct{
 } client_hints_t;
 
 typedef struct client_t{
-	monitor_t *mon;
 	unsigned int tags;
 
 	Window win;
@@ -49,8 +47,8 @@ typedef struct client_t{
 				  geom_store;
 	client_hints_t hints;
 
-	struct client_t *next;			// client list per monitor
-	struct client_t *stack_next;	// client stack per monitor
+	struct client_t *next;
+	struct client_t *stack_next;
 } client_t;
 
 
@@ -71,7 +69,6 @@ void detachstack(client_t *c);
 void focus(client_t *c);
 void unfocus(client_t *c, int setfocus);
 void showhide(client_t *c);
-void sendmon(client_t *c, monitor_t *m);
 
 void resize(client_t *c, int x, int y, int w, int h, int interact);
 void resizeclient(client_t *c, int x, int y, int w, int h);

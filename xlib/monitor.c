@@ -4,13 +4,8 @@
 #include <dwm.h>
 #include <layout.h>
 #include <statusbar.h>
+#include <monitor.h>
 #include <utils.h>
-
-
-/* macros */
-#define INTERSECT(x,y,w,h,m) \
-	  (MAX(0, MIN((x)+(w),(m)->x+(m)->width) - MAX((x),(m)->x)) \
-	* MAX(0, MIN((y)+(h),(m)->y+(m)->height) - MAX((y),(m)->y)))
 
 
 /* global functions */
@@ -23,36 +18,24 @@ monitor_t *createmon(void){
 	return m;
 }
 
-monitor_t *recttomon(int x, int y, int w, int h){
-	monitor_t *m, *r = dwm.mons;
-	int a, area = 0;
+monitor_t *client_to_monitor(client_t *c){
+	int area = 0;
+	monitor_t *r = dwm.mons;
+	client_geom_t *geom = &c->geom;
+	int a;
 
 
-	for(m=dwm.mons; m; m=m->next){
-		if((a = INTERSECT(x, y, w, h, m)) > area){
+	for(monitor_t *m=dwm.mons; m; m=m->next){
+		a = MAX(0, MIN(geom->x + geom->width, m->x + m->width) - MAX(geom->x, m->x))
+		  * MAX(0, MIN(geom->y + geom->height, m->y + m->height) - MAX(geom->y, m->y));
+
+		if(a > area){
 			area = a;
 			r = m;
 		}
 	}
 
 	return r;
-}
-
-monitor_t *wintomon(Window w){
-	int x, y;
-	client_t *c;
-
-
-	if(w == dwm.root && getrootptr(&x, &y))
-		return recttomon(x, y, 1, 1);
-
-	if(w == dwm.statusbar.win)
-		return dwm.mons;
-
-	if((c = wintoclient(w)))
-		return c->mon;
-
-	return dwm.mons;
 }
 
 void cleanupmon(monitor_t *mon){
@@ -71,16 +54,16 @@ void cleanupmon(monitor_t *mon){
 	free(mon);
 }
 
-void restack(monitor_t *m){
+void restack(void){
 	XEvent ev;
 
 
 	statusbar_draw();
 
-	if(!m->sel)
+	if(!dwm.focused)
 		return;
 
-	XRaiseWindow(dwm.dpy, m->sel->win);
+	XRaiseWindow(dwm.dpy, dwm.focused->win);
 	XSync(dwm.dpy, False);
 
 	while(XCheckMaskEvent(dwm.dpy, EnterWindowMask, &ev));

@@ -10,13 +10,18 @@
 
 
 /* global functions */
-void tile(monitor_t *m){
+void tile(void){
+	// TODO
+	// 	has to be re-implemented to tile the clients on each monitor separately
+	// 	since clients no longer have the monitor as struct member, the list of
+	// 	clients for a particular monitor has to be computed first
 	unsigned int i, n, h, w, y, ty;
+	monitor_t *m = dwm.mons;
 	client_t *c;
 	client_geom_t *geom;
 
 
-	for(n=0, c=nexttiled(m->clients); c; c=nexttiled(c->next), n++);
+	for(n=0, c=nexttiled(dwm.clients); c; c=nexttiled(c->next), n++);
 
 	if(n == 0)
 		return;
@@ -24,7 +29,7 @@ void tile(monitor_t *m){
 	if(n > NMASTER)	w = NMASTER ? m->width * (CONFIG_LAYOUT_MASTER_RATIO / 100.0) : 0;
 	else			w = m->width;
 
-	for(i=y=ty=0, c=nexttiled(m->clients); c; c=nexttiled(c->next), i++){
+	for(i=y=ty=0, c=nexttiled(dwm.clients); c; c=nexttiled(c->next), i++){
 		geom = &c->geom;
 
 		if(i < NMASTER){

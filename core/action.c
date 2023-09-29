@@ -25,18 +25,18 @@ void action_focusstack(action_arg_t const *arg){
 	client_t *c = NULL, *i;
 
 
-	if(!dwm.mons->sel)
+	if(!dwm.focused)
 		return;
 
 	if(arg->i > 0){
-		for(c=dwm.mons->sel->next; c && !ISVISIBLE(c); c=c->next);
+		for(c=dwm.focused->next; c && !ISVISIBLE(c); c=c->next);
 
 		if(!c){
-			for(c=dwm.mons->clients; c && !ISVISIBLE(c); c=c->next);
+			for(c=dwm.clients; c && !ISVISIBLE(c); c=c->next);
 		}
 	}
 	else{
-		for(i=dwm.mons->clients; i!=dwm.mons->sel; i=i->next){
+		for(i=dwm.clients; i!=dwm.focused; i=i->next){
 			if(ISVISIBLE(i))
 				c = i;
 		}
@@ -51,18 +51,18 @@ void action_focusstack(action_arg_t const *arg){
 
 	if(c){
 		focus(c);
-		restack(dwm.mons);
+		restack();
 	}
 
 	statusbar_draw();
 }
 
 void action_killclient(action_arg_t const *arg){
-	if(!dwm.mons->sel)
+	if(!dwm.focused)
 		return;
 
-	if(!sendevent(dwm.mons->sel, dwm.wmatom[WMDelete]))
-		killclient(dwm.mons->sel->win);
+	if(!sendevent(dwm.focused, dwm.wmatom[WMDelete]))
+		killclient(dwm.focused->win);
 }
 
 void action_movemouse(action_arg_t const *arg){
@@ -72,10 +72,10 @@ void action_movemouse(action_arg_t const *arg){
 	Time lasttime = 0;
 
 
-	if(!(c = dwm.mons->sel))
+	if(!(c = dwm.focused))
 		return;
 
-	restack(dwm.mons);
+	restack();
 	ocx = c->geom.x;
 	ocy = c->geom.y;
 
@@ -127,11 +127,11 @@ void action_moveclient(action_arg_t const *arg){
 	client_geom_t *geom;
 
 
-	if(!(c = dwm.mons->sel))
+	if(!(c = dwm.focused))
 		return;
 
 	geom = &c->geom;
-	restack(dwm.mons);
+	restack();
 
 	nx = ((int*)(arg->v))[0];
 	ny = ((int*)(arg->v))[1];
@@ -165,11 +165,11 @@ void action_reszclient(action_arg_t const *arg){
 	client_geom_t *geom;
 
 
-	if(!(c = dwm.mons->sel))
+	if(!(c = dwm.focused))
 		return;
 
 	geom = &c->geom;
-	restack(dwm.mons);
+	restack();
 
 	nw = ((int*)(arg->v))[0];
 	nh = ((int*)(arg->v))[1];
@@ -231,13 +231,13 @@ void action_resizemouse(action_arg_t const *arg){
 	Time lasttime = 0;
 
 
-	if(!(c = dwm.mons->sel))
+	if(!(c = dwm.focused))
 		return;
 
 	geom = &c->geom;
 	ocx = c->geom.x;
 	ocy = c->geom.y;
-	restack(dwm.mons);
+	restack();
 
 	if(XGrabPointer(dwm.dpy, dwm.root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, dwm.cursor[CurResize]->cursor, CurrentTime) != GrabSuccess)
 		return;
@@ -287,8 +287,8 @@ void action_setlayout(action_arg_t const *arg){
 	else
 		dwm.layout = (layout_t*)arg->v;
 
-	if(dwm.mons->sel)
-		arrange(dwm.mons);
+	if(dwm.focused)
+		arrange();
 
 	statusbar_draw();
 }
@@ -331,7 +331,7 @@ void action_tags_toggle(action_arg_t const *arg){
 }
 
 void action_client_tags_set(action_arg_t const *arg){
-	client_t *c = dwm.mons->sel;
+	client_t *c = dwm.focused;
 
 
 	if(c == 0x0)
@@ -341,7 +341,7 @@ void action_client_tags_set(action_arg_t const *arg){
 }
 
 void action_client_tags_toggle(action_arg_t const *arg){
-	client_t *c = dwm.mons->sel;
+	client_t *c = dwm.focused;
 
 
 	if(c == 0x0)

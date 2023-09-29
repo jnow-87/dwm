@@ -9,16 +9,16 @@
 /* types */
 typedef struct layout_t{
 	char const *symbol;
-	void (*arrange)(monitor_t*);
+	void (*arrange)(void);
 } layout_t;
 
 
 /* prototypes */
 client_t *nexttiled(client_t *c);
-void arrange(monitor_t *m);
+void arrange(void);
 
-void tile(monitor_t *m);
-void monocle(monitor_t *m);
+void tile(void);
+void monocle(void);
 
 
 #endif // LAYOUT_H

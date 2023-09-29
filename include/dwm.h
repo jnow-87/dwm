@@ -54,6 +54,10 @@ typedef struct{
 
 	int (*xlib_xerror_hdlr)(Display *, XErrorEvent *); // default error handler used by xlib
 
+	client_t *clients,
+			 *stack,
+			 *focused;
+
 	color_t **scheme;
 	cursor_t *cursor[CurLast];
 	statusbar_t statusbar;

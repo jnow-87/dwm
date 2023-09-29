@@ -75,11 +75,10 @@ int xinerama_discover_monitor(void){
 
 		DEBUG("remove monitor\n");
 
-		while((c = m->clients)){
+		while((c = dwm.clients)){
 			dirty = true;
-			m->clients = c->next;
+			dwm.clients = c->next;
 			detachstack(c);
-			c->mon = dwm.mons;
 			attach(c);
 			attachstack(c);
 		}

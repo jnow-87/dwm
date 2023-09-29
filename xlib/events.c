@@ -117,7 +117,7 @@ static void buttonpress(XEvent *e){
 	}
 	else if((c = wintoclient(ev->window))){
 		focus(c);
-		restack(dwm.mons);
+		restack();
 		XAllowEvents(dwm.dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
 		statusbar_draw();
@@ -144,7 +144,7 @@ static void configurerequest(XEvent *e){
 			geom->border_width = ev->border_width;
 		}
 		else{
-			m = c->mon;
+			m = client_to_monitor(c);
 
 			if(ev->value_mask & CWX){
 				c->geom_store.x = geom->x;
@@ -204,10 +204,9 @@ static void destroynotify(XEvent *e){
 
 static void expose(XEvent *e){
 	XExposeEvent *ev = &e->xexpose;
-	monitor_t *m;
 
 
-	if(ev->count == 0 && (m = wintomon(ev->window)))
+	if(ev->window == dwm.statusbar.win && ev->count == 0)
 		statusbar_draw();
 }
 
@@ -216,8 +215,8 @@ static void focusin(XEvent *e){
 	XFocusChangeEvent *ev = &e->xfocus;
 
 
-	if(dwm.mons->sel && ev->window != dwm.mons->sel->win)
-		setfocus(dwm.mons->sel);
+	if(dwm.focused && ev->window != dwm.focused->win)
+		setfocus(dwm.focused);
 }
 
 static void keypress(XEvent *e){
