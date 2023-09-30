@@ -17,7 +17,7 @@ void monocle(void){
 	}
 
 	for(c=nexttiled(dwm.clients); c; c=nexttiled(c->next)){
-		m = client_to_monitor(c);
+		m = monitor_from_client(c);
 
 		resize(c, m->x, m->y, m->width - 2 * c->geom.border_width, m->height - 2 * c->geom.border_width, 0);
 	}

@@ -96,24 +96,14 @@ void grabkeys(void){
 	}
 }
 
-int monitor_discover(void){
-	int dirty;
-
-
-	dirty = xinerama_discover_monitor();
-
-	if(dirty < 0){
-		if(!dwm.mons)
-			dwm.mons = createmon();
-
-		if(dwm.mons->width != dwm.screen_width || dwm.mons->height != dwm.screen_height){
-			dirty = 1;
-			dwm.mons->width = dwm.screen_width;
-			dwm.mons->height = dwm.screen_height;
-		}
+void monitor_discover(void){
+	/* free existing monitors */
+	while(dwm.mons){
+		monitor_destroy(dwm.mons);
 	}
 
-	return dirty;
+	if(xinerama_discover_monitor() < 0)
+		monitor_create(0, 0, dwm.screen_width, dwm.screen_height);
 }
 
 void updatenumlockmask(void){

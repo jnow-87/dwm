@@ -175,8 +175,9 @@ static void cleanup(void){
 
 	XUngrabKey(dwm.dpy, AnyKey, AnyModifier, dwm.root);
 
-	while(dwm.mons)
-		cleanupmon(dwm.mons);
+	while(dwm.mons){
+		monitor_destroy(dwm.mons);
+	}
 
 	for(i=0; i<CurLast; i++)
 		drw_cur_free(dwm.drw, dwm.cursor[i]);

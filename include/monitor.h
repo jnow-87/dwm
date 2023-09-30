@@ -2,11 +2,7 @@
 #define MONITOR_H
 
 
-#include <X11/X.h>
-
-
-/* incomplete types */
-struct client_t;
+#include <client.h>
 
 
 /* types */
@@ -21,10 +17,12 @@ typedef struct monitor_t{
 
 
 /* prototypes */
-monitor_t *createmon(void);
-monitor_t *client_to_monitor(struct client_t *c);
-void cleanupmon(monitor_t *mon);
-void restack(void);
+monitor_t *monitor_create(int x, int y, int width, int height);
+void monitor_destroy(monitor_t *mon);
+
+monitor_t *monitor_from_client(client_t *c);
+
+void monitor_restack(void);
 
 
 #endif // MONITOR_H

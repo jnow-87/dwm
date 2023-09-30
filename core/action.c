@@ -51,7 +51,7 @@ void action_focusstack(action_arg_t const *arg){
 
 	if(c){
 		focus(c);
-		restack();
+		monitor_restack();
 	}
 
 	statusbar_draw();
@@ -75,7 +75,7 @@ void action_movemouse(action_arg_t const *arg){
 	if(!(c = dwm.focused))
 		return;
 
-	restack();
+	monitor_restack();
 	ocx = c->geom.x;
 	ocy = c->geom.y;
 
@@ -131,7 +131,7 @@ void action_moveclient(action_arg_t const *arg){
 		return;
 
 	geom = &c->geom;
-	restack();
+	monitor_restack();
 
 	nx = ((int*)(arg->v))[0];
 	ny = ((int*)(arg->v))[1];
@@ -169,7 +169,7 @@ void action_reszclient(action_arg_t const *arg){
 		return;
 
 	geom = &c->geom;
-	restack();
+	monitor_restack();
 
 	nw = ((int*)(arg->v))[0];
 	nh = ((int*)(arg->v))[1];
@@ -237,7 +237,7 @@ void action_resizemouse(action_arg_t const *arg){
 	geom = &c->geom;
 	ocx = c->geom.x;
 	ocy = c->geom.y;
-	restack();
+	monitor_restack();
 
 	if(XGrabPointer(dwm.dpy, dwm.root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, dwm.cursor[CurResize]->cursor, CurrentTime) != GrabSuccess)
 		return;

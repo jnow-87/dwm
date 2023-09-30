@@ -9,16 +9,42 @@
 
 
 /* global functions */
-monitor_t *createmon(void){
+monitor_t *monitor_create(int x, int y, int width, int height){
 	monitor_t *m;
 
 
-	m = ecalloc(1, sizeof(monitor_t));
+	m = malloc(sizeof(monitor_t));
+
+	if(m == 0x0)
+		return 0x0;
+
+	m->x = x;
+	m->y = y;
+	m->width = width;
+	m->height = height;
+	m->next = dwm.mons;
+
+	dwm.mons = m;
 
 	return m;
 }
 
-monitor_t *client_to_monitor(client_t *c){
+void monitor_destroy(monitor_t *mon){
+	monitor_t *m;
+
+
+	if(mon != dwm.mons){
+		for(m=dwm.mons; m && m->next!=mon; m=m->next);
+
+		m->next = mon->next;
+	}
+	else
+		dwm.mons = dwm.mons->next;
+
+	free(mon);
+}
+
+monitor_t *monitor_from_client(client_t *c){
 	int area = 0;
 	monitor_t *r = dwm.mons;
 	client_geom_t *geom = &c->geom;
@@ -38,23 +64,7 @@ monitor_t *client_to_monitor(client_t *c){
 	return r;
 }
 
-void cleanupmon(monitor_t *mon){
-	monitor_t *m;
-
-
-	if(mon != dwm.mons){
-		for(m=dwm.mons; m && m->next!=mon; m=m->next);
-
-		m->next = mon->next;
-	}
-	else
-		dwm.mons = dwm.mons->next;
-
-	statusbar_destroy();
-	free(mon);
-}
-
-void restack(void){
+void monitor_restack(void){
 	XEvent ev;
 
 

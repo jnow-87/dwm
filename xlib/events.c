@@ -117,7 +117,7 @@ static void buttonpress(XEvent *e){
 	}
 	else if((c = wintoclient(ev->window))){
 		focus(c);
-		restack();
+		monitor_restack();
 		XAllowEvents(dwm.dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
 		statusbar_draw();
@@ -144,7 +144,7 @@ static void configurerequest(XEvent *e){
 			geom->border_width = ev->border_width;
 		}
 		else{
-			m = client_to_monitor(c);
+			m = monitor_from_client(c);
 
 			if(ev->value_mask & CWX){
 				c->geom_store.x = geom->x;
@@ -194,22 +194,16 @@ static void configurerequest(XEvent *e){
 }
 
 static void configurenotify(XEvent *e){
-	int dirty = 0;
 	XConfigureEvent *ev = &e->xconfigure;
 
 
 	if(ev->window != dwm.root)
 		return;
 
-	dirty = (dwm.screen_width != ev->width || dwm.screen_height != ev->height);
-
 	dwm.screen_width = ev->width;
 	dwm.screen_height = ev->height;
 
-	dirty |= monitor_discover();
-
-	if(dirty == 0)
-		return;
+	monitor_discover();
 
 	drw_resize(dwm.drw, dwm.screen_width, dwm.screen_height);
 	XMoveResizeWindow(dwm.dpy, dwm.statusbar.win, dwm.mons->x, dwm.statusbar.y, dwm.mons->width, dwm.statusbar.height);

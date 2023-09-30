@@ -391,7 +391,7 @@ static void updateclientlist(){
 }
 
 static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int interact){
-	monitor_t *m = client_to_monitor(c);
+	monitor_t *m = monitor_from_client(c);
 	client_geom_t *geom = &c->geom;
 	int baseismin;
 

@@ -70,7 +70,7 @@ typedef struct{
 void die(char const *fmt, ...);
 int getrootptr(int *x, int *y);
 void grabkeys(void);
-int monitor_discover(void);
+void monitor_discover(void);
 void updatenumlockmask(void);
 
 
