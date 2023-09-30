@@ -7,7 +7,6 @@
 #include <layout.h>
 #include <monitor.h>
 #include <statusbar.h>
-#include <log.h>
 
 
 /* macros */
@@ -17,6 +16,7 @@
 /* local/static prototypes */
 static void buttonpress(XEvent *e);
 static void configurerequest(XEvent *e);
+static void configurenotify(XEvent *e);
 static void destroynotify(XEvent *e);
 static void expose(XEvent *e);
 static void focusin(XEvent *e);
@@ -32,7 +32,7 @@ static void (*handler[LASTEvent])(XEvent*) = {
 	[ButtonPress] = buttonpress,
 	[ClientMessage] = 0x0,
 	[ConfigureRequest] = configurerequest,
-	[ConfigureNotify] = 0x0,
+	[ConfigureNotify] = configurenotify,
 	[DestroyNotify] = destroynotify,
 	[EnterNotify] = 0x0,
 	[Expose] = expose,
@@ -191,6 +191,30 @@ static void configurerequest(XEvent *e){
 	}
 
 	XSync(dwm.dpy, False);
+}
+
+static void configurenotify(XEvent *e){
+	int dirty = 0;
+	XConfigureEvent *ev = &e->xconfigure;
+
+
+	if(ev->window != dwm.root)
+		return;
+
+	dirty = (dwm.screen_width != ev->width || dwm.screen_height != ev->height);
+
+	dwm.screen_width = ev->width;
+	dwm.screen_height = ev->height;
+
+	dirty |= monitor_discover();
+
+	if(dirty == 0)
+		return;
+
+	drw_resize(dwm.drw, dwm.screen_width, dwm.screen_height);
+	XMoveResizeWindow(dwm.dpy, dwm.statusbar.win, dwm.mons->x, dwm.statusbar.y, dwm.mons->width, dwm.statusbar.height);
+	focus(0x0);
+	arrange();
 }
 
 static void destroynotify(XEvent *e){

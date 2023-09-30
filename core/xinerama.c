@@ -19,7 +19,6 @@ int xinerama_discover_monitor(void){
 		nmon,
 		ninfo,
 		nunique;
-	client_t *c;
 	monitor_t *m;
 	XineramaScreenInfo *info;
 	XineramaScreenInfo *unique = NULL;
@@ -65,7 +64,6 @@ int xinerama_discover_monitor(void){
 
 			DEBUG("init monitor %d:\n", i);
 			DEBUG("  screen area: %dx%d+%d+%d\n", m->x, m->y, m->width, m->height);
-			DEBUG("  window area: %dx%d+%d+%d\n", m->x, m->y, m->width, m->height);
 		}
 	}
 
@@ -74,15 +72,6 @@ int xinerama_discover_monitor(void){
 		for(m=dwm.mons; m && m->next; m=m->next);
 
 		DEBUG("remove monitor\n");
-
-		while((c = dwm.clients)){
-			dirty = true;
-			dwm.clients = c->next;
-			detachstack(c);
-			attach(c);
-			attachstack(c);
-		}
-
 		cleanupmon(m);
 	}
 
