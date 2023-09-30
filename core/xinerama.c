@@ -46,7 +46,7 @@ int xinerama_discover_monitor(void){
 
 	/* allccate monitors */
 	for(i=0; i<ninfo; i++){
-		info = unique + ninfo - i - 1;
+		info = unique + i;
 		m = monitor_create(info->x_org, info->y_org, info->width, info->height);
 
 		if(m == 0x0)

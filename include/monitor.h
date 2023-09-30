@@ -7,12 +7,13 @@
 
 /* types */
 typedef struct monitor_t{
+	struct monitor_t *prev,
+					 *next;
+
 	int x,
 		y,
 		width,
 		height;
-
-	struct monitor_t *next;
 } monitor_t;
 
 

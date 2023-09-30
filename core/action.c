@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <utils.h>
 #include <tags.h>
+#include <list.h>
 
 
 /* macros */
@@ -31,17 +32,23 @@ void action_focusstack(action_arg_t const *arg){
 	if(arg->i > 0){
 		for(c=dwm.focused->next; c && !ISVISIBLE(c); c=c->next);
 
-		if(!c){
-			for(c=dwm.clients; c && !ISVISIBLE(c); c=c->next);
+		if(c == 0x0){
+			list_for_each(dwm.clients, c){
+				if(ISVISIBLE(c))
+					break;
+			}
 		}
 	}
 	else{
-		for(i=dwm.clients; i!=dwm.focused; i=i->next){
+		list_for_each(dwm.clients, i){
+			if(i == dwm.focused)
+				break;
+
 			if(ISVISIBLE(i))
 				c = i;
 		}
 
-		if(!c){
+		if(c == 0x0){
 			for(; i; i=i->next){
 				if(ISVISIBLE(i))
 					c = i;
@@ -49,7 +56,7 @@ void action_focusstack(action_arg_t const *arg){
 		}
 	}
 
-	if(c){
+	if(c != 0x0){
 		focus(c);
 		monitor_restack();
 	}

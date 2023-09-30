@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <utils.h>
+#include <list.h>
 
 #define UTF_INVALID	0xFFFD
 #define UTF_SIZ		4
@@ -16,8 +17,6 @@
 /* local/static prototypes */
 static font_t *xfont_create(drw_t *drw, char const *fontname, FcPattern *fontpattern);
 static void xfont_free(font_t *font);
-static font_t *drw_fontset_create(drw_t *drw, char const *fonts[], size_t fontcount);
-static void drw_fontset_free(font_t *set);
 
 static void drw_color_create(drw_t *drw, color_t *dest, char const *name);
 
@@ -40,6 +39,7 @@ static long const utfmax[UTF_SIZ + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF, 0x10FFFF
 /* global functions */
 drw_t *drw_create(Display *dpy, int screen, Window root, unsigned int w, unsigned int h){
 	drw_t *drw = ecalloc(1, sizeof(drw_t));
+	font_t *f;
 
 
 	drw->dpy = dpy;
@@ -50,11 +50,15 @@ drw_t *drw_create(Display *dpy, int screen, Window root, unsigned int w, unsigne
 	drw->drawable = XCreatePixmap(dpy, root, w, h, DefaultDepth(dpy, screen));
 	drw->gc = XCreateGC(dpy, root, 0, NULL);
 	XSetLineAttributes(dpy, drw->gc, 1, LineSolid, CapButt, JoinMiter);
+	f = xfont_create(drw, CONFIG_FONT, NULL);
 
-	if(!drw_fontset_create(drw, (char const *[]){CONFIG_FONT}, 1))
+	if(f == 0x0)
 		die("no fonts could be loaded.");
 
-	dwm.lrpad = drw->fonts->h;
+	drw->fonts = 0x0;
+	list_add_tail(drw->fonts, f);
+
+	dwm.lrpad = f->h;
 
 	return drw;
 }
@@ -72,9 +76,17 @@ void drw_resize(drw_t *drw, unsigned int w, unsigned int h){
 }
 
 void drw_free(drw_t *drw){
+	font_t *f;
+
+
 	XFreePixmap(drw->dpy, drw->drawable);
 	XFreeGC(drw->dpy, drw->gc);
-	drw_fontset_free(drw->fonts);
+
+	list_for_each(drw->fonts, f){
+		list_rm(drw->fonts, f);
+		xfont_free(f);
+	}
+
 	free(drw);
 }
 
@@ -190,7 +202,7 @@ int drw_text(drw_t *drw, int x, int y, unsigned int w, unsigned int h, unsigned 
 		while(*text){
 			utf8charlen = utf8decode(text, &utf8codepoint, UTF_SIZ);
 
-			for(curfont=drw->fonts; curfont; curfont=curfont->next){
+			list_for_each(drw->fonts, curfont){
 				charexists = charexists || XftCharExists(drw->dpy, curfont->xfont, utf8codepoint);
 
 				if(charexists){
@@ -282,8 +294,7 @@ int drw_text(drw_t *drw, int x, int y, unsigned int w, unsigned int h, unsigned 
 				usedfont = xfont_create(drw, NULL, match);
 
 				if(usedfont && XftCharExists(drw->dpy, usedfont->xfont, utf8codepoint)){
-					for(curfont=drw->fonts; curfont->next; curfont=curfont->next); /* NOP */
-					curfont->next = usedfont;
+					list_add_tail(drw->fonts, usedfont);
 				}
 				else{
 					xfont_free(usedfont);
@@ -363,9 +374,6 @@ static size_t utf8decode(char const *c, long *u, size_t clen){
 
 /* local functions */
 static font_t *xfont_create(drw_t *drw, char const *fontname, FcPattern *fontpattern){
-	/* This function is an implementation detail. Library users should use
-	 * drw_fontset_create instead.
-	 */
 	font_t *font;
 	XftFont *xfont = NULL;
 	FcPattern *pattern = NULL;
@@ -418,31 +426,6 @@ static void xfont_free(font_t *font){
 
 	XftFontClose(font->dpy, font->xfont);
 	free(font);
-}
-
-static font_t *drw_fontset_create(drw_t *drw, char const *fonts[], size_t fontcount){
-	font_t *cur, *ret = NULL;
-	size_t i;
-
-
-	if(!drw || !fonts)
-		return NULL;
-
-	for(i=1; i<=fontcount; i++){
-		if((cur = xfont_create(drw, fonts[fontcount - i], NULL))){
-			cur->next = ret;
-			ret = cur;
-		}
-	}
-
-	return (drw->fonts = ret);
-}
-
-static void drw_fontset_free(font_t *font){
-	if(font){
-		drw_fontset_free(font->next);
-		xfont_free(font);
-	}
 }
 
 static void drw_color_create(drw_t *drw, color_t *dest, char const *name){

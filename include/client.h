@@ -40,15 +40,16 @@ typedef struct{
 } client_hints_t;
 
 typedef struct client_t{
+	struct client_t *prev,
+					*next;
+	struct client_t *stack_next;
+
 	unsigned int tags;
 
 	Window win;
 	client_geom_t geom,
 				  geom_store;
 	client_hints_t hints;
-
-	struct client_t *next;
-	struct client_t *stack_next;
 } client_t;
 
 
@@ -61,9 +62,7 @@ void killclient(Window win);
 
 void configure(client_t *c);
 
-void attach(client_t *c);
 void attachstack(client_t *c);
-// TODO detach
 void detachstack(client_t *c);
 
 void focus(client_t *c);

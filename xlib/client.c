@@ -9,6 +9,7 @@
 #include <layout.h>
 #include <statusbar.h>
 #include <utils.h>
+#include <list.h>
 
 
 /* macros */
@@ -18,7 +19,6 @@
 /* local/static prototypes */
 static void updateclientlist();
 static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int interact);
-static void detach(client_t *c);
 static Atom getatomprop(client_t *c, Atom prop);
 static void grabbuttons(client_t *c, int focused);
 
@@ -28,7 +28,7 @@ client_t *wintoclient(Window w){
 	client_t *c;
 
 
-	for(c=dwm.clients; c; c=c->next){
+	list_for_each(dwm.clients, c){
 		if(c->win == w)
 			return c;
 	}
@@ -37,7 +37,7 @@ client_t *wintoclient(Window w){
 }
 
 void manage(Window w, XWindowAttributes *wa){
-	monitor_t *mon = dwm.mons;
+	monitor_t *m = dwm.mons;
 	client_t *c, *t = NULL;
 	Window trans = None;
 	client_geom_t *geom;
@@ -61,14 +61,14 @@ void manage(Window w, XWindowAttributes *wa){
 	if(XGetTransientForHint(dwm.dpy, w, &trans) && (t = wintoclient(trans)))
 		c->tags = t->tags;
 
-	if(geom->x + WIDTH(c) > mon->x + mon->width)
-		geom->x = mon->x + mon->width - WIDTH(c);
+	if(geom->x + WIDTH(c) > m->x + m->width)
+		geom->x = m->x + m->width - WIDTH(c);
 
-	if(geom->y + HEIGHT(c) > mon->y + mon->height)
-		geom->y = mon->y + mon->height - HEIGHT(c);
+	if(geom->y + HEIGHT(c) > m->y + m->height)
+		geom->y = m->y + m->height - HEIGHT(c);
 
-	geom->x = MAX(geom->x, mon->x);
-	geom->y = MAX(geom->y, mon->y);
+	geom->x = MAX(geom->x, m->x);
+	geom->y = MAX(geom->y, m->y);
 	geom->border_width = CONFIG_BORDER_PIXEL;
 
 	wc.border_width = geom->border_width;
@@ -83,7 +83,7 @@ void manage(Window w, XWindowAttributes *wa){
 	XRaiseWindow(dwm.dpy, c->win);
 
 	/* add client to monitor lists */
-	attach(c);
+	list_add_tail(dwm.clients, c);
 	attachstack(c);
 
 	// add client to xserver client list for the window manager
@@ -93,8 +93,7 @@ void manage(Window w, XWindowAttributes *wa){
 	XMoveResizeWindow(dwm.dpy, c->win, geom->x + 2 * dwm.screen_width, geom->y, geom->width, geom->height); /* some windows require this */
 	setclientstate(c, NormalState);
 
-	if(mon == dwm.mons)
-		unfocus(dwm.focused, 0);
+	unfocus(dwm.focused, 0);
 
 	dwm.focused = c;
 	XMapWindow(dwm.dpy, c->win);
@@ -108,7 +107,7 @@ void unmanage(client_t *c, int destroyed){
 	XWindowChanges wc;
 
 
-	detach(c);
+	list_rm(dwm.clients, c);
 	detachstack(c);
 
 	if(!destroyed){
@@ -157,11 +156,6 @@ void configure(client_t *c){
 	ce.above = None;
 	ce.override_redirect = False;
 	XSendEvent(dwm.dpy, c->win, False, StructureNotifyMask, (XEvent*)&ce);
-}
-
-void attach(client_t *c){
-	c->next = dwm.clients;
-	dwm.clients = c;
 }
 
 void attachstack(client_t *c){
@@ -386,7 +380,7 @@ static void updateclientlist(){
 
 	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList]);
 
-	for(c=dwm.clients; c; c=c->next)
+	list_for_each(dwm.clients, c)
 		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
 }
 
@@ -469,15 +463,6 @@ static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int inter
 		*h = MIN(*h, c->hints.height_max);
 
 	return *x != geom->x || *y != geom->y || *w != geom->width || *h != geom->height;
-}
-
-static void detach(client_t *c){
-	client_t **tc;
-
-
-	for(tc=&dwm.clients; *tc && *tc!=c; tc=&(*tc)->next);
-
-	*tc = c->next;
 }
 
 static Atom getatomprop(client_t *c, Atom prop){

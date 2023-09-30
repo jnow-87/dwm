@@ -26,11 +26,13 @@ typedef struct{
 } cursor_t;
 
 typedef struct font_t{
+	struct font_t *prev,
+				  *next;
+
 	Display *dpy;
 	unsigned int h;
 	XftFont *xfont;
 	FcPattern *pattern;
-	struct font_t *next;
 } font_t;
 
 typedef struct{
