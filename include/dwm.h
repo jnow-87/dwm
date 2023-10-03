@@ -42,10 +42,9 @@ typedef struct{
 	int screen_width,
 		screen_height;
 	int lrpad;	/* sum of left and right padding for text */
-	int running;
 	unsigned int numlock_mask;
+	unsigned char modifier_state;
 	drw_t *drw;
-
 	Display *dpy;
 	int screen;
 	Atom netatom[NetLast];
@@ -53,6 +52,9 @@ typedef struct{
 	Window root;
 
 	int (*xlib_xerror_hdlr)(Display *, XErrorEvent *); // default error handler used by xlib
+
+	int running;
+	int event_fd;
 
 	client_t *clients,
 			 *stack,
@@ -65,6 +67,8 @@ typedef struct{
 	unsigned int tag_mask;
 } dwm_t;
 
+typedef int (*event_hdlr_t)(void);
+
 
 /* prototypes */
 void die(char const *fmt, ...);
@@ -72,6 +76,7 @@ int getrootptr(int *x, int *y);
 void grabkeys(void);
 void monitor_discover(void);
 void updatenumlockmask(void);
+int event_add(int fd, event_hdlr_t hdlr);
 
 
 /* external variables */

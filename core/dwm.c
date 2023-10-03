@@ -24,6 +24,7 @@
 #include <X11/X.h>
 #include <X11/Xatom.h>
 #include <config/config.h>
+#include <sys/epoll.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -122,4 +123,14 @@ void updatenumlockmask(void){
 	}
 
 	XFreeModifiermap(modmap);
+}
+
+int event_add(int fd, event_hdlr_t hdlr){
+	struct epoll_event ev;
+
+
+	ev.events = EPOLLIN;
+	ev.data.ptr = hdlr;
+
+	return epoll_ctl(dwm.event_fd, EPOLL_CTL_ADD, fd, &ev);
 }

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/epoll.h>
 #include <unistd.h>
 #include <utils.h>
 #include <version.h>
@@ -82,6 +83,11 @@ static void setup(void){
 
 	check_other_wm_running();
 
+	dwm.event_fd = epoll_create(1);
+
+	if(dwm.event_fd == -1)
+		die("unable to init event loop\n");
+
 	/* do not transform children into zombies when they terminate */
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT | SA_RESTART;
@@ -98,6 +104,10 @@ static void setup(void){
 	dwm.root = RootWindow(dwm.dpy, dwm.screen);
 	dwm.drw = drw_create(dwm.dpy, dwm.screen, dwm.root, dwm.screen_width, dwm.screen_height);
 
+	if(event_add(ConnectionNumber(dwm.dpy), xlib_events_hdlr))
+		die("error adding xlib event handler\n");
+
+	xlib_events_init();
 	monitor_discover();
 
 	/* init atoms */
@@ -160,6 +170,8 @@ static void setup(void){
 
 	focus(NULL);
 	scan();
+
+	XSync(dwm.dpy, False);
 }
 
 static void cleanup(void){
@@ -192,6 +204,10 @@ static void cleanup(void){
 	XSetInputFocus(dwm.dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow]);
 	XCloseDisplay(dwm.dpy);
+
+	xlib_cleanup();
+	close(dwm.event_fd);
+	log_cleanup();
 }
 
 static void scan(void){
@@ -224,14 +240,19 @@ static void scan(void){
 }
 
 static void run(void){
-	XEvent ev;
+	int n;
+	struct epoll_event evts[2];
 
 
-	/* main event loop */
-	XSync(dwm.dpy, False);
+	while(dwm.running > 0){
+		xlib_events_hdlr();
+		n = epoll_wait(dwm.event_fd, evts, LENGTH(evts), -1);
 
-	while(dwm.running > 0 && !XNextEvent(dwm.dpy, &ev))
-		handle_event(&ev);
+		for(; n>0; n--){
+			if(((event_hdlr_t)evts[n - 1].data.ptr)() != 0)
+				return;
+		}
+	}
 }
 
 static void check_other_wm_running(void){

@@ -98,7 +98,7 @@ void action_movemouse(action_arg_t const *arg){
 		case ConfigureRequest:
 		case Expose:
 		case MapRequest:
-			handle_event(&ev);
+			xlib_event_handle(&ev);
 			break;
 
 		case MotionNotify:
@@ -257,7 +257,7 @@ void action_resizemouse(action_arg_t const *arg){
 		case ConfigureRequest:
 		case Expose:
 		case MapRequest:
-			handle_event(&ev);
+			xlib_event_handle(&ev);
 			break;
 
 		case MotionNotify:

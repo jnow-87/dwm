@@ -6,7 +6,11 @@
 
 
 /* prototypes */
-void handle_event(XEvent *ev);
+int xlib_events_init(void);
+void xlib_cleanup(void);
+
+int xlib_events_hdlr(void);
+void xlib_event_handle(XEvent *ev);
 
 int xerror_hdlr(Display *dpy, XErrorEvent *ee);
 int startup_xerror_hdlr(Display *dpy, XErrorEvent *ee);

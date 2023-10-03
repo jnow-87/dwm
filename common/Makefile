@@ -1,1 +1,1 @@
-obj-y := utils.o list2.o log.o
+obj-y := utils.o list2.o timer.o log.o

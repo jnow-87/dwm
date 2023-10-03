@@ -1,12 +1,17 @@
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
+#include <X11/XKBlib.h>
+#include <stdint.h>
+#include <unistd.h>
 #include <client.h>
 #include <config.h>
 #include <dwm.h>
 #include <layout.h>
 #include <monitor.h>
 #include <statusbar.h>
+#include <timer.h>
+#include <events.h>
 
 
 /* macros */
@@ -25,6 +30,8 @@ static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
 static void propertynotify(XEvent *e);
 static void unmapnotify(XEvent *e);
+
+static int modifier_reset_hdlr(void);
 
 
 /* static variables */
@@ -45,9 +52,39 @@ static void (*handler[LASTEvent])(XEvent*) = {
 	[UnmapNotify] = unmapnotify
 };
 
+static int modifier_reset_timer = -1;
+
 
 /* global functions */
-void handle_event(XEvent *ev){
+int xlib_events_init(void){
+	modifier_reset_timer = timer_init();
+
+	if(modifier_reset_timer == -1)
+		return -1;
+
+	return event_add(modifier_reset_timer, modifier_reset_hdlr);
+}
+
+void xlib_cleanup(void){
+	if(modifier_reset_timer != -1)
+		close(modifier_reset_timer);
+}
+
+int xlib_events_hdlr(void){
+	XEvent ev;
+
+
+	while(XPending(dwm.dpy) != 0){
+		if(XNextEvent(dwm.dpy, &ev))
+			return -1;
+
+		xlib_event_handle(&ev);
+	}
+
+	return 0;
+}
+
+void xlib_event_handle(XEvent *ev){
 	if(handler[ev->type] != 0x0)
 		handler[ev->type](ev);
 }
@@ -245,8 +282,18 @@ static void keypress(XEvent *e){
 	keysym = XKeycodeToKeysym(dwm.dpy, (KeyCode)ev->keycode, 0);
 
 	for(unsigned int i=0; i<nkeys; i++){
-		if(keysym == keys[i].keysym && CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) && keys[i].func)
+		if(keysym == keys[i].keysym && CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) && keys[i].func){
 			keys[i].func(&(keys[i].arg));
+
+			// the xlib KeyRelease event does not reliably report the release of modifier keys,
+			// hence use a timer to reset the modifier state manually
+			if(dwm.modifier_state == 0 && ev->state){
+				if(timer_set(modifier_reset_timer, 100) != 0)
+					die("unable to activate timer\n");
+			}
+
+			dwm.modifier_state = ev->state;
+		}
 	}
 }
 
@@ -314,4 +361,20 @@ static void unmapnotify(XEvent *e){
 		if(ev->send_event)	setclientstate(c, WithdrawnState);
 		else				unmanage(c, 0);
 	}
+}
+
+static int modifier_reset_hdlr(void){
+	uint64_t data;
+	XkbStateRec state;
+
+
+	read(modifier_reset_timer, &data, sizeof(data));
+
+	XkbGetState(dwm.dpy, XkbUseCoreKbd, &state);
+	dwm.modifier_state &= state.mods;
+
+	if(dwm.modifier_state == 0)
+		return timer_set(modifier_reset_timer, 0);
+
+	return 0;
 }
