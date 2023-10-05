@@ -234,8 +234,6 @@ void focus(client_t *c, bool restack){
 		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(c->win), 1);
 		XRaiseWindow(dwm.dpy, c->win);
 		sendevent(c, dwm.wmatom[WMTakeFocus]);
-
-		monitor_restack();
 	}
 	else{
 		XSetInputFocus(dwm.dpy, dwm.root, RevertToPointerRoot, CurrentTime);

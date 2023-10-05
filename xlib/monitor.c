@@ -54,18 +54,3 @@ monitor_t *monitor_from_client(client_t *c){
 
 	return r;
 }
-
-void monitor_restack(void){
-	XEvent ev;
-
-
-	statusbar_draw();
-
-	if(!dwm.focused)
-		return;
-
-	XRaiseWindow(dwm.dpy, dwm.focused->win);
-	XSync(dwm.dpy, False);
-
-	while(XCheckMaskEvent(dwm.dpy, EnterWindowMask, &ev));
-}

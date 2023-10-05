@@ -62,7 +62,6 @@ void action_movemouse(action_arg_t const *arg){
 	if(!(c = dwm.focused))
 		return;
 
-	monitor_restack();
 	ocx = c->geom.x;
 	ocy = c->geom.y;
 
@@ -118,7 +117,6 @@ void action_moveclient(action_arg_t const *arg){
 		return;
 
 	geom = &c->geom;
-	monitor_restack();
 
 	nx = ((int*)(arg->v))[0];
 	ny = ((int*)(arg->v))[1];
@@ -156,7 +154,6 @@ void action_reszclient(action_arg_t const *arg){
 		return;
 
 	geom = &c->geom;
-	monitor_restack();
 
 	nw = ((int*)(arg->v))[0];
 	nh = ((int*)(arg->v))[1];
@@ -224,7 +221,6 @@ void action_resizemouse(action_arg_t const *arg){
 	geom = &c->geom;
 	ocx = c->geom.x;
 	ocy = c->geom.y;
-	monitor_restack();
 
 	if(XGrabPointer(dwm.dpy, dwm.root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, dwm.cursor[CurResize]->cursor, CurrentTime) != GrabSuccess)
 		return;

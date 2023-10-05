@@ -23,7 +23,5 @@ void monitor_destroy(monitor_t *mon);
 
 monitor_t *monitor_from_client(client_t *c);
 
-void monitor_restack(void);
-
 
 #endif // MONITOR_H
