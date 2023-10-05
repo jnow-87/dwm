@@ -43,7 +43,6 @@ typedef struct{
 		screen_height;
 	int lrpad;	/* sum of left and right padding for text */
 	unsigned int numlock_mask;
-	unsigned char modifier_state;
 	drw_t *drw;
 	Display *dpy;
 	int screen;
@@ -56,8 +55,7 @@ typedef struct{
 	int running;
 	int event_fd;
 
-	client_t *clients,
-			 *stack,
+	client_t *stack,
 			 *focused;
 
 	color_t **scheme;

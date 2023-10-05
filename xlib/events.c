@@ -3,6 +3,7 @@
 #include <X11/Xproto.h>
 #include <X11/XKBlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <client.h>
 #include <config.h>
@@ -12,6 +13,7 @@
 #include <statusbar.h>
 #include <timer.h>
 #include <events.h>
+#include <log.h>
 
 
 /* macros */
@@ -52,7 +54,9 @@ static void (*handler[LASTEvent])(XEvent*) = {
 	[UnmapNotify] = unmapnotify
 };
 
+static unsigned char modifier_state = 0;
 static int modifier_reset_timer = -1;
+static cycle_callback_t cycle_complete = 0x0;
 
 
 /* global functions */
@@ -120,6 +124,41 @@ int dummy_xerror_hdlr(Display *dpy, XErrorEvent *ee){
 	return 0;
 }
 
+void key_cycle_start(cycle_callback_t complete){
+	XkbStateRec state;
+
+
+	XkbGetState(dwm.dpy, XkbUseCoreKbd, &state);
+
+	if(state.mods == 0)
+		return;
+
+	key_cycle_complete();
+
+	// the xlib KeyRelease event does not reliably report the release of modifier keys,
+	// hence use a timer to reset the modifier state manually
+	if(timer_set(modifier_reset_timer, 100) != 0)
+		die("unable to start key-cycle timer\n");
+
+	modifier_state = state.mods;
+	cycle_complete = complete;
+}
+
+void key_cycle_complete(void){
+	if(cycle_complete != 0x0)
+		cycle_complete();
+
+	modifier_state = 0;
+	cycle_complete = 0x0;
+
+	if(timer_set(modifier_reset_timer, 0) != 0)
+		die("unable to stop key-cycle timer\n");
+}
+
+bool key_cycle_active(void){
+	return (modifier_state != 0);
+}
+
 
 /* local functions */
 static void buttonpress(XEvent *e){
@@ -153,8 +192,7 @@ static void buttonpress(XEvent *e){
 			click = ClkWinTitle;
 	}
 	else if((c = wintoclient(ev->window))){
-		focus(c);
-		monitor_restack();
+		focus(c, true);
 		XAllowEvents(dwm.dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
 		statusbar_draw();
@@ -244,7 +282,6 @@ static void configurenotify(XEvent *e){
 
 	drw_resize(dwm.drw, dwm.screen_width, dwm.screen_height);
 	XMoveResizeWindow(dwm.dpy, dwm.statusbar.win, dwm.mons->x, dwm.statusbar.y, dwm.mons->width, dwm.statusbar.height);
-	focus(0x0);
 	arrange();
 }
 
@@ -271,7 +308,7 @@ static void focusin(XEvent *e){
 
 
 	if(dwm.focused && ev->window != dwm.focused->win)
-		setfocus(dwm.focused);
+		focus(dwm.focused, false);
 }
 
 static void keypress(XEvent *e){
@@ -282,18 +319,8 @@ static void keypress(XEvent *e){
 	keysym = XKeycodeToKeysym(dwm.dpy, (KeyCode)ev->keycode, 0);
 
 	for(unsigned int i=0; i<nkeys; i++){
-		if(keysym == keys[i].keysym && CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) && keys[i].func){
+		if(keysym == keys[i].keysym && CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) && keys[i].func)
 			keys[i].func(&(keys[i].arg));
-
-			// the xlib KeyRelease event does not reliably report the release of modifier keys,
-			// hence use a timer to reset the modifier state manually
-			if(dwm.modifier_state == 0 && ev->state){
-				if(timer_set(modifier_reset_timer, 100) != 0)
-					die("unable to activate timer\n");
-			}
-
-			dwm.modifier_state = ev->state;
-		}
 	}
 }
 
@@ -371,10 +398,10 @@ static int modifier_reset_hdlr(void){
 	read(modifier_reset_timer, &data, sizeof(data));
 
 	XkbGetState(dwm.dpy, XkbUseCoreKbd, &state);
-	dwm.modifier_state &= state.mods;
+	modifier_state &= state.mods;
 
-	if(dwm.modifier_state == 0)
-		return timer_set(modifier_reset_timer, 0);
+	if(modifier_state == 0)
+		key_cycle_complete();
 
 	return 0;
 }

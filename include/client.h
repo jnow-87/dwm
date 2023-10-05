@@ -2,6 +2,7 @@
 #define CLIENT_H
 
 
+#include <stdbool.h>
 #include <X11/Xlib.h>
 
 
@@ -12,6 +13,12 @@
 
 
 /* types */
+typedef enum{
+	CYCLE_START = 0,
+	CYCLE_CONT,
+	CYCLE_END,
+} cycle_state_t;
+
 typedef struct{
 	int x,
 		y,
@@ -42,7 +49,6 @@ typedef struct{
 typedef struct client_t{
 	struct client_t *prev,
 					*next;
-	struct client_t *stack_next;
 
 	unsigned int tags;
 
@@ -62,17 +68,15 @@ void killclient(Window win);
 
 void configure(client_t *c);
 
-void attachstack(client_t *c);
-void detachstack(client_t *c);
+client_t *cycle(int dir, cycle_state_t state);
 
-void focus(client_t *c);
-void unfocus(client_t *c, int setfocus);
-void showhide(client_t *c);
+void refocus(void);
+void focus(client_t *c, bool restack);
+void showhide(void);
 
 void resize(client_t *c, int x, int y, int w, int h, int interact);
 void resizeclient(client_t *c, int x, int y, int w, int h);
 void setclientstate(client_t *c, long state);
-void setfocus(client_t *c);
 
 int sendevent(client_t *c, Atom proto);
 

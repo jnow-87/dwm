@@ -31,7 +31,7 @@ static long getstate(Window w);
 
 /* global variables */
 dwm_t dwm = {
-	.clients = 0x0,
+	.stack = 0x0,
 	.layout = layouts + 0,
 	.running = 1,
 	.numlock_mask = 0,
@@ -168,7 +168,6 @@ static void setup(void){
 	XSelectInput(dwm.dpy, dwm.root, wa.event_mask);
 	grabkeys();
 
-	focus(NULL);
 	scan();
 
 	XSync(dwm.dpy, False);

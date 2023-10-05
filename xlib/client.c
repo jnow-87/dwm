@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <X11/Xatom.h>
 #include <client.h>
 #include <colors.h>
@@ -10,6 +11,7 @@
 #include <statusbar.h>
 #include <utils.h>
 #include <list.h>
+#include <stack.h>
 
 
 /* macros */
@@ -28,7 +30,7 @@ client_t *wintoclient(Window w){
 	client_t *c;
 
 
-	list_for_each(dwm.clients, c){
+	list_for_each(dwm.stack, c){
 		if(c->win == w)
 			return c;
 	}
@@ -81,23 +83,15 @@ void manage(Window w, XWindowAttributes *wa){
 	grabbuttons(c, 0);
 
 	XRaiseWindow(dwm.dpy, c->win);
-
-	/* add client to monitor lists */
-	list_add_tail(dwm.clients, c);
-	attachstack(c);
-
-	// add client to xserver client list for the window manager
-	// TODO make this part of attach
 	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
 
 	XMoveResizeWindow(dwm.dpy, c->win, geom->x + 2 * dwm.screen_width, geom->y, geom->width, geom->height); /* some windows require this */
 	setclientstate(c, NormalState);
 
-	unfocus(dwm.focused, 0);
-
-	dwm.focused = c;
 	XMapWindow(dwm.dpy, c->win);
-	focus(NULL);
+
+	stack_push(dwm.stack, c);
+	focus(c, true);
 
 	// TODO move arrange out of the function to avoid calling it multiple times during startup
 	arrange();
@@ -107,8 +101,7 @@ void unmanage(client_t *c, int destroyed){
 	XWindowChanges wc;
 
 
-	list_rm(dwm.clients, c);
-	detachstack(c);
+	list_rm(dwm.stack, c);
 
 	if(!destroyed){
 		wc.border_width = c->geom_store.border_width;
@@ -124,7 +117,8 @@ void unmanage(client_t *c, int destroyed){
 	}
 
 	free(c);
-	focus(NULL);
+
+	refocus();
 	updateclientlist();
 	arrange();
 }
@@ -158,81 +152,118 @@ void configure(client_t *c){
 	XSendEvent(dwm.dpy, c->win, False, StructureNotifyMask, (XEvent*)&ce);
 }
 
-void attachstack(client_t *c){
-	c->stack_next = dwm.stack;
-	dwm.stack = c;
-}
-
-void detachstack(client_t *c){
-	client_t **tc, *t;
+client_t *cycle(int dir, cycle_state_t state){
+	static client_t *cycle_origin = 0x0;
+	client_t *c;
 
 
-	for(tc=&dwm.stack; *tc && *tc!=c; tc=&(*tc)->stack_next);
+	switch(state){
+	case CYCLE_START:
+		cycle_origin = dwm.stack;
 
-	*tc = c->stack_next;
+		// fall through
+	case CYCLE_CONT:
+		// find the next visible client, either starting at the currently focused one
+		// or restart at the top of the client stack
+		c = dwm.focused;
+		c = (c != 0x0) ? ((dir > 0) ? c->next : c->prev) : dwm.stack;
 
-	if(c == dwm.focused){
-		for(t=dwm.stack; t && !ISVISIBLE(t); t=t->stack_next);
+		for(; c!=0x0; c=(dir > 0) ? c->next : c->prev){
+			if(ISVISIBLE(c))
+				return c;
+		}
 
-		dwm.focused = t;
+		if(dwm.focused == 0x0) // the entire stack has been checked and nothing has bee found
+			return 0x0;
+
+		// retry, this time from the top of the stack
+		dwm.focused = 0x0;
+
+		return cycle(dir, 0);
+
+	case CYCLE_END:
+		if(cycle_origin != 0x0){
+			stack_raise(dwm.stack, cycle_origin);
+			cycle_origin = 0x0;
+		}
+
+		if(dwm.focused != 0x0)
+			stack_raise(dwm.stack, dwm.focused);
+
+		return dwm.stack;
 	}
+
+	return 0x0;
 }
 
-void focus(client_t *c){
-	if(!c || !ISVISIBLE(c))
-		for(c=dwm.stack; c && !ISVISIBLE(c); c=c->stack_next);
+void refocus(void){
+	client_t *c;
 
-	if(dwm.focused && dwm.focused != c)
-		unfocus(dwm.focused, 0);
 
-	if(c){
-		detachstack(c);
-		attachstack(c);
+	dwm.focused = 0x0;
+
+	list_for_each(dwm.stack, c){
+		if(ISVISIBLE(c) && !c->hints.never_focus)
+			break;
+	}
+
+	focus(c, true);
+}
+
+void focus(client_t *c, bool restack){
+	if(c == dwm.focused)
+		return;
+
+	/* unfocus client */
+	if(dwm.focused){
+		grabbuttons(dwm.focused, 0);
+		XSetWindowBorder(dwm.dpy, dwm.focused->win, dwm.scheme[SchemeNorm][ColBorder].pixel);
+	}
+
+	/* focus */
+	dwm.focused = c;
+
+	if(c != 0x0){
+		if(restack)
+			stack_raise(dwm.stack, c);
+
 		grabbuttons(c, 1);
+
 		XSetWindowBorder(dwm.dpy, c->win, dwm.scheme[SchemeSel][ColBorder].pixel);
-		setfocus(c);
+		XSetInputFocus(dwm.dpy, c->win, RevertToPointerRoot, CurrentTime);
+		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(c->win), 1);
+		XRaiseWindow(dwm.dpy, c->win);
+		sendevent(c, dwm.wmatom[WMTakeFocus]);
+
+		monitor_restack();
 	}
 	else{
 		XSetInputFocus(dwm.dpy, dwm.root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow]);
 	}
-
-	dwm.focused = c;
-	statusbar_draw();
 }
 
-void unfocus(client_t *c, int setfocus){
-	if(!c)
-		return;
-
-	grabbuttons(c, 0);
-	XSetWindowBorder(dwm.dpy, c->win, dwm.scheme[SchemeNorm][ColBorder].pixel);
-
-	if(setfocus){
-		XSetInputFocus(dwm.dpy, dwm.root, RevertToPointerRoot, CurrentTime);
-		XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow]);
-	}
-}
-
-void showhide(client_t *c){
+void showhide(void){
+	// TODO move to dwm level
+	client_t *c;
 	client_geom_t *geom;
 
 
-	if(!c)
-		return;
+	list_for_each(dwm.stack, c){
+		geom = &c->geom;
 
-	geom = &c->geom;
-
-	if(ISVISIBLE(c)){
-		/* show clients top down */
-		XMoveWindow(dwm.dpy, c->win, geom->x, geom->y);
-		resize(c, geom->x, geom->y, geom->width, geom->height, 0);
-		showhide(c->stack_next);
-	}
-	else{
-		/* hide clients bottom up */
-		showhide(c->stack_next);
-		XMoveWindow(dwm.dpy, c->win, WIDTH(c) * -2, geom->y);
+		// TODO
+		// 	This function has been changed to use the client list instead of
+		// 	the stack. Originally, hiding and showing work top-down and bottom-up
+		// 	respectively. This might cause some issues with correct overlapping
+		// 	of windows.
+		if(ISVISIBLE(c)){
+			XMoveWindow(dwm.dpy, c->win, geom->x, geom->y);
+			resize(c, geom->x, geom->y, geom->width, geom->height, 0);
+		}
+		else{
+			XMoveWindow(dwm.dpy, c->win, WIDTH(c) * -2, geom->y);
+		}
 	}
 }
 
@@ -264,15 +295,6 @@ void setclientstate(client_t *c, long state){
 
 
 	XChangeProperty(dwm.dpy, c->win, dwm.wmatom[WMState], dwm.wmatom[WMState], 32, PropModeReplace, (unsigned char *)data, 2);
-}
-
-void setfocus(client_t *c){
-	if(!c->hints.never_focus){
-		XSetInputFocus(dwm.dpy, c->win, RevertToPointerRoot, CurrentTime);
-		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(c->win), 1);
-	}
-
-	sendevent(c, dwm.wmatom[WMTakeFocus]);
 }
 
 int sendevent(client_t *c, Atom proto){
@@ -380,7 +402,7 @@ static void updateclientlist(){
 
 	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList]);
 
-	list_for_each(dwm.clients, c)
+	list_for_each(dwm.stack, c)
 		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
 }
 

@@ -13,7 +13,7 @@ client_t *nexttiled(client_t *c){
 }
 
 void arrange(void){
-	showhide(dwm.stack);
+	showhide();
 
 	if(dwm.layout->arrange)
 		dwm.layout->arrange();

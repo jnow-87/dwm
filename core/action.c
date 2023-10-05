@@ -15,51 +15,31 @@
 #include <utils.h>
 #include <tags.h>
 #include <list.h>
+#include <events.h>
 
 
 /* macros */
 #define MOUSEMASK (ButtonPressMask | ButtonReleaseMask | PointerMotionMask)
 
 
+/* local/static prototypes */
+static void focusstack_complete(void);
+
+
 /* global functions */
 void action_focusstack(action_arg_t const *arg){
-	client_t *c = NULL, *i;
+	client_t *c;
 
 
-	if(!dwm.focused)
+	c = cycle(arg->i, key_cycle_active() ? CYCLE_CONT : CYCLE_START);
+
+	if(c == 0x0)
 		return;
 
-	if(arg->i > 0){
-		for(c=dwm.focused->next; c && !ISVISIBLE(c); c=c->next);
+	if(!key_cycle_active())
+		key_cycle_start(focusstack_complete);
 
-		if(c == 0x0){
-			list_for_each(dwm.clients, c){
-				if(ISVISIBLE(c))
-					break;
-			}
-		}
-	}
-	else{
-		list_for_each(dwm.clients, i){
-			if(i == dwm.focused)
-				break;
-
-			if(ISVISIBLE(i))
-				c = i;
-		}
-
-		if(c == 0x0){
-			for(; i; i=i->next){
-				if(ISVISIBLE(i))
-					c = i;
-			}
-		}
-	}
-
-	if(c != 0x0){
-		focus(c);
-		monitor_restack();
-	}
+	focus(c, false);
 
 	statusbar_draw();
 }
@@ -163,7 +143,7 @@ void action_moveclient(action_arg_t const *arg){
 	// 	- move it bottom-left
 	// 		=> focus moves to the other window
 	resizeclient(c, nx, ny, geom->width, geom->height);
-	focus(c);
+	statusbar_draw();
 }
 
 void action_reszclient(action_arg_t const *arg){
@@ -219,7 +199,7 @@ void action_reszclient(action_arg_t const *arg){
 		ny = geom->y;
 
 	resizeclient(c, nx, ny, nw, nh);
-	focus(c);
+	statusbar_draw();
 }
 
 void action_quit(action_arg_t const *arg){
@@ -355,4 +335,15 @@ void action_client_tags_toggle(action_arg_t const *arg){
 		return;
 
 	tags_toggle(&c->tags, arg->ui);
+}
+
+
+/* local functions */
+static void focusstack_complete(void){
+	client_t *c;
+
+
+	c = cycle(0, CYCLE_END);
+
+	focus(c, false);
 }

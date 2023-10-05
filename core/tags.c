@@ -12,7 +12,7 @@ void tags_set(unsigned int *tags, unsigned int v){
 	*tags = v;
 
 	// TODO this should be moved to dwm level
-	focus(NULL);
+	refocus();
 	arrange();
 	statusbar_draw();
 }
