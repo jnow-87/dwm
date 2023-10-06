@@ -1,4 +1,4 @@
-#include <dwm.h>
+#include <core/dwm.h>
 #include <config.h>
 
 
@@ -12,8 +12,8 @@ void tags_set(unsigned int *tags, unsigned int v){
 	*tags = v;
 
 	// TODO this should be moved to dwm level
-	refocus();
-	arrange();
+	client_refocus();
+	layout_arrange();
 	statusbar_update();
 }
 

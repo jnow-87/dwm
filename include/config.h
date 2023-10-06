@@ -4,8 +4,8 @@
 #define CONFIG_H
 
 
-#include <action.h>
-#include <layout.h>
+#include <core/actions.h>
+#include <core/layout.h>
 
 
 /* macros */

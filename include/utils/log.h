@@ -4,6 +4,8 @@
 
 #include <stdbool.h>
 #include <stdarg.h>
+#include <errno.h>
+#include <string.h>
 #include <sys/types.h>
 
 

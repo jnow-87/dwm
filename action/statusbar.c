@@ -1,5 +1,5 @@
-#include <action.h>
-#include <statusbar.h>
+#include <core/actions.h>
+#include <core/statusbar.h>
 
 
 /* global functions */

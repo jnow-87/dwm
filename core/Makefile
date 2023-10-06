@@ -5,10 +5,11 @@ dwm-y := \
 	dwm.o \
 	tags.o \
 	statusbar.o \
+	xevents.o \
 	action/ \
 	config/ \
 	layout/ \
-	common/ \
+	utils/ \
 	xlib/
 
 

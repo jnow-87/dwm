@@ -1,12 +1,12 @@
-#include <client.h>
-#include <dwm.h>
-#include <layout.h>
+#include <xlib/client.h>
+#include <core/dwm.h>
+#include <core/layout.h>
 #include <stdio.h>
-#include <list.h>
+#include <utils/list.h>
 
 
 /* global functions */
-void monocle(void){
+void layout_monocle(void){
 	unsigned int n = 0;
 	monitor_t *m;
 	client_t *c;
@@ -20,6 +20,6 @@ void monocle(void){
 	for(c=nexttiled(dwm.stack); c; c=nexttiled(c->next)){
 		m = monitor_from_client(c);
 
-		resize(c, m->x, m->y, m->width - 2 * c->geom.border_width, m->height - 2 * c->geom.border_width, 0);
+		client_resize_with_hints(c, m->x, m->y, m->width - 2 * c->geom.border_width, m->height - 2 * c->geom.border_width, 0);
 	}
 }

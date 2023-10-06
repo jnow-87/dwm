@@ -12,7 +12,7 @@
  *
  * Each child of the root window is called a client, except windows which have
  * set the override_redirect flag. Clients are organized in a linked client
- * list on each monitor, the focus history is remembered through a stack list
+ * list on each monitor, the client_focus history is remembered through a stack list
  * on each monitor. Each client contains a bit array to indicate the tags of a
  * client.
  *
@@ -30,14 +30,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <client.h>
-#include <colors.h>
+#include <xlib/client.h>
+#include <core/scheme.h>
 #include <config.h>
-#include <dwm.h>
-#include <monitor.h>
-#include <statusbar.h>
-#include <utils.h>
-#include <xinerama.h>
+#include <core/dwm.h>
+#include <xlib/monitor.h>
+#include <core/statusbar.h>
+#include <utils/math.h>
+#include <xlib/xinerama.h>
 
 
 /* global functions */
@@ -103,7 +103,7 @@ void monitor_discover(void){
 		monitor_destroy(dwm.mons);
 	}
 
-	if(xinerama_discover_monitor() < 0)
+	if(xinerama_discover() < 0)
 		monitor_create(0, 0, dwm.screen_width, dwm.screen_height);
 }
 

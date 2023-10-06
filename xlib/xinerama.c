@@ -1,19 +1,19 @@
 #include <X11/extensions/Xinerama.h>
 #include <sys/types.h>
-#include <client.h>
-#include <monitor.h>
-#include <statusbar.h>
-#include <dwm.h>
-#include <utils.h>
-#include <log.h>
+#include <xlib/client.h>
+#include <xlib/monitor.h>
+#include <core/statusbar.h>
+#include <core/dwm.h>
+#include <utils/math.h>
+#include <utils/log.h>
 
 
 /* local/static prototypes */
-static int isuniquegeom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info);
+static int is_unique(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info);
 
 
 /* global functions */
-int xinerama_discover_monitor(void){
+int xinerama_discover(void){
 	int i,
 		ninfo,
 		nunique;
@@ -36,7 +36,7 @@ int xinerama_discover_monitor(void){
 		die("out of memory\n");
 
 	for(i=0; i<ninfo; i++){
-		if(isuniquegeom(unique, nunique, &info[i]))
+		if(is_unique(unique, nunique, &info[i]))
 			memcpy(&unique[nunique++], &info[i], sizeof(XineramaScreenInfo));
 	}
 
@@ -63,7 +63,7 @@ int xinerama_discover_monitor(void){
 
 
 /* local functions */
-static int isuniquegeom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info){
+static int is_unique(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info){
 	while(n--){
 		if(unique[n].x_org == info->x_org && unique[n].y_org == info->y_org && unique[n].width == info->width && unique[n].height == info->height)
 			return 0;

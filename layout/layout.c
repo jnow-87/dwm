@@ -1,7 +1,7 @@
-#include <client.h>
-#include <dwm.h>
-#include <layout.h>
-#include <monitor.h>
+#include <xlib/client.h>
+#include <core/dwm.h>
+#include <core/layout.h>
+#include <xlib/monitor.h>
 
 
 
@@ -12,9 +12,9 @@ client_t *nexttiled(client_t *c){
 	return c;
 }
 
-void arrange(void){
-	showhide();
+void layout_arrange(void){
+	client_showhide();
 
-	if(dwm.layout->arrange)
-		dwm.layout->arrange();
+	if(dwm.layout->layout_arrange)
+		dwm.layout->layout_arrange();
 }

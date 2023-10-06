@@ -6,10 +6,10 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/cursorfont.h>
-#include <gfx.h>
-#include <monitor.h>
-#include <statusbar.h>
-#include <layout.h>
+#include <xlib/gfx.h>
+#include <xlib/monitor.h>
+#include <core/statusbar.h>
+#include <core/layout.h>
 
 
 /* types */

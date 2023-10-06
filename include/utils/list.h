@@ -12,8 +12,8 @@
 
 
 
-#ifndef SYS_LIST_H
-#define SYS_LIST_H
+#ifndef LIST_H
+#define LIST_H
 
 
 #include <stdbool.h>
@@ -220,4 +220,4 @@ list2_t *_list2_find(list2_t *head, size_t mem_offset, void const *ref, size_t n
 list2_t *_list2_find_str(list2_t *head, size_t mem_offset, char const *ref, size_t n, bool is_array);
 
 
-#endif // SYS_LIST_H
+#endif // LIST_H

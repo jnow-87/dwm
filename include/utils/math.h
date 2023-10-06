@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef MATH_H
+#define MATH_H
 
 
 #include <stddef.h>
@@ -13,8 +13,4 @@
 #define BETWEEN(X, A, B)	((A) <= (X) && (X) <= (B))
 
 
-/* prototypes */
-void *ecalloc(size_t nmemb, size_t size);
-
-
-#endif // UTILS_H
+#endif // MATH_H

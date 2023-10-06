@@ -1,8 +1,8 @@
 #include <config/config.h>
-#include <client.h>
-#include <dwm.h>
-#include <layout.h>
-#include <utils.h>
+#include <xlib/client.h>
+#include <core/dwm.h>
+#include <core/layout.h>
+#include <utils/math.h>
 
 
 /* macros */
@@ -10,9 +10,9 @@
 
 
 /* global functions */
-void tile(void){
+void layout_tile(void){
 	// TODO
-	// 	has to be re-implemented to tile the clients on each monitor separately
+	// 	has to be re-implemented to layout_tile the clients on each monitor separately
 	// 	since clients no longer have the monitor as struct member, the list of
 	// 	clients for a particular monitor has to be computed first
 	unsigned int i, n, h, w, y, ty;
@@ -34,14 +34,14 @@ void tile(void){
 
 		if(i < NMASTER){
 			h = (m->height - y) / (MIN(n, NMASTER) - i);
-			resize(c, m->x, m->y + y, w - (2 * geom->border_width), h - (2 * geom->border_width), 0);
+			client_resize_with_hints(c, m->x, m->y + y, w - (2 * geom->border_width), h - (2 * geom->border_width), 0);
 
 			if(y + HEIGHT(c) < m->height)
 				y += HEIGHT(c);
 		}
 		else{
 			h = (m->height - ty) / (n - i);
-			resize(c, m->x + w, m->y + ty, m->width - w - (2 * geom->border_width), h - (2 * geom->border_width), 0);
+			client_resize_with_hints(c, m->x + w, m->y + ty, m->width - w - (2 * geom->border_width), h - (2 * geom->border_width), 0);
 
 			if(ty + HEIGHT(c) < m->height)
 				ty += HEIGHT(c);

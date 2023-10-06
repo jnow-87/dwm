@@ -26,8 +26,7 @@ tool_deps :=
 
 # init source and build tree
 default_build_tree := build/
-src_dirs := \
-	core
+src_dirs := core/
 
 # include build system Makefile
 include $(scripts_dir)/main.make

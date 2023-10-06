@@ -1,17 +1,18 @@
 #include <stdbool.h>
+#include <stdlib.h>
 #include <X11/Xatom.h>
-#include <client.h>
-#include <colors.h>
+#include <xlib/client.h>
+#include <core/scheme.h>
 #include <config.h>
 #include <config/config.h>
-#include <dwm.h>
-#include <atoms.h>
-#include <events.h>
-#include <layout.h>
-#include <statusbar.h>
-#include <utils.h>
-#include <list.h>
-#include <stack.h>
+#include <core/dwm.h>
+#include <xlib/atoms.h>
+#include <core/xevents.h>
+#include <core/layout.h>
+#include <core/statusbar.h>
+#include <utils/math.h>
+#include <utils/list.h>
+#include <utils/stack.h>
 
 
 /* macros */
@@ -19,14 +20,12 @@
 
 
 /* local/static prototypes */
-static void updateclientlist();
-static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int interact);
-static Atom getatomprop(client_t *c, Atom prop);
-static void grabbuttons(client_t *c, int focused);
+static int apply_sizehints(client_t *c, int *x, int *y, int *w, int *h, int interact);
+static void grab_buttons(client_t *c, int focused);
 
 
 /* global functions */
-client_t *wintoclient(Window w){
+client_t *client_from_win(Window w){
 	client_t *c;
 
 
@@ -38,7 +37,7 @@ client_t *wintoclient(Window w){
 	return NULL;
 }
 
-void manage(Window w, XWindowAttributes *wa){
+void client_init(Window w, XWindowAttributes *wa){
 	monitor_t *m = dwm.mons;
 	client_t *c, *t = NULL;
 	Window trans = None;
@@ -46,11 +45,15 @@ void manage(Window w, XWindowAttributes *wa){
 	XWindowChanges wc;
 
 
-	c = ecalloc(1, sizeof(client_t));
+	c = calloc(1, sizeof(client_t));
+
+	if(c == 0x0)
+		die("unable to allocate new client\n");
+
 	c->win = w;
 	geom = &c->geom;
 
-	/* init client struct and configure the xlib client accordingly */
+	/* init client struct and client_configure the xlib client accordingly */
 	geom->x = wa->x;
 	geom->y = wa->y;
 	geom->width = wa->width;
@@ -60,7 +63,7 @@ void manage(Window w, XWindowAttributes *wa){
 	c->geom_store = *geom;
 	c->tags = dwm.tag_mask;
 
-	if(XGetTransientForHint(dwm.dpy, w, &trans) && (t = wintoclient(trans)))
+	if(XGetTransientForHint(dwm.dpy, w, &trans) && (t = client_from_win(trans)))
 		c->tags = t->tags;
 
 	if(geom->x + WIDTH(c) > m->x + m->width)
@@ -76,28 +79,28 @@ void manage(Window w, XWindowAttributes *wa){
 	wc.border_width = geom->border_width;
 	XConfigureWindow(dwm.dpy, w, CWBorderWidth, &wc);
 	XSetWindowBorder(dwm.dpy, w, dwm.scheme[SchemeNorm][ColBorder].pixel);
-	configure(c); /* propagates border_width, if size doesn't change */
-	updatesizehints(c);
-	updatewmhints(c);
+	client_configure(c); /* propagates border_width, if size doesn't change */
+	client_update_sizehints(c);
+	client_update_wmhints(c);
 	XSelectInput(dwm.dpy, w, FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
-	grabbuttons(c, 0);
+	grab_buttons(c, 0);
 
 	XRaiseWindow(dwm.dpy, c->win);
 	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
 
 	XMoveResizeWindow(dwm.dpy, c->win, geom->x + 2 * dwm.screen_width, geom->y, geom->width, geom->height); /* some windows require this */
-	setclientstate(c, NormalState);
+	client_set_state(c, NormalState);
 
 	XMapWindow(dwm.dpy, c->win);
 
 	stack_push(dwm.stack, c);
-	focus(c, true);
+	client_focus(c, true);
 
-	// TODO move arrange out of the function to avoid calling it multiple times during startup
-	arrange();
+	// TODO move layout_arrange out of the function to avoid calling it multiple times during startup
+	layout_arrange();
 }
 
-void unmanage(client_t *c, int destroyed){
+void client_cleanup(client_t *c, int destroyed){
 	XWindowChanges wc;
 
 
@@ -110,7 +113,7 @@ void unmanage(client_t *c, int destroyed){
 		XSelectInput(dwm.dpy, c->win, NoEventMask);
 		XConfigureWindow(dwm.dpy, c->win, CWBorderWidth, &wc); /* restore border */
 		XUngrabButton(dwm.dpy, AnyButton, AnyModifier, c->win);
-		setclientstate(c, WithdrawnState);
+		client_set_state(c, WithdrawnState);
 		XSync(dwm.dpy, False);
 		XSetErrorHandler(xerror_hdlr);
 		XUngrabServer(dwm.dpy);
@@ -118,12 +121,18 @@ void unmanage(client_t *c, int destroyed){
 
 	free(c);
 
-	refocus();
-	updateclientlist();
-	arrange();
+	client_refocus();
+
+	/* update client list */
+	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList]);
+
+	list_for_each(dwm.stack, c)
+		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
+
+	layout_arrange();
 }
 
-void killclient(Window win){
+void client_kill(Window win){
 	XGrabServer(dwm.dpy);
 	XSetErrorHandler(dummy_xerror_hdlr);
 	XSetCloseDownMode(dwm.dpy, DestroyAll);
@@ -133,7 +142,7 @@ void killclient(Window win){
 	XUngrabServer(dwm.dpy);
 }
 
-void configure(client_t *c){
+void client_configure(client_t *c){
 	client_geom_t *geom = &c->geom;
 	XConfigureEvent ce;
 
@@ -152,7 +161,7 @@ void configure(client_t *c){
 	XSendEvent(dwm.dpy, c->win, False, StructureNotifyMask, (XEvent*)&ce);
 }
 
-client_t *cycle(int dir, cycle_state_t state){
+client_t *client_cycle(int dir, cycle_state_t state){
 	static client_t *cycle_origin = 0x0;
 	client_t *c;
 
@@ -179,7 +188,7 @@ client_t *cycle(int dir, cycle_state_t state){
 		// retry, this time from the top of the stack
 		dwm.focused = 0x0;
 
-		return cycle(dir, 0);
+		return client_cycle(dir, 0);
 
 	case CYCLE_END:
 		if(cycle_origin != 0x0){
@@ -196,7 +205,7 @@ client_t *cycle(int dir, cycle_state_t state){
 	return 0x0;
 }
 
-void refocus(void){
+void client_refocus(void){
 	client_t *c;
 
 
@@ -207,33 +216,33 @@ void refocus(void){
 			break;
 	}
 
-	focus(c, true);
+	client_focus(c, true);
 }
 
-void focus(client_t *c, bool restack){
+void client_focus(client_t *c, bool restack){
 	if(c == dwm.focused)
 		return;
 
 	/* unfocus client */
 	if(dwm.focused){
-		grabbuttons(dwm.focused, 0);
+		grab_buttons(dwm.focused, 0);
 		XSetWindowBorder(dwm.dpy, dwm.focused->win, dwm.scheme[SchemeNorm][ColBorder].pixel);
 	}
 
-	/* focus */
+	/* client_focus */
 	dwm.focused = c;
 
 	if(c != 0x0){
 		if(restack)
 			stack_raise(dwm.stack, c);
 
-		grabbuttons(c, 1);
+		grab_buttons(c, 1);
 
 		XSetWindowBorder(dwm.dpy, c->win, dwm.scheme[SchemeSel][ColBorder].pixel);
 		XSetInputFocus(dwm.dpy, c->win, RevertToPointerRoot, CurrentTime);
 		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(c->win), 1);
 		XRaiseWindow(dwm.dpy, c->win);
-		sendevent(c, dwm.wmatom[WMTakeFocus]);
+		client_send_event(c, dwm.wmatom[WMTakeFocus]);
 	}
 	else{
 		XSetInputFocus(dwm.dpy, dwm.root, RevertToPointerRoot, CurrentTime);
@@ -241,7 +250,7 @@ void focus(client_t *c, bool restack){
 	}
 }
 
-void showhide(void){
+void client_showhide(void){
 	// TODO move to dwm level
 	client_t *c;
 	client_geom_t *geom;
@@ -257,7 +266,7 @@ void showhide(void){
 		// 	of windows.
 		if(ISVISIBLE(c)){
 			XMoveWindow(dwm.dpy, c->win, geom->x, geom->y);
-			resize(c, geom->x, geom->y, geom->width, geom->height, 0);
+			client_resize_with_hints(c, geom->x, geom->y, geom->width, geom->height, 0);
 		}
 		else{
 			XMoveWindow(dwm.dpy, c->win, WIDTH(c) * -2, geom->y);
@@ -265,12 +274,14 @@ void showhide(void){
 	}
 }
 
-void resize(client_t *c, int x, int y, int w, int h, int interact){
-	if(applysizehints(c, &x, &y, &w, &h, interact))
-		resizeclient(c, x, y, w, h);
+void client_resize_with_hints(client_t *c, int x, int y, int w, int h, int interact){
+	c->geom_store = c->geom;
+
+	if(apply_sizehints(c, &x, &y, &w, &h, interact))
+		client_resize(c, x, y, w, h);
 }
 
-void resizeclient(client_t *c, int x, int y, int w, int h){
+void client_resize(client_t *c, int x, int y, int w, int h){
 	client_geom_t *geom = &c->geom;
 	XWindowChanges wc;
 
@@ -284,18 +295,18 @@ void resizeclient(client_t *c, int x, int y, int w, int h){
 	wc.border_width = geom->border_width;
 
 	XConfigureWindow(dwm.dpy, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
-	configure(c);
+	client_configure(c);
 	XSync(dwm.dpy, False);
 }
 
-void setclientstate(client_t *c, long state){
+void client_set_state(client_t *c, long state){
 	long data[] = {state, None};
 
 
 	XChangeProperty(dwm.dpy, c->win, dwm.wmatom[WMState], dwm.wmatom[WMState], 32, PropModeReplace, (unsigned char *)data, 2);
 }
 
-int sendevent(client_t *c, Atom proto){
+int client_send_event(client_t *c, Atom proto){
 	int n;
 	Atom *protocols;
 	int exists = 0;
@@ -321,7 +332,7 @@ int sendevent(client_t *c, Atom proto){
 	return exists;
 }
 
-void updatewmhints(client_t *c){
+void client_update_wmhints(client_t *c){
 	XWMHints *wmh;
 
 
@@ -338,7 +349,7 @@ void updatewmhints(client_t *c){
 	}
 }
 
-void updatesizehints(client_t *c){
+void client_update_sizehints(client_t *c){
 	long msize;
 	XSizeHints size;
 
@@ -394,17 +405,7 @@ void updatesizehints(client_t *c){
 
 
 /* local functions */
-static void updateclientlist(){
-	client_t *c;
-
-
-	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList]);
-
-	list_for_each(dwm.stack, c)
-		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
-}
-
-static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int interact){
+static int apply_sizehints(client_t *c, int *x, int *y, int *w, int *h, int interact){
 	monitor_t *m = monitor_from_client(c);
 	client_geom_t *geom = &c->geom;
 	int baseismin;
@@ -485,22 +486,7 @@ static int applysizehints(client_t *c, int *x, int *y, int *w, int *h, int inter
 	return *x != geom->x || *y != geom->y || *w != geom->width || *h != geom->height;
 }
 
-static Atom getatomprop(client_t *c, Atom prop){
-	int di;
-	unsigned long dl;
-	unsigned char *p = NULL;
-	Atom da, atom = None;
-
-
-	if(XGetWindowProperty(dwm.dpy, c->win, prop, 0L, sizeof atom, False, XA_ATOM, &da, &di, &dl, &dl, &p) == Success && p){
-		atom = *(Atom*)p;
-		XFree(p);
-	}
-
-	return atom;
-}
-
-static void grabbuttons(client_t *c, int focused){
+static void grab_buttons(client_t *c, int focused){
 	updatenumlockmask();
 	{
 		unsigned int i, j;

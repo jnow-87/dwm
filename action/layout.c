@@ -1,8 +1,8 @@
 #include <config.h>
-#include <dwm.h>
-#include <action.h>
-#include <client.h>
-#include <statusbar.h>
+#include <core/dwm.h>
+#include <core/actions.h>
+#include <xlib/client.h>
+#include <core/statusbar.h>
 
 
 /* global functions */
@@ -20,7 +20,7 @@ void action_setlayout(action_arg_t const *arg){
 		dwm.layout = (layout_t*)arg->v;
 
 	if(dwm.focused)
-		arrange();
+		layout_arrange();
 
 	statusbar_update();
 }

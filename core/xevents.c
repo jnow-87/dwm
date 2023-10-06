@@ -5,15 +5,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <client.h>
+#include <xlib/client.h>
 #include <config.h>
-#include <dwm.h>
-#include <layout.h>
-#include <monitor.h>
-#include <statusbar.h>
-#include <timer.h>
-#include <events.h>
-#include <log.h>
+#include <core/dwm.h>
+#include <core/layout.h>
+#include <xlib/monitor.h>
+#include <core/statusbar.h>
+#include <utils/timer.h>
+#include <core/xevents.h>
+#include <utils/log.h>
 
 
 /* macros */
@@ -138,7 +138,7 @@ void key_cycle_start(cycle_callback_t complete){
 	// the xlib KeyRelease event does not reliably report the release of modifier keys,
 	// hence use a timer to reset the modifier state manually
 	if(timer_set(modifier_reset_timer, 100) != 0)
-		die("unable to start key-cycle timer\n");
+		die("unable to start key-client_cycle timer\n");
 
 	modifier_state = state.mods;
 	cycle_complete = complete;
@@ -152,7 +152,7 @@ void key_cycle_complete(void){
 	cycle_complete = 0x0;
 
 	if(timer_set(modifier_reset_timer, 0) != 0)
-		die("unable to stop key-cycle timer\n");
+		die("unable to stop key-client_cycle timer\n");
 }
 
 bool key_cycle_active(void){
@@ -170,7 +170,7 @@ static void buttonpress(XEvent *e){
 
 	click = ClkRootWin;
 
-	/* focus monitor if necessary */
+	/* client_focus monitor if necessary */
 	if(ev->window == dwm.statusbar.win){
 		i = x = 0;
 
@@ -191,8 +191,8 @@ static void buttonpress(XEvent *e){
 		else
 			click = ClkWinTitle;
 	}
-	else if((c = wintoclient(ev->window))){
-		focus(c, true);
+	else if((c = client_from_win(ev->window))){
+		client_focus(c, true);
 		XAllowEvents(dwm.dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
 		statusbar_raise();
@@ -212,7 +212,7 @@ static void configurerequest(XEvent *e){
 	XWindowChanges wc;
 
 
-	if((c = wintoclient(ev->window))){
+	if((c = client_from_win(ev->window))){
 		geom = &c->geom;
 
 		if(ev->value_mask & CWBorderWidth){
@@ -248,7 +248,7 @@ static void configurerequest(XEvent *e){
 				geom->y = m->y + (m->height / 2 - HEIGHT(c) / 2); /* center in y direction */
 
 			if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
-				configure(c);
+				client_configure(c);
 
 			if(ISVISIBLE(c))
 				XMoveResizeWindow(dwm.dpy, c->win, geom->x, geom->y, geom->width, geom->height);
@@ -282,7 +282,7 @@ static void configurenotify(XEvent *e){
 
 	gfx_resize(dwm.gfx, dwm.screen_width, dwm.screen_height);
 	XMoveResizeWindow(dwm.dpy, dwm.statusbar.win, dwm.mons->x, dwm.statusbar.y, dwm.mons->width, dwm.statusbar.height);
-	arrange();
+	layout_arrange();
 }
 
 static void destroynotify(XEvent *e){
@@ -290,8 +290,8 @@ static void destroynotify(XEvent *e){
 	client_t *c;
 
 
-	if((c = wintoclient(ev->window)))
-		unmanage(c, 1);
+	if((c = client_from_win(ev->window)))
+		client_cleanup(c, 1);
 }
 
 static void expose(XEvent *e){
@@ -303,12 +303,12 @@ static void expose(XEvent *e){
 }
 
 static void focusin(XEvent *e){
-	/* there are some broken focus acquiring clients needing extra handling */
+	/* there are some broken client_focus acquiring clients needing extra handling */
 	XFocusChangeEvent *ev = &e->xfocus;
 
 
 	if(dwm.focused && ev->window != dwm.focused->win)
-		focus(dwm.focused, false);
+		client_focus(dwm.focused, false);
 }
 
 static void keypress(XEvent *e){
@@ -342,8 +342,8 @@ static void maprequest(XEvent *e){
 	if(!XGetWindowAttributes(dwm.dpy, ev->window, &wa) || wa.override_redirect)
 		return;
 
-	if(!wintoclient(ev->window))
-		manage(ev->window, &wa);
+	if(!client_from_win(ev->window))
+		client_init(ev->window, &wa);
 }
 
 static void propertynotify(XEvent *e){
@@ -358,20 +358,20 @@ static void propertynotify(XEvent *e){
 	if((ev->window == dwm.root) && (ev->atom == XA_WM_NAME)){
 		statusbar_update();
 	}
-	else if((c = wintoclient(ev->window))){
+	else if((c = client_from_win(ev->window))){
 		switch(ev->atom){
 		// TODO check if the following is still needed with isfloating being removed
 //		case XA_WM_TRANSIENT_FOR:
-//			if(!c->isfloating && (XGetTransientForHint(dwm.dpy, c->win, &trans)) && (c->isfloating = (wintoclient(trans)) != NULL))
-//				arrange(c->mon);
+//			if(!c->isfloating && (XGetTransientForHint(dwm.dpy, c->win, &trans)) && (c->isfloating = (client_from_win(trans)) != NULL))
+//				layout_arrange(c->mon);
 //			break;
 
 		case XA_WM_NORMAL_HINTS:
-			updatesizehints(c);
+			client_update_sizehints(c);
 			break;
 
 		case XA_WM_HINTS:
-			updatewmhints(c);
+			client_update_wmhints(c);
 			break;
 		}
 	}
@@ -382,9 +382,9 @@ static void unmapnotify(XEvent *e){
 	client_t *c;
 
 
-	if((c = wintoclient(ev->window))){
-		if(ev->send_event)	setclientstate(c, WithdrawnState);
-		else				unmanage(c, 0);
+	if((c = client_from_win(ev->window))){
+		if(ev->send_event)	client_set_state(c, WithdrawnState);
+		else				client_cleanup(c, 0);
 	}
 }
 

@@ -7,13 +7,13 @@
 
 /* macros */
 #ifndef CONFIG_XINERAMA
-# define xinerama_discover_monitor()	-1
+# define xinerama_discover()	-1
 #endif // CONFIG_XINERAMA
 
 
 /* prototypes */
 #ifdef CONFIG_XINERAMA
-int xinerama_discover_monitor(void);
+int xinerama_discover(void);
 #endif // CONFIG_XINERAMA
 
 

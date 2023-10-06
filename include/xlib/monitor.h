@@ -2,7 +2,7 @@
 #define MONITOR_H
 
 
-#include <client.h>
+#include <xlib/client.h>
 
 
 /* types */

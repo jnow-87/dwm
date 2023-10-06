@@ -1,7 +1,7 @@
-#include <dwm.h>
-#include <action.h>
-#include <tags.h>
-#include <client.h>
+#include <core/dwm.h>
+#include <core/actions.h>
+#include <core/tags.h>
+#include <xlib/client.h>
 
 
 /* global functions */

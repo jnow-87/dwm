@@ -1,27 +1,28 @@
-#include <client.h>
+#include <stdlib.h>
+#include <xlib/client.h>
 #include <config.h>
 #include <config/config.h>
-#include <dwm.h>
-#include <events.h>
-#include <layout.h>
+#include <core/dwm.h>
+#include <core/xevents.h>
+#include <core/layout.h>
 #include <locale.h>
-#include <monitor.h>
+#include <xlib/monitor.h>
 #include <signal.h>
-#include <statusbar.h>
+#include <core/statusbar.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/epoll.h>
 #include <unistd.h>
-#include <utils.h>
+#include <utils/math.h>
 #include <version.h>
-#include <layout.h>
-#include <tags.h>
-#include <log.h>
+#include <core/layout.h>
+#include <core/tags.h>
+#include <utils/log.h>
 
 
 /* local/static prototypes */
-static void setup(void);
+static int setup(void);
 static void cleanup(void);
 static void scan(void);
 static void run(void);
@@ -51,7 +52,9 @@ int main(int argc, char *argv[]){
 	if(argc != 1)
 		die("usage: dwm [-v]");
 
-	setup();
+	if(setup() != 0)
+		die("setup failed\n");
+
 	run();
 	cleanup();
 
@@ -64,7 +67,7 @@ int main(int argc, char *argv[]){
 
 
 /* local functions */
-static void setup(void){
+static int setup(void){
 	XSetWindowAttributes wa;
 	Atom utf8string;
 	struct sigaction sa;
@@ -104,6 +107,9 @@ static void setup(void){
 	dwm.root = RootWindow(dwm.dpy, dwm.screen);
 	dwm.gfx = gfx_create(dwm.dpy, dwm.screen, dwm.root, dwm.screen_width, dwm.screen_height);
 
+	if(dwm.gfx == 0x0)
+		return STRERROR("error creating grafix context");
+
 	if(event_add(ConnectionNumber(dwm.dpy), xlib_events_hdlr))
 		die("error adding xlib event handler\n");
 
@@ -129,7 +135,10 @@ static void setup(void){
 	dwm.cursor[CurMove] = gfx_cur_create(dwm.gfx, XC_fleur);
 
 	/* init appearance */
-	dwm.scheme = ecalloc(ncolors, sizeof(color_t*));
+	dwm.scheme = calloc(ncolors, sizeof(color_t*));
+
+	if(dwm.scheme == 0x0)
+		return STRERROR("cannot allocate scheme");
 
 	for(int i=0; i<ncolors; i++)
 		dwm.scheme[i] = gfx_scm_create(dwm.gfx, colors[i], 3);
@@ -171,6 +180,8 @@ static void setup(void){
 	scan();
 
 	XSync(dwm.dpy, False);
+
+	return 0;
 }
 
 static void cleanup(void){
@@ -182,7 +193,7 @@ static void cleanup(void){
 	dwm.layout = &foo;
 
 	while(dwm.stack)
-		unmanage(dwm.stack, 0);
+		client_cleanup(dwm.stack, 0);
 
 	XUngrabKey(dwm.dpy, AnyKey, AnyModifier, dwm.root);
 
@@ -224,7 +235,7 @@ static void scan(void){
 			continue;
 
 		if(wa.map_state == IsViewable || getstate(childs[i]) == IconicState)
-			manage(childs[i], &wa);
+			client_init(childs[i], &wa);
 	}
 
 	for(unsigned int i=0; i<nchilds; i++){ /* now the transients */
@@ -232,7 +243,7 @@ static void scan(void){
 			continue;
 
 		if(XGetTransientForHint(dwm.dpy, childs[i], &dummy) && (wa.map_state == IsViewable || getstate(childs[i]) == IconicState))
-			manage(childs[i], &wa);
+			client_init(childs[i], &wa);
 	}
 
 	XFree(childs);

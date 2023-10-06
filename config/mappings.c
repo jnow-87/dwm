@@ -1,9 +1,9 @@
 #include <X11/X.h>
 #include <X11/keysym.h>
-#include <action.h>
+#include <core/actions.h>
 #include <config/config.h>
 #include <limits.h>
-#include <utils.h>
+#include <utils/math.h>
 
 
 /* macros */
@@ -56,7 +56,7 @@ key_map_t const keys[] = {
 	{ MODKEY | ALT | ShiftMask,	XK_Left,	action_reszclient,	{ .v = (int []){ INT_MAX, 0 } } },
 	{ MODKEY,					XK_Insert,	action_reszclient,	{ .v = (int []){ INT_MAX, INT_MAX } } },
 
-	// window open/close/focus
+	// window open/close/client_focus
 	{ ALT,						XK_F4,		action_killclient,	{ 0 } },
 	{ ALT,						XK_Tab,		action_focusstack,	{ .i = +1 } },
 	{ ALT | ShiftMask,			XK_Tab,		action_focusstack,	{ .i = -1 } },
@@ -83,7 +83,7 @@ key_map_t const keys[] = {
 	{ MODKEY | ShiftMask,		XK_3,		action_spawn,		{ .v = (char const *[]){ "winfade", "--group", "3", "select" } } },
 //	{ MODKEY,                       XK_Return, zoom,           {0} },
 //	{ MODKEY,                       XK_Tab,    view,           {0} },
-//	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
+//	{ MODKEY|ShiftMask,             XK_c,      client_kill,     {0} },
 //	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
 //	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
 //	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },

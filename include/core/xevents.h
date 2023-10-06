@@ -1,5 +1,5 @@
-#ifndef XLIB_EVENTS_H
-#define XLIB_EVENTS_H
+#ifndef EVENTS_H
+#define EVENTS_H
 
 
 #include <X11/Xlib.h>
@@ -25,4 +25,4 @@ void key_cycle_complete(void);
 bool key_cycle_active(void);
 
 
-#endif // XLIB_EVENTS_H
+#endif // EVENTS_H

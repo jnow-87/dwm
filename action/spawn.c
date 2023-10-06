@@ -1,7 +1,7 @@
 #include <unistd.h>
 #include <signal.h>
-#include <dwm.h>
-#include <action.h>
+#include <core/dwm.h>
+#include <core/actions.h>
 
 
 /* global functions */

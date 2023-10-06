@@ -1,8 +1,8 @@
 #include <config/config.h>
-#include <client.h>
-#include <colors.h>
-#include <dwm.h>
-#include <atoms.h>
+#include <xlib/client.h>
+#include <core/scheme.h>
+#include <core/dwm.h>
+#include <xlib/atoms.h>
 #include <config.h>
 
 
@@ -64,7 +64,7 @@ void statusbar_update(void){
 
 	statusbar_raise();
 
-	gettextprop(dwm.root, XA_WM_NAME, dwm.statusbar.status, sizeof(dwm.statusbar.status));
+	atoms_text_prop(dwm.root, XA_WM_NAME, dwm.statusbar.status, sizeof(dwm.statusbar.status));
 	status_width = TEXTW(bar->status) - dwm.lrpad + 2; // 2px right padding
 
 	/* draw status spacer */

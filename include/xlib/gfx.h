@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifndef gfx_H
-#define gfx_H
+#ifndef GFX_H
+#define GFX_H
 
 
 #include <X11/X.h>
@@ -74,4 +74,4 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, unsigned 
 void gfx_map(gfx_t *gfx, Window win, int x, int y, unsigned int w, unsigned int h);
 
 
-#endif // gfx_H
+#endif // GFX_H

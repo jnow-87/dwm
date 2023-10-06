@@ -1,5 +1,5 @@
-#include <dwm.h>
-#include <action.h>
+#include <core/dwm.h>
+#include <core/actions.h>
 
 
 /* global functions */

@@ -7,7 +7,7 @@ typedef enum{
 	SchemeNorm,
 	SchemeSel,
 	SchemeSpacer,
-} color_scheme_t;
+} scheme_t;
 
 
 #endif // COLORS_H

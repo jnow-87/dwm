@@ -1,6 +1,6 @@
-#include <colors.h>
+#include <core/scheme.h>
 #include <config/config.h>
-#include <utils.h>
+#include <utils/math.h>
 
 
 /* global variables */

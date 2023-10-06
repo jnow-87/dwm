@@ -60,28 +60,28 @@ typedef struct client_t{
 
 
 /* prototypes */
-client_t *wintoclient(Window w);
+client_t *client_from_win(Window w);
 
-void manage(Window w, XWindowAttributes *wa);
-void unmanage(client_t *c, int destroyed);
-void killclient(Window win);
+void client_init(Window w, XWindowAttributes *wa);
+void client_cleanup(client_t *c, int destroyed);
+void client_kill(Window win);
 
-void configure(client_t *c);
+void client_configure(client_t *c);
 
-client_t *cycle(int dir, cycle_state_t state);
+client_t *client_cycle(int dir, cycle_state_t state);
 
-void refocus(void);
-void focus(client_t *c, bool restack);
-void showhide(void);
+void client_refocus(void);
+void client_focus(client_t *c, bool restack);
+void client_showhide(void);
 
-void resize(client_t *c, int x, int y, int w, int h, int interact);
-void resizeclient(client_t *c, int x, int y, int w, int h);
-void setclientstate(client_t *c, long state);
+void client_resize_with_hints(client_t *c, int x, int y, int w, int h, int interact);
+void client_resize(client_t *c, int x, int y, int w, int h);
+void client_set_state(client_t *c, long state);
 
-int sendevent(client_t *c, Atom proto);
+int client_send_event(client_t *c, Atom proto);
 
-void updatewmhints(client_t *c);
-void updatesizehints(client_t *c);
+void client_update_wmhints(client_t *c);
+void client_update_sizehints(client_t *c);
 
 
 #endif // CLIENT_H

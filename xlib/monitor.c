@@ -1,12 +1,12 @@
-#include <client.h>
+#include <xlib/client.h>
 #include <config.h>
 #include <config/config.h>
-#include <dwm.h>
-#include <layout.h>
-#include <statusbar.h>
-#include <monitor.h>
-#include <utils.h>
-#include <list.h>
+#include <core/dwm.h>
+#include <core/layout.h>
+#include <core/statusbar.h>
+#include <xlib/monitor.h>
+#include <utils/math.h>
+#include <utils/list.h>
 
 
 /* global functions */
