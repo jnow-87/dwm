@@ -2,6 +2,7 @@ bin-y := dwm
 
 dwm-y := \
 	main.o \
+	input.o \
 	dwm.o \
 	tags.o \
 	statusbar.o \

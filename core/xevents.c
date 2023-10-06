@@ -12,6 +12,7 @@
 #include <xlib/monitor.h>
 #include <core/statusbar.h>
 #include <utils/timer.h>
+#include <core/input.h>
 #include <core/xevents.h>
 #include <utils/log.h>
 
@@ -66,7 +67,7 @@ int xlib_events_init(void){
 	if(modifier_reset_timer == -1)
 		return -1;
 
-	return event_add(modifier_reset_timer, modifier_reset_hdlr);
+	return dwm_hdlr_add(modifier_reset_timer, modifier_reset_hdlr);
 }
 
 void xlib_cleanup(void){
@@ -115,7 +116,7 @@ int xerror_hdlr(Display *dpy, XErrorEvent *ee){
 
 int startup_xerror_hdlr(Display *dpy, XErrorEvent *ee){
 	// startup Error handler to check if another window manager is already running
-	die("dwm: another window manager is already running");
+	dwm_die("dwm: another window manager is already running");
 
 	return -1;
 }
@@ -138,7 +139,7 @@ void key_cycle_start(cycle_callback_t complete){
 	// the xlib KeyRelease event does not reliably report the release of modifier keys,
 	// hence use a timer to reset the modifier state manually
 	if(timer_set(modifier_reset_timer, 100) != 0)
-		die("unable to start key-client_cycle timer\n");
+		dwm_die("unable to start key-client_cycle timer\n");
 
 	modifier_state = state.mods;
 	cycle_complete = complete;
@@ -152,7 +153,7 @@ void key_cycle_complete(void){
 	cycle_complete = 0x0;
 
 	if(timer_set(modifier_reset_timer, 0) != 0)
-		die("unable to stop key-client_cycle timer\n");
+		dwm_die("unable to stop key-client_cycle timer\n");
 }
 
 bool key_cycle_active(void){
@@ -331,7 +332,7 @@ static void mappingnotify(XEvent *e){
 	XRefreshKeyboardMapping(ev);
 
 	if(ev->request == MappingKeyboard)
-		grabkeys();
+		input_grab_keys();
 }
 
 static void maprequest(XEvent *e){

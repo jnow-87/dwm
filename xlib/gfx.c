@@ -57,7 +57,7 @@ gfx_t *gfx_create(Display *dpy, int screen, Window root, unsigned int w, unsigne
 	f = xfont_create(gfx, CONFIG_FONT, 0x0);
 
 	if(f == 0x0)
-		die("no fonts could be loaded.");
+		dwm_die("no fonts could be loaded.");
 
 	gfx->fonts = 0x0;
 	list_add_tail(gfx->fonts, f);
@@ -286,7 +286,7 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, unsigned 
 
 			if(!gfx->fonts->pattern){
 				/* Refer to the comment in xfont_create for more information. */
-				die("the first font in the cache must be loaded from a font string.");
+				dwm_die("the first font in the cache must be loaded from a font string.");
 			}
 
 			fcpattern = FcPatternDuplicate(gfx->fonts->pattern);
@@ -414,7 +414,7 @@ static font_t *xfont_create(gfx_t *gfx, char const *fontname, FcPattern *fontpat
 		}
 	}
 	else
-		die("no font specified.");
+		dwm_die("no font specified.");
 
 	font = calloc(1, sizeof(font_t));
 
@@ -445,7 +445,7 @@ static void color_create(gfx_t *gfx, color_t *dest, char const *name){
 		return;
 
 	if(!XftColorAllocName(gfx->dpy, DefaultVisual(gfx->dpy, gfx->screen), DefaultColormap(gfx->dpy, gfx->screen), name, dest))
-		die("error, cannot allocate color '%s'", name);
+		dwm_die("error, cannot allocate color '%s'", name);
 }
 
 static void font_extents(font_t *font, char const *text, unsigned int len, unsigned int *w, unsigned int *h){

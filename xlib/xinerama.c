@@ -33,7 +33,7 @@ int xinerama_discover(void){
 	unique = malloc(ninfo * sizeof(XineramaScreenInfo));
 
 	if(unique == 0x0)
-		die("out of memory\n");
+		dwm_die("out of memory\n");
 
 	for(i=0; i<ninfo; i++){
 		if(is_unique(unique, nunique, &info[i]))
@@ -50,7 +50,7 @@ int xinerama_discover(void){
 		m = monitor_create(info->x_org, info->y_org, info->width, info->height);
 
 		if(m == 0x0)
-			die("unable to create monitor\n");
+			dwm_die("unable to create monitor\n");
 
 		DEBUG("init monitor %d:\n", i);
 		DEBUG("  screen area: %dx%d+%d+%d\n", m->x, m->y, m->width, m->height);

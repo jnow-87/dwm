@@ -23,5 +23,5 @@ void action_spawn(action_arg_t const *arg){
 	sigaction(SIGCHLD, &sa, NULL);
 
 	execvp(((char **)arg->v)[0], (char **)arg->v);
-	die("dwm: execvp '%s' failed:", ((char **)arg->v)[0]);
+	dwm_die("dwm: execvp '%s' failed:", ((char **)arg->v)[0]);
 }

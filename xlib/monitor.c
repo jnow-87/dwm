@@ -5,11 +5,22 @@
 #include <core/layout.h>
 #include <core/statusbar.h>
 #include <xlib/monitor.h>
+#include <xlib/xinerama.h>
 #include <utils/math.h>
 #include <utils/list.h>
 
 
 /* global functions */
+void monitor_discover(void){
+	/* free existing monitors */
+	while(dwm.mons){
+		monitor_destroy(dwm.mons);
+	}
+
+	if(xinerama_discover() < 0)
+		monitor_create(0, 0, dwm.screen_width, dwm.screen_height);
+}
+
 monitor_t *monitor_create(int x, int y, int width, int height){
 	monitor_t *m;
 

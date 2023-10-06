@@ -7,6 +7,7 @@
 #include <config/config.h>
 #include <core/dwm.h>
 #include <xlib/atoms.h>
+#include <core/input.h>
 #include <core/xevents.h>
 #include <core/layout.h>
 #include <core/statusbar.h>
@@ -15,13 +16,8 @@
 #include <utils/stack.h>
 
 
-/* macros */
-#define BUTTONMASK (ButtonPressMask | ButtonReleaseMask)
-
-
 /* local/static prototypes */
 static int apply_sizehints(client_t *c, int *x, int *y, int *w, int *h, int interact);
-static void grab_buttons(client_t *c, int focused);
 
 
 /* global functions */
@@ -48,7 +44,7 @@ void client_init(Window w, XWindowAttributes *wa){
 	c = calloc(1, sizeof(client_t));
 
 	if(c == 0x0)
-		die("unable to allocate new client\n");
+		dwm_die("unable to allocate new client\n");
 
 	c->win = w;
 	geom = &c->geom;
@@ -83,7 +79,7 @@ void client_init(Window w, XWindowAttributes *wa){
 	client_update_sizehints(c);
 	client_update_wmhints(c);
 	XSelectInput(dwm.dpy, w, FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
-	grab_buttons(c, 0);
+	input_grab_buttons(c, 0);
 
 	XRaiseWindow(dwm.dpy, c->win);
 	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
@@ -225,7 +221,7 @@ void client_focus(client_t *c, bool restack){
 
 	/* unfocus client */
 	if(dwm.focused){
-		grab_buttons(dwm.focused, 0);
+		input_grab_buttons(dwm.focused, 0);
 		XSetWindowBorder(dwm.dpy, dwm.focused->win, dwm.scheme[SchemeNorm][ColBorder].pixel);
 	}
 
@@ -236,7 +232,7 @@ void client_focus(client_t *c, bool restack){
 		if(restack)
 			stack_raise(dwm.stack, c);
 
-		grab_buttons(c, 1);
+		input_grab_buttons(c, 1);
 
 		XSetWindowBorder(dwm.dpy, c->win, dwm.scheme[SchemeSel][ColBorder].pixel);
 		XSetInputFocus(dwm.dpy, c->win, RevertToPointerRoot, CurrentTime);
@@ -484,25 +480,4 @@ static int apply_sizehints(client_t *c, int *x, int *y, int *w, int *h, int inte
 		*h = MIN(*h, c->hints.height_max);
 
 	return *x != geom->x || *y != geom->y || *w != geom->width || *h != geom->height;
-}
-
-static void grab_buttons(client_t *c, int focused){
-	updatenumlockmask();
-	{
-		unsigned int i, j;
-		unsigned int modifiers[] = {0, LockMask, dwm.numlock_mask, dwm.numlock_mask | LockMask};
-
-
-		XUngrabButton(dwm.dpy, AnyButton, AnyModifier, c->win);
-
-		if(!focused)
-			XGrabButton(dwm.dpy, AnyButton, AnyModifier, c->win, False, BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
-
-		for(i=0; i<nbuttons; i++){
-			if(buttons[i].click == ClkClientWin){
-				for(j=0; j<LENGTH(modifiers); j++)
-					XGrabButton(dwm.dpy, buttons[i].button, buttons[i].mask | modifiers[j], c->win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-			}
-		}
-	}
 }

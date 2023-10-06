@@ -69,12 +69,12 @@ typedef int (*event_hdlr_t)(void);
 
 
 /* prototypes */
-void die(char const *fmt, ...);
-int getrootptr(int *x, int *y);
-void grabkeys(void);
-void monitor_discover(void);
-void updatenumlockmask(void);
-int event_add(int fd, event_hdlr_t hdlr);
+int dwm_setup(void);
+void dwm_cleanup(void);
+void dwm_run(void);
+void dwm_die(char const *fmt, ...);
+
+int dwm_hdlr_add(int fd, event_hdlr_t hdlr);
 
 
 /* external variables */

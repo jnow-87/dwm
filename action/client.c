@@ -5,6 +5,7 @@
 #include <core/dwm.h>
 #include <core/actions.h>
 #include <xlib/client.h>
+#include <core/input.h>
 #include <core/xevents.h>
 #include <core/statusbar.h>
 
@@ -59,7 +60,7 @@ void action_movemouse(action_arg_t const *arg){
 	if(XGrabPointer(dwm.dpy, dwm.root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, dwm.cursor[CurMove]->cursor, CurrentTime) != GrabSuccess)
 		return;
 
-	if(!getrootptr(&x, &y))
+	if(!input_get_root_pointer(&x, &y))
 		return;
 
 	do{
