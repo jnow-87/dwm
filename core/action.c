@@ -41,7 +41,7 @@ void action_focusstack(action_arg_t const *arg){
 
 	focus(c, false);
 
-	statusbar_draw();
+	statusbar_raise();
 }
 
 void action_killclient(action_arg_t const *arg){
@@ -141,7 +141,7 @@ void action_moveclient(action_arg_t const *arg){
 	// 	- move it bottom-left
 	// 		=> focus moves to the other window
 	resizeclient(c, nx, ny, geom->width, geom->height);
-	statusbar_draw();
+	statusbar_raise();
 }
 
 void action_reszclient(action_arg_t const *arg){
@@ -196,7 +196,7 @@ void action_reszclient(action_arg_t const *arg){
 		ny = geom->y;
 
 	resizeclient(c, nx, ny, nw, nh);
-	statusbar_draw();
+	statusbar_raise();
 }
 
 void action_quit(action_arg_t const *arg){
@@ -273,7 +273,7 @@ void action_setlayout(action_arg_t const *arg){
 	if(dwm.focused)
 		arrange();
 
-	statusbar_draw();
+	statusbar_update();
 }
 
 void action_spawn(action_arg_t const *arg){

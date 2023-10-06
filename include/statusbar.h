@@ -21,8 +21,8 @@ void statusbar_init(unsigned int height);
 void statusbar_destroy(void);
 
 void statusbar_update(void);
+void statusbar_raise(void);
 
-void statusbar_draw(void);
 void statusbar_toggle(void);
 
 

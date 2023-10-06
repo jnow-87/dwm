@@ -14,7 +14,7 @@ void tags_set(unsigned int *tags, unsigned int v){
 	// TODO this should be moved to dwm level
 	refocus();
 	arrange();
-	statusbar_draw();
+	statusbar_update();
 }
 
 void tags_toggle(unsigned int *tags, unsigned int v){

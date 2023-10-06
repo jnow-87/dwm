@@ -195,7 +195,7 @@ static void buttonpress(XEvent *e){
 		focus(c, true);
 		XAllowEvents(dwm.dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
-		statusbar_draw();
+		statusbar_raise();
 	}
 
 	for(i=0; i<nbuttons; i++){
@@ -299,7 +299,7 @@ static void expose(XEvent *e){
 
 
 	if(ev->window == dwm.statusbar.win && ev->count == 0)
-		statusbar_draw();
+		statusbar_update();
 }
 
 static void focusin(XEvent *e){
@@ -357,7 +357,6 @@ static void propertynotify(XEvent *e){
 
 	if((ev->window == dwm.root) && (ev->atom == XA_WM_NAME)){
 		statusbar_update();
-		statusbar_draw();
 	}
 	else if((c = wintoclient(ev->window))){
 		switch(ev->atom){
@@ -373,7 +372,6 @@ static void propertynotify(XEvent *e){
 
 		case XA_WM_HINTS:
 			updatewmhints(c);
-			statusbar_draw();
 			break;
 		}
 	}

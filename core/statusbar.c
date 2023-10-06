@@ -52,10 +52,6 @@ void statusbar_destroy(void){
 }
 
 void statusbar_update(void){
-	gettextprop(dwm.root, XA_WM_NAME, dwm.statusbar.status, sizeof(dwm.statusbar.status));
-}
-
-void statusbar_draw(void){
 	statusbar_t *bar = &dwm.statusbar;
 	monitor_t *m = dwm.mons;
 	int x,
@@ -66,6 +62,9 @@ void statusbar_draw(void){
 	if(!visible())
 		return;
 
+	statusbar_raise();
+
+	gettextprop(dwm.root, XA_WM_NAME, dwm.statusbar.status, sizeof(dwm.statusbar.status));
 	status_width = TEXTW(bar->status) - dwm.lrpad + 2; // 2px right padding
 
 	/* draw status spacer */
@@ -107,10 +106,11 @@ void statusbar_draw(void){
 	}
 
 	drw_map(dwm.drw, bar->win, 0, 0, m->width, bar->height);
+}
 
-	/* raise */
+void statusbar_raise(void){
 	// ensure the statusbar is on top of other windows
-	XRaiseWindow(dwm.dpy, bar->win);
+	XRaiseWindow(dwm.dpy, dwm.statusbar.win);
 }
 
 void statusbar_toggle(void){
