@@ -2,7 +2,6 @@ bin-y := dwm
 
 dwm-y := \
 	main.o \
-	drw.o \
 	dwm.o \
 	tags.o \
 	statusbar.o \
@@ -11,8 +10,6 @@ dwm-y := \
 	layout/ \
 	common/ \
 	xlib/
-
-dwm-$(CONFIG_XINERAMA) += xinerama.o
 
 
 # flags
@@ -30,4 +27,3 @@ dwm-ldlibs := \
 	-lXft
 
 dwm-ldlibs-$(CONFIG_XINERAMA) += -lXinerama
-

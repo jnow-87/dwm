@@ -280,7 +280,7 @@ static void configurenotify(XEvent *e){
 
 	monitor_discover();
 
-	drw_resize(dwm.drw, dwm.screen_width, dwm.screen_height);
+	gfx_resize(dwm.gfx, dwm.screen_width, dwm.screen_height);
 	XMoveResizeWindow(dwm.dpy, dwm.statusbar.win, dwm.mons->x, dwm.statusbar.y, dwm.mons->width, dwm.statusbar.height);
 	arrange();
 }

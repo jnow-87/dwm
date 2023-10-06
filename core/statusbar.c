@@ -69,13 +69,13 @@ void statusbar_update(void){
 
 	/* draw status spacer */
 	w = TEXTW(CONFIG_STATUSBAR_SPACER_RIGHT) - dwm.lrpad;
-	drw_setscheme(dwm.drw, dwm.scheme[SchemeSpacer]);
-	x = drw_text(dwm.drw, m->width - status_width - w, 0, w, bar->height, 0, CONFIG_STATUSBAR_SPACER_RIGHT, 0);
+	gfx_setscheme(dwm.gfx, dwm.scheme[SchemeSpacer]);
+	x = gfx_text(dwm.gfx, m->width - status_width - w, 0, w, bar->height, 0, CONFIG_STATUSBAR_SPACER_RIGHT, 0);
 
 	/* draw status text */
 	// draw status first so it can be overdrawn by tags later
-	drw_setscheme(dwm.drw, dwm.scheme[SchemeNorm]);
-	drw_text(dwm.drw, x, 0, status_width, bar->height, 0, bar->status, 0);
+	gfx_setscheme(dwm.gfx, dwm.scheme[SchemeNorm]);
+	gfx_text(dwm.gfx, x, 0, status_width, bar->height, 0, bar->status, 0);
 	status_width += w;
 
 	/* draw tags */
@@ -83,29 +83,29 @@ void statusbar_update(void){
 
 	for(unsigned int i=0; i<ntags; i++){
 		w = TEXTW(tags[i]);
-		drw_setscheme(dwm.drw, dwm.scheme[(dwm.tag_mask & (1 << i)) ? SchemeSel : SchemeNorm]);
-		drw_text(dwm.drw, x, 0, w, bar->height, dwm.lrpad / 2, tags[i], 0);
+		gfx_setscheme(dwm.gfx, dwm.scheme[(dwm.tag_mask & (1 << i)) ? SchemeSel : SchemeNorm]);
+		gfx_text(dwm.gfx, x, 0, w, bar->height, dwm.lrpad / 2, tags[i], 0);
 
 		x += w;
 	}
 
 	/* draw layout symbol */
 	w = TEXTW(dwm.layout->symbol);
-	drw_setscheme(dwm.drw, dwm.scheme[SchemeNorm]);
-	x = drw_text(dwm.drw, x, 0, w, bar->height, dwm.lrpad / 2, dwm.layout->symbol, 0);
+	gfx_setscheme(dwm.gfx, dwm.scheme[SchemeNorm]);
+	x = gfx_text(dwm.gfx, x, 0, w, bar->height, dwm.lrpad / 2, dwm.layout->symbol, 0);
 
 	/* draw layout spacer */
 	w = TEXTW(CONFIG_STATUSBAR_SPACER_LEFT) - dwm.lrpad;
-	drw_setscheme(dwm.drw, dwm.scheme[SchemeSpacer]);
-	x = drw_text(dwm.drw, x, 0, w, bar->height, 0, CONFIG_STATUSBAR_SPACER_LEFT, 0);
+	gfx_setscheme(dwm.gfx, dwm.scheme[SchemeSpacer]);
+	x = gfx_text(dwm.gfx, x, 0, w, bar->height, 0, CONFIG_STATUSBAR_SPACER_LEFT, 0);
 
 	/* draw space */
 	if((w = m->width - status_width - x) > bar->height){
-		drw_setscheme(dwm.drw, dwm.scheme[SchemeSel]);
-		drw_rect(dwm.drw, x, 0, w, bar->height, 1, 1);
+		gfx_setscheme(dwm.gfx, dwm.scheme[SchemeSel]);
+		gfx_rect(dwm.gfx, x, 0, w, bar->height, 1, 1);
 	}
 
-	drw_map(dwm.drw, bar->win, 0, 0, m->width, bar->height);
+	gfx_map(dwm.gfx, bar->win, 0, 0, m->width, bar->height);
 }
 
 void statusbar_raise(void){

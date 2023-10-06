@@ -102,7 +102,7 @@ static void setup(void){
 	dwm.screen_width = DisplayWidth(dwm.dpy, dwm.screen);
 	dwm.screen_height = DisplayHeight(dwm.dpy, dwm.screen);
 	dwm.root = RootWindow(dwm.dpy, dwm.screen);
-	dwm.drw = drw_create(dwm.dpy, dwm.screen, dwm.root, dwm.screen_width, dwm.screen_height);
+	dwm.gfx = gfx_create(dwm.dpy, dwm.screen, dwm.root, dwm.screen_width, dwm.screen_height);
 
 	if(event_add(ConnectionNumber(dwm.dpy), xlib_events_hdlr))
 		die("error adding xlib event handler\n");
@@ -124,18 +124,18 @@ static void setup(void){
 	dwm.netatom[NetClientList] = XInternAtom(dwm.dpy, "_NET_CLIENT_LIST", False);
 
 	/* init cursors */
-	dwm.cursor[CurNormal] = drw_cur_create(dwm.drw, XC_left_ptr);
-	dwm.cursor[CurResize] = drw_cur_create(dwm.drw, XC_sizing);
-	dwm.cursor[CurMove] = drw_cur_create(dwm.drw, XC_fleur);
+	dwm.cursor[CurNormal] = gfx_cur_create(dwm.gfx, XC_left_ptr);
+	dwm.cursor[CurResize] = gfx_cur_create(dwm.gfx, XC_sizing);
+	dwm.cursor[CurMove] = gfx_cur_create(dwm.gfx, XC_fleur);
 
 	/* init appearance */
 	dwm.scheme = ecalloc(ncolors, sizeof(color_t*));
 
 	for(int i=0; i<ncolors; i++)
-		dwm.scheme[i] = drw_scm_create(dwm.drw, colors[i], 3);
+		dwm.scheme[i] = gfx_scm_create(dwm.gfx, colors[i], 3);
 
 	/* init bars */
-	statusbar_init(dwm.drw->fonts->h + 2);
+	statusbar_init(dwm.gfx->fonts->h + 2);
 	statusbar_update();
 
 	/* supporting window for NetWMCheck */
@@ -191,14 +191,14 @@ static void cleanup(void){
 	}
 
 	for(i=0; i<CurLast; i++)
-		drw_cur_free(dwm.drw, dwm.cursor[i]);
+		gfx_cur_free(dwm.gfx, dwm.cursor[i]);
 
 	for(i=0; i<ncolors; i++)
 		free(dwm.scheme[i]);
 
 	free(dwm.scheme);
 	XDestroyWindow(dwm.dpy, wmcheckwin);
-	drw_free(dwm.drw);
+	gfx_free(dwm.gfx);
 	XSync(dwm.dpy, False);
 	XSetInputFocus(dwm.dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow]);

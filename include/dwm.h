@@ -6,7 +6,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/cursorfont.h>
-#include <drw.h>
+#include <gfx.h>
 #include <monitor.h>
 #include <statusbar.h>
 #include <layout.h>
@@ -43,7 +43,7 @@ typedef struct{
 		screen_height;
 	int lrpad;	/* sum of left and right padding for text */
 	unsigned int numlock_mask;
-	drw_t *drw;
+	gfx_t *gfx;
 	Display *dpy;
 	int screen;
 	Atom netatom[NetLast];
