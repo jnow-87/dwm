@@ -2,6 +2,9 @@
 #define ACTION_H
 
 
+#include <X11/X.h>
+
+
 /* types */
 typedef enum{
 	ClkTagBar,

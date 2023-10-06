@@ -1,21 +1,12 @@
-#include <X11/Xft/Xft.h>
+#include <config/config.h>
+#include <stdint.h>
+#include <X11/X.h>
+#include <utils.h>
+#include <dwm.h>
 #include <action.h>
 #include <client.h>
-#include <config.h>
-#include <config/config.h>
-#include <dwm.h>
 #include <events.h>
-#include <layout.h>
-#include <limits.h>
-#include <monitor.h>
-#include <signal.h>
 #include <statusbar.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <utils.h>
-#include <tags.h>
-#include <list.h>
-#include <events.h>
 
 
 /* macros */
@@ -199,14 +190,6 @@ void action_reszclient(action_arg_t const *arg){
 	statusbar_raise();
 }
 
-void action_quit(action_arg_t const *arg){
-	dwm.running = 0;
-}
-
-void action_restart(action_arg_t const *arg){
-	dwm.running = -1;
-}
-
 void action_resizemouse(action_arg_t const *arg){
 	int ocx, ocy, nw, nh;
 	client_t *c;
@@ -255,82 +238,6 @@ void action_resizemouse(action_arg_t const *arg){
 	XUngrabPointer(dwm.dpy, CurrentTime);
 
 	while(XCheckMaskEvent(dwm.dpy, EnterWindowMask, &ev));
-}
-
-void action_setlayout(action_arg_t const *arg){
-	if(arg == 0x0 || arg->v == 0x0){
-		for(unsigned int i=0; i<nlayouts; i++){
-			if(dwm.layout == layouts + i){
-				i = (i + 1 < nlayouts) ? i + 1 : 0;
-				dwm.layout = layouts + i;
-				break;
-			}
-		}
-	}
-	else
-		dwm.layout = (layout_t*)arg->v;
-
-	if(dwm.focused)
-		arrange();
-
-	statusbar_update();
-}
-
-void action_spawn(action_arg_t const *arg){
-	struct sigaction sa;
-
-
-	// TODO
-	//	why is this needed
-//	if(arg->v == dmenucmd)
-//		dmenumon[0] = '0' + dwm.mons->num;
-
-	if(fork() == 0){
-		if(dwm.dpy)
-			close(ConnectionNumber(dwm.dpy));
-
-		setsid();
-
-		sigemptyset(&sa.sa_mask);
-		sa.sa_flags = 0;
-		sa.sa_handler = SIG_DFL;
-		sigaction(SIGCHLD, &sa, NULL);
-
-		execvp(((char **)arg->v)[0], (char **)arg->v);
-		die("dwm: execvp '%s' failed:", ((char **)arg->v)[0]);
-	}
-}
-
-void action_togglebar(action_arg_t const *arg){
-	statusbar_toggle();
-}
-
-void action_tags_view(action_arg_t const *arg){
-	tags_set(&dwm.tag_mask, arg->ui);
-}
-
-void action_tags_toggle(action_arg_t const *arg){
-	tags_toggle(&dwm.tag_mask, arg->ui);
-}
-
-void action_client_tags_set(action_arg_t const *arg){
-	client_t *c = dwm.focused;
-
-
-	if(c == 0x0)
-		return;
-
-	tags_set(&c->tags, arg->ui);
-}
-
-void action_client_tags_toggle(action_arg_t const *arg){
-	client_t *c = dwm.focused;
-
-
-	if(c == 0x0)
-		return;
-
-	tags_toggle(&c->tags, arg->ui);
 }
 
 
