@@ -1,5 +1,5 @@
-#ifndef CORE_CLIENT_H
-#define CORE_CLIENT_H
+#ifndef CLIENT_H
+#define CLIENT_H
 
 
 #include <stdbool.h>
@@ -15,24 +15,6 @@
 
 
 /* types */
-typedef struct{
-	// size hints
-	float aspect_min,
-		  aspect_max;
-
-	int width_base,
-		width_min,
-		width_max,
-		width_inc,
-		height_base,
-		height_min,
-		height_max,
-		height_inc;
-
-	// window manager hints
-	int never_focus;
-} client_hints_t;
-
 typedef struct client_t{
 	struct client_t *prev,
 					*next;
@@ -41,8 +23,8 @@ typedef struct client_t{
 
 	Window win;
 	win_geom_t geom,
-				  geom_store;
-	client_hints_t hints;
+			   geom_store;
+	win_hints_t hints;
 } client_t;
 
 
@@ -52,5 +34,7 @@ void client_cleanup(client_t *c, bool destroyed);
 
 client_t *client_from_win(Window w);
 
+void client_resize(client_t *c, int x, int y, int width, int height);
 
-#endif // CORE_CLIENT_H
+
+#endif // CLIENT_H

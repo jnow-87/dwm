@@ -17,8 +17,8 @@ void layout_arrange(void){
 
 
 	list_for_each(dwm.stack, c){
-		if(ISVISIBLE(c))	client_show(c);
-		else				client_hide(c);
+		if(ISVISIBLE(c))	win_show(c->win, &c->geom);
+		else				win_hide(c->win, &c->geom);
 	}
 
 	if(dwm.layout->layout_arrange)

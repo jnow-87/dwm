@@ -1,5 +1,5 @@
-#ifndef CORE_STACK_H
-#define CORE_STACK_H
+#ifndef CLIENT_STACK_H
+#define CLIENT_STACK_H
 
 
 #include <stdbool.h>
@@ -20,4 +20,4 @@ void client_refocus(void);
 void client_focus(client_t *c, bool restack);
 
 
-#endif // CORE_STACK_H
+#endif // CLIENT_STACK_H

@@ -1,13 +1,30 @@
-#ifndef CLIENT_H
-#define CLIENT_H
+#ifndef WINDOW_H
+#define WINDOW_H
 
 
 #include <stdbool.h>
-#include <X11/Xlib.h>
+#include <X11/X.h>
 
-struct client_t;
 
 /* types */
+typedef struct{
+	// size hints
+	float aspect_min,
+		  aspect_max;
+
+	int width_base,
+		width_min,
+		width_max,
+		width_inc,
+		height_base,
+		height_min,
+		height_max,
+		height_inc;
+
+	// window manager hints
+	int never_focus;
+} win_hints_t;
+
 typedef struct{
 	int x,
 		y,
@@ -19,22 +36,19 @@ typedef struct{
 
 
 /* prototypes */
-void client_show(struct client_t *c);
-void client_hide(struct client_t *c);
+void win_show(Window win, win_geom_t *geom);
+void win_hide(Window win, win_geom_t *geom);
 
-void client_kill(Window win);
-void client_release(struct client_t *c);
+void win_kill(Window win);
+void win_release(Window win, win_geom_t *original);
 
-void client_configure(struct client_t *c);
+void win_configure(Window win, win_geom_t *geom);
+void win_resize(Window win, win_geom_t *geom, win_hints_t *hints);
+void win_set_state(Window win, long state);
+bool win_send_event(Window win, Atom proto);
 
-void client_resize_with_hints(struct client_t *c, int x, int y, int w, int h, bool interact);
-void client_resize(struct client_t *c, int x, int y, int w, int h);
-void client_set_state(struct client_t *c, long state);
-
-bool client_send_event(struct client_t *c, Atom proto);
-
-void client_update_wmhints(struct client_t *c);
-void client_update_sizehints(struct client_t *c);
+void win_update_wmhints(Window win, win_hints_t *hints, bool isfocused);
+void win_update_sizehints(Window win, win_hints_t *hints);
 
 
-#endif // CLIENT_H
+#endif // WINDOW_H

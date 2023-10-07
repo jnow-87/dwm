@@ -31,7 +31,7 @@ void client_init(Window w, XWindowAttributes *wa){
 	c->win = w;
 	geom = &c->geom;
 
-	/* init client struct and client_configure the xlib client accordingly */
+	/* init client struct and win_configure the xlib client accordingly */
 	geom->x = wa->x;
 	geom->y = wa->y;
 	geom->width = wa->width;
@@ -57,9 +57,9 @@ void client_init(Window w, XWindowAttributes *wa){
 	wc.border_width = geom->border_width;
 	XConfigureWindow(dwm.dpy, w, CWBorderWidth, &wc);
 	XSetWindowBorder(dwm.dpy, w, dwm.scheme[SchemeNorm][ColBorder].pixel);
-	client_configure(c); /* propagates border_width, if size doesn't change */
-	client_update_sizehints(c);
-	client_update_wmhints(c);
+	win_configure(c->win, &c->geom); /* propagates border_width, if size doesn't change */
+	win_update_sizehints(c->win, &c->hints);
+	win_update_wmhints(c->win, &c->hints, false);
 	XSelectInput(dwm.dpy, w, FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
 	input_register_button_mappings(c->win, buttons, nbuttons, 0);
 
@@ -67,7 +67,7 @@ void client_init(Window w, XWindowAttributes *wa){
 	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
 
 	XMoveResizeWindow(dwm.dpy, c->win, geom->x + 2 * dwm.screen_width, geom->y, geom->width, geom->height); /* some windows require this */
-	client_set_state(c, NormalState);
+	win_set_state(c->win, NormalState);
 
 	XMapWindow(dwm.dpy, c->win);
 
@@ -83,7 +83,7 @@ void client_cleanup(client_t *c, bool destroyed){
 	client_refocus();
 
 	if(!destroyed)
-		client_release(c);
+		win_release(c->win, &c->geom_store);
 
 	free(c);
 
@@ -107,4 +107,21 @@ client_t *client_from_win(Window w){
 	}
 
 	return 0x0;
+}
+
+void client_resize(client_t *c, int x, int y, int width, int height){
+	win_geom_t *geom = &c->geom;
+
+
+	if(x == geom->x && y == geom->y && width == geom->width && height == geom->height)
+		return;
+
+	c->geom_store = *geom;
+
+	geom->x = x;
+	geom->y = y;
+	geom->width = width;
+	geom->height = height;
+
+	win_resize(c->win, geom, &c->hints);
 }

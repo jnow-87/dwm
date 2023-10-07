@@ -34,14 +34,14 @@ void layout_tile(void){
 
 		if(i < NMASTER){
 			h = (m->height - y) / (MIN(n, NMASTER) - i);
-			client_resize_with_hints(c, m->x, m->y + y, w - (2 * geom->border_width), h - (2 * geom->border_width), false);
+			client_resize(c, m->x, m->y + y, w - (2 * geom->border_width), h - (2 * geom->border_width));
 
 			if(y + HEIGHT(c) < m->height)
 				y += HEIGHT(c);
 		}
 		else{
 			h = (m->height - ty) / (n - i);
-			client_resize_with_hints(c, m->x + w, m->y + ty, m->width - w - (2 * geom->border_width), h - (2 * geom->border_width), false);
+			client_resize(c, m->x + w, m->y + ty, m->width - w - (2 * geom->border_width), h - (2 * geom->border_width));
 
 			if(ty + HEIGHT(c) < m->height)
 				ty += HEIGHT(c);

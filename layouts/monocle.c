@@ -20,6 +20,6 @@ void layout_monocle(void){
 	for(c=nexttiled(dwm.stack); c; c=nexttiled(c->next)){
 		m = monitor_from_client(c);
 
-		client_resize_with_hints(c, m->x, m->y, m->width - 2 * c->geom.border_width, m->height - 2 * c->geom.border_width, false);
+		client_resize(c, m->x, m->y, m->width - 2 * c->geom.border_width, m->height - 2 * c->geom.border_width);
 	}
 }

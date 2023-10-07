@@ -83,7 +83,7 @@ key_map_t const keys[] = {
 	{ MODKEY | ShiftMask,		XK_3,		action_spawn,		{ .v = (char const *[]){ "winfade", "--group", "3", "select" } } },
 //	{ MODKEY,                       XK_Return, zoom,           {0} },
 //	{ MODKEY,                       XK_Tab,    view,           {0} },
-//	{ MODKEY|ShiftMask,             XK_c,      client_kill,     {0} },
+//	{ MODKEY|ShiftMask,             XK_c,      win_kill,     {0} },
 //	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
 //	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
 //	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },

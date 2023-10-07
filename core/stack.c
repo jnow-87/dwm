@@ -90,7 +90,7 @@ void client_focus(client_t *c, bool restack){
 		XSetInputFocus(dwm.dpy, c->win, RevertToPointerRoot, CurrentTime);
 		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(c->win), 1);
 		XRaiseWindow(dwm.dpy, c->win);
-		client_send_event(c, dwm.wmatom[WMTakeFocus]);
+		win_send_event(c->win, dwm.wmatom[WMTakeFocus]);
 	}
 	else{
 		XSetInputFocus(dwm.dpy, dwm.root, RevertToPointerRoot, CurrentTime);

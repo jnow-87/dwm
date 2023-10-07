@@ -41,8 +41,8 @@ void action_killclient(action_arg_t const *arg){
 	if(!dwm.focused)
 		return;
 
-	if(!client_send_event(dwm.focused, dwm.wmatom[WMDelete]))
-		client_kill(dwm.focused->win);
+	if(!win_send_event(dwm.focused->win, dwm.wmatom[WMDelete]))
+		win_kill(dwm.focused->win);
 }
 
 void action_movemouse(action_arg_t const *arg){
@@ -92,7 +92,7 @@ void action_movemouse(action_arg_t const *arg){
 			else if(abs((dwm.mons->y + dwm.mons->height) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
 				ny = dwm.mons->y + dwm.mons->height - HEIGHT(c);
 
-			client_resize_with_hints(c, nx, ny, c->geom.width, c->geom.height, true);
+			client_resize(c, nx, ny, c->geom.width, c->geom.height);
 			break;
 		}
 	} while(ev.type != ButtonRelease);
@@ -128,12 +128,12 @@ void action_moveclient(action_arg_t const *arg){
 
 	// TODO why do the following two lines not lead to the following glitch
 	// 	- tiling mode with two windows
-	// 	- client_resize_with_hints the right windw
+	// 	- client_resize the right windw
 	// 	- move it to top-right
 	// 	- move it to top-left
 	// 	- move it bottom-left
 	// 		=> client_focus moves to the other window
-	client_resize_with_hints(c, nx, ny, geom->width, geom->height, true);
+	client_resize(c, nx, ny, geom->width, geom->height);
 	statusbar_raise();
 }
 
@@ -230,7 +230,7 @@ void action_resizemouse(action_arg_t const *arg){
 			nw = MAX(ev.xmotion.x - ocx - 2 * geom->border_width + 1, 1);
 			nh = MAX(ev.xmotion.y - ocy - 2 * geom->border_width + 1, 1);
 
-			client_resize_with_hints(c, geom->x, geom->y, nw, nh, true);
+			client_resize(c, geom->x, geom->y, nw, nh);
 
 			break;
 		}

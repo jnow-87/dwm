@@ -239,7 +239,7 @@ static void configurerequest(XEvent *e){
 				geom->y = m->y + (m->height / 2 - HEIGHT(c) / 2); /* center in y direction */
 
 			if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
-				client_configure(c);
+				win_configure(c->win, &c->geom);
 
 			if(ISVISIBLE(c))
 				XMoveResizeWindow(dwm.dpy, c->win, geom->x, geom->y, geom->width, geom->height);
@@ -358,11 +358,11 @@ static void propertynotify(XEvent *e){
 //			break;
 
 		case XA_WM_NORMAL_HINTS:
-			client_update_sizehints(c);
+			win_update_sizehints(c->win, &c->hints);
 			break;
 
 		case XA_WM_HINTS:
-			client_update_wmhints(c);
+			win_update_wmhints(c->win, &c->hints, c == dwm.focused);
 			break;
 		}
 	}
@@ -374,7 +374,7 @@ static void unmapnotify(XEvent *e){
 
 
 	if((c = client_from_win(ev->window))){
-		if(ev->send_event)	client_set_state(c, WithdrawnState);
+		if(ev->send_event)	win_set_state(c->win, WithdrawnState);
 		else				client_cleanup(c, false);
 	}
 }
