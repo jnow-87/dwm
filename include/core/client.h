@@ -29,10 +29,10 @@ typedef struct client_t{
 
 
 /* prototypes */
-void client_init(Window w, XWindowAttributes *wa);
+void client_init(Window win, XWindowAttributes *wa);
 void client_cleanup(client_t *c, bool destroyed);
 
-client_t *client_from_win(Window w);
+client_t *client_from_win(Window win);
 
 void client_resize(client_t *c, int x, int y, int width, int height);
 

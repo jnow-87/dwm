@@ -7,20 +7,20 @@
 #include <core/dwm.h>
 #include <core/monitor.h>
 #include <core/scheme.h>
-#include <core/stack.h>
+#include <core/clientstack.h>
 #include <xlib/input.h>
+#include <xlib/atoms.h>
 #include <utils/list.h>
 #include <utils/stack.h>
 #include <utils/math.h>
 
 
 /* global functions */
-void client_init(Window w, XWindowAttributes *wa){
+void client_init(Window win, XWindowAttributes *wa){
 	monitor_t *m = dwm.mons;
-	client_t *c, *t = NULL;
-	Window trans = None;
+	client_t *c,
+			 *trans;
 	win_geom_t *geom;
-	XWindowChanges wc;
 
 
 	c = calloc(1, sizeof(client_t));
@@ -28,81 +28,59 @@ void client_init(Window w, XWindowAttributes *wa){
 	if(c == 0x0)
 		dwm_die("unable to allocate new client\n");
 
-	c->win = w;
-	geom = &c->geom;
+	/* init client */
+	c->win = win;
 
-	/* init client struct and win_configure the xlib client accordingly */
-	geom->x = wa->x;
-	geom->y = wa->y;
+	trans = client_from_win(win_get_transient(win));
+	c->tags = (trans != 0x0) ? trans->tags : dwm.tag_mask;
+
+	geom = &c->geom;
+	geom->x = MAX(wa->x, m->x);
+	geom->y = MAX(wa->y, m->y);
 	geom->width = wa->width;
 	geom->height = wa->height;
-	geom->border_width = wa->border_width;
-
-	c->geom_store = *geom;
-	c->tags = dwm.tag_mask;
-
-	if(XGetTransientForHint(dwm.dpy, w, &trans) && (t = client_from_win(trans)))
-		c->tags = t->tags;
-
-	if(geom->x + WIDTH(c) > m->x + m->width)
-		geom->x = m->x + m->width - WIDTH(c);
-
-	if(geom->y + HEIGHT(c) > m->y + m->height)
-		geom->y = m->y + m->height - HEIGHT(c);
-
-	geom->x = MAX(geom->x, m->x);
-	geom->y = MAX(geom->y, m->y);
 	geom->border_width = CONFIG_BORDER_PIXEL;
 
-	wc.border_width = geom->border_width;
-	XConfigureWindow(dwm.dpy, w, CWBorderWidth, &wc);
-	XSetWindowBorder(dwm.dpy, w, dwm.scheme[SchemeNorm][ColBorder].pixel);
-	win_configure(c->win, &c->geom); /* propagates border_width, if size doesn't change */
-	win_update_sizehints(c->win, &c->hints);
-	win_update_wmhints(c->win, &c->hints, false);
-	XSelectInput(dwm.dpy, w, FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
-	input_register_button_mappings(c->win, buttons, nbuttons, 0);
+	c->geom_store = *geom;
+	c->geom_store.border_width = wa->border_width;
 
-	XRaiseWindow(dwm.dpy, c->win);
-	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
+	win_init(win, &c->geom, &c->hints);
 
-	XMoveResizeWindow(dwm.dpy, c->win, geom->x + 2 * dwm.screen_width, geom->y, geom->width, geom->height); /* some windows require this */
-	win_set_state(c->win, NormalState);
+	/* update client list */
+	atoms_netatom_append(NetClientList, (unsigned char*)&win);
 
-	XMapWindow(dwm.dpy, c->win);
-
+	/* update clientstack */
 	stack_push(dwm.stack, c);
-	client_focus(c, true);
-
-	// TODO move layout_arrange out of the function to avoid calling it multiple times during startup
-	layout_arrange();
+	clientstack_focus(c, true);
 }
 
 void client_cleanup(client_t *c, bool destroyed){
+	/* update clientstack */
 	list_rm(dwm.stack, c);
-	client_refocus();
+	clientstack_refocus();
 
+	/* destroy */
 	if(!destroyed)
 		win_release(c->win, &c->geom_store);
 
 	free(c);
 
 	/* update client list */
-	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList]);
+	atoms_netatom_delete(NetClientList);
 
 	list_for_each(dwm.stack, c)
-		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
-
-	layout_arrange();
-	statusbar_raise();
+		atoms_netatom_append(NetClientList, (unsigned char*)&c->win);
 }
 
-client_t *client_from_win(Window w){
+client_t *client_from_win(Window win){
 	client_t *c;
 
 
+	if(win == None)
+		return 0x0;
+
 	list_for_each(dwm.stack, c){
-		if(c->win == w)
+		if(c->win == win)
 			return c;
 	}
 

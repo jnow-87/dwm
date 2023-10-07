@@ -4,6 +4,7 @@
 
 #include <stdbool.h>
 #include <X11/X.h>
+#include <core/scheme.h>
 
 
 /* types */
@@ -36,9 +37,7 @@ typedef struct{
 
 
 /* prototypes */
-void win_show(Window win, win_geom_t *geom);
-void win_hide(Window win, win_geom_t *geom);
-
+void win_init(Window win, win_geom_t *geom, win_hints_t *hints);
 void win_kill(Window win);
 void win_release(Window win, win_geom_t *original);
 
@@ -47,6 +46,12 @@ void win_resize(Window win, win_geom_t *geom, win_hints_t *hints);
 void win_set_state(Window win, long state);
 bool win_send_event(Window win, Atom proto);
 
+void win_show(Window win, win_geom_t *geom);
+void win_hide(Window win, win_geom_t *geom);
+void win_focus(Window win);
+void win_unfocus(Window win);
+
+Window win_get_transient(Window win);
 void win_update_wmhints(Window win, win_hints_t *hints, bool isfocused);
 void win_update_sizehints(Window win, win_hints_t *hints);
 

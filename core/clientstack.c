@@ -1,15 +1,12 @@
-#include <config.h>
 #include <core/client.h>
 #include <core/dwm.h>
-#include <core/scheme.h>
-#include <core/stack.h>
-#include <xlib/input.h>
+#include <core/clientstack.h>
 #include <utils/list.h>
 #include <utils/stack.h>
 
 
 /* global functions */
-client_t *client_cycle(int dir, cycle_state_t state){
+client_t *clientstack_cycle(int dir, cycle_state_t state){
 	static client_t *cycle_origin = 0x0;
 	client_t *c;
 
@@ -36,7 +33,7 @@ client_t *client_cycle(int dir, cycle_state_t state){
 		// retry, this time from the top of the stack
 		dwm.focused = 0x0;
 
-		return client_cycle(dir, 0);
+		return clientstack_cycle(dir, 0);
 
 	case CYCLE_END:
 		if(cycle_origin != 0x0){
@@ -53,7 +50,7 @@ client_t *client_cycle(int dir, cycle_state_t state){
 	return 0x0;
 }
 
-void client_refocus(void){
+void clientstack_refocus(void){
 	client_t *c;
 
 
@@ -64,36 +61,24 @@ void client_refocus(void){
 			break;
 	}
 
-	client_focus(c, true);
+	clientstack_focus(c, true);
 }
 
-void client_focus(client_t *c, bool restack){
+void clientstack_focus(client_t *c, bool restack){
 	if(c == dwm.focused)
 		return;
 
-	/* unfocus client */
-	if(dwm.focused){
-		input_register_button_mappings(dwm.focused->win, buttons, nbuttons, 0);
-		XSetWindowBorder(dwm.dpy, dwm.focused->win, dwm.scheme[SchemeNorm][ColBorder].pixel);
-	}
+	if(dwm.focused)
+		win_unfocus(dwm.focused->win);
 
-	/* client_focus */
 	dwm.focused = c;
 
 	if(c != 0x0){
 		if(restack)
 			stack_raise(dwm.stack, c);
 
-		input_register_button_mappings(c->win, buttons, nbuttons, 1);
-
-		XSetWindowBorder(dwm.dpy, c->win, dwm.scheme[SchemeSel][ColBorder].pixel);
-		XSetInputFocus(dwm.dpy, c->win, RevertToPointerRoot, CurrentTime);
-		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(c->win), 1);
-		XRaiseWindow(dwm.dpy, c->win);
-		win_send_event(c->win, dwm.wmatom[WMTakeFocus]);
+		win_focus(c->win);
 	}
-	else{
-		XSetInputFocus(dwm.dpy, dwm.root, RevertToPointerRoot, CurrentTime);
-		XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow]);
-	}
+	else
+		win_focus(dwm.root);
 }

@@ -1,5 +1,5 @@
 #include <core/dwm.h>
-#include <core/stack.h>
+#include <core/clientstack.h>
 #include <config.h>
 
 
@@ -13,7 +13,7 @@ void tags_set(unsigned int *tags, unsigned int v){
 	*tags = v;
 
 	// TODO this should be moved to dwm level
-	client_refocus();
+	clientstack_refocus();
 	layout_arrange();
 	statusbar_update();
 }

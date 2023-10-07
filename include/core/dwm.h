@@ -3,10 +3,8 @@
 
 
 #include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/cursorfont.h>
 #include <xlib/gfx.h>
+#include <xlib/atoms.h>
 #include <core/monitor.h>
 #include <core/statusbar.h>
 #include <core/layout.h>
@@ -19,23 +17,6 @@ typedef enum{
 	CurMove,
 	CurLast
 } cursor_type_t;
-
-typedef enum{
-	NetSupported,
-	NetWMName,
-	NetWMCheck,
-	NetActiveWindow,
-	NetClientList,
-	NetLast
-} net_atom_t;
-
-typedef enum{
-	WMProtocols,
-	WMDelete,
-	WMState,
-	WMTakeFocus,
-	WMLast
-} default_atoms_t;
 
 typedef struct{
 	monitor_t *mons;

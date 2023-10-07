@@ -1,24 +1,34 @@
+#include <config.h>
 #include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <core/dwm.h>
 #include <core/xevents.h>
 #include <xlib/window.h>
+#include <xlib/input.h>
 #include <utils/math.h>
 
 
 /* local/static prototypes */
+static void set_border(Window win, scheme_t scheme);
 static void apply_sizehints(Window win, win_geom_t *geom, win_hints_t *hints);
 static int dummy_xerror_hdlr(Display *dpy, XErrorEvent *ee);
 
 
 /* global functions */
-void win_show(Window win, win_geom_t *geom){
-	XMoveWindow(dwm.dpy, win, geom->x, geom->y);
-}
+void win_init(Window win, win_geom_t *geom, win_hints_t *hints){
+	win_configure(win, geom);
 
-void win_hide(Window win, win_geom_t *geom){
-	XMoveWindow(dwm.dpy, win, geom->width * -2, geom->y);
+	XConfigureWindow(dwm.dpy, win, CWBorderWidth, &((XWindowChanges){ .border_width = geom->border_width }));
+	XSelectInput(dwm.dpy, win, FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
+	XMoveResizeWindow(dwm.dpy, win, geom->x + 2 * dwm.screen_width, geom->y, geom->width, geom->height); //some windows require this
+
+	set_border(win, SchemeNorm);
+	win_update_sizehints(win, hints);
+	win_update_wmhints(win, hints, false);
+	win_set_state(win, NormalState);
+
+	XMapWindow(dwm.dpy, win);
 }
 
 void win_kill(Window win){
@@ -26,7 +36,7 @@ void win_kill(Window win){
 	XSetErrorHandler(dummy_xerror_hdlr);
 	XSetCloseDownMode(dwm.dpy, DestroyAll);
 
-	XKillClient(dwm.dpy, dwm.focused->win);
+	XKillClient(dwm.dpy, win);
 	XSync(dwm.dpy, False);
 
 	XSetErrorHandler(xerror_hdlr);
@@ -123,6 +133,44 @@ bool win_send_event(Window win, Atom proto){
 	return true;
 }
 
+void win_show(Window win, win_geom_t *geom){
+	XMoveWindow(dwm.dpy, win, geom->x, geom->y);
+}
+
+void win_hide(Window win, win_geom_t *geom){
+	XMoveWindow(dwm.dpy, win, geom->width * -2, geom->y);
+}
+
+void win_focus(Window win){
+	XSetInputFocus(dwm.dpy, win, RevertToPointerRoot, CurrentTime);
+
+	if(win != dwm.root){
+		input_register_button_mappings(win, buttons, nbuttons, 1);
+		set_border(win, SchemeSel);
+
+		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(win), 1);
+		XRaiseWindow(dwm.dpy, win);
+		win_send_event(win, dwm.wmatom[WMTakeFocus]);
+	}
+	else
+		XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow]);
+}
+
+void win_unfocus(Window win){
+	input_register_button_mappings(win, buttons, nbuttons, 0);
+	set_border(win, SchemeNorm);
+}
+
+Window win_get_transient(Window win){
+	Window trans;
+
+
+	if(XGetTransientForHint(dwm.dpy, win, &trans))
+		return trans;
+
+	return None;
+}
+
 void win_update_wmhints(Window win, win_hints_t *hints, bool isfocused){
 	XWMHints *wmh;
 
@@ -196,6 +244,10 @@ void win_update_sizehints(Window win, win_hints_t *hints){
 
 
 /* local functions */
+static void set_border(Window win, scheme_t scheme){
+	XSetWindowBorder(dwm.dpy, win, dwm.scheme[scheme][ColBorder].pixel);
+}
+
 static void apply_sizehints(Window win, win_geom_t *geom, win_hints_t *hints){
 	int baseismin;
 

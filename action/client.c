@@ -4,7 +4,7 @@
 #include <utils/math.h>
 #include <core/dwm.h>
 #include <core/actions.h>
-#include <core/stack.h>
+#include <core/clientstack.h>
 #include <xlib/window.h>
 #include <xlib/input.h>
 #include <core/xevents.h>
@@ -24,7 +24,7 @@ void action_focusstack(action_arg_t const *arg){
 	client_t *c;
 
 
-	c = client_cycle(arg->i, key_cycle_active() ? CYCLE_CONT : CYCLE_START);
+	c = clientstack_cycle(arg->i, key_cycle_active() ? CYCLE_CONT : CYCLE_START);
 
 	if(c == 0x0)
 		return;
@@ -32,7 +32,7 @@ void action_focusstack(action_arg_t const *arg){
 	if(!key_cycle_active())
 		key_cycle_start(focusstack_complete);
 
-	client_focus(c, false);
+	clientstack_focus(c, false);
 
 	statusbar_raise();
 }
@@ -132,7 +132,7 @@ void action_moveclient(action_arg_t const *arg){
 	// 	- move it to top-right
 	// 	- move it to top-left
 	// 	- move it bottom-left
-	// 		=> client_focus moves to the other window
+	// 		=> clientstack_focus moves to the other window
 	client_resize(c, nx, ny, geom->width, geom->height);
 	statusbar_raise();
 }
@@ -248,7 +248,7 @@ static void focusstack_complete(void){
 	client_t *c;
 
 
-	c = client_cycle(0, CYCLE_END);
+	c = clientstack_cycle(0, CYCLE_END);
 
-	client_focus(c, false);
+	clientstack_focus(c, false);
 }

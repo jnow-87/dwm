@@ -5,7 +5,7 @@
 
 
 /* global functions */
-int atoms_text_prop(Window w, Atom atom, char *text, unsigned int size){
+int atoms_text_prop(Window win, Atom atom, char *text, unsigned int size){
 	char **list = 0x0;
 	int n;
 	XTextProperty name;
@@ -16,7 +16,7 @@ int atoms_text_prop(Window w, Atom atom, char *text, unsigned int size){
 
 	text[0] = '\0';
 
-	if(!XGetTextProperty(dwm.dpy, w, &name, atom) || !name.nitems)
+	if(!XGetTextProperty(dwm.dpy, win, &name, atom) || !name.nitems)
 		return 0;
 
 	if(name.encoding == XA_STRING){
@@ -33,17 +33,10 @@ int atoms_text_prop(Window w, Atom atom, char *text, unsigned int size){
 	return 1;
 }
 
-Atom atoms_atom_prop(client_t *c, Atom prop){
-	int di;
-	unsigned long dl;
-	unsigned char *p = NULL;
-	Atom da, atom = None;
+void atoms_netatom_append(net_atom_t atom, unsigned char *value){
+	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[atom], XA_WINDOW, 32, PropModeAppend, value, 1);
+}
 
-
-	if(XGetWindowProperty(dwm.dpy, c->win, prop, 0L, sizeof atom, False, XA_ATOM, &da, &di, &dl, &dl, &p) == Success && p){
-		atom = *(Atom*)p;
-		XFree(p);
-	}
-
-	return atom;
+void atoms_netatom_delete(net_atom_t atom){
+	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[atom]);
 }

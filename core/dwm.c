@@ -23,6 +23,7 @@
 
 #include <X11/X.h>
 #include <X11/Xatom.h>
+#include <X11/cursorfont.h>
 #include <config/config.h>
 #include <sys/epoll.h>
 #include <errno.h>
@@ -188,6 +189,7 @@ int dwm_setup(void){
 	input_register_key_mappings(keys, nkeys);
 
 	scan();
+	layout_arrange();
 
 	XSync(dwm.dpy, False);
 

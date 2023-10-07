@@ -2,11 +2,11 @@ bin-y := dwm
 
 dwm-y := \
 	client.o \
+	clientstack.o \
 	dwm.o \
 	layout.o \
 	main.o \
 	monitor.o \
-	stack.o \
 	statusbar.o \
 	tags.o \
 	xevents.o \

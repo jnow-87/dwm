@@ -14,7 +14,7 @@
 #include <utils/timer.h>
 #include <xlib/input.h>
 #include <core/xevents.h>
-#include <core/stack.h>
+#include <core/clientstack.h>
 #include <utils/log.h>
 
 
@@ -129,7 +129,7 @@ void key_cycle_start(cycle_callback_t complete){
 	// the xlib KeyRelease event does not reliably report the release of modifier keys,
 	// hence use a timer to reset the modifier state manually
 	if(timer_set(modifier_reset_timer, 100) != 0)
-		dwm_die("unable to start key-client_cycle timer\n");
+		dwm_die("unable to start key-clientstack_cycle timer\n");
 
 	modifier_state = state.mods;
 	cycle_complete = complete;
@@ -143,7 +143,7 @@ void key_cycle_complete(void){
 	cycle_complete = 0x0;
 
 	if(timer_set(modifier_reset_timer, 0) != 0)
-		dwm_die("unable to stop key-client_cycle timer\n");
+		dwm_die("unable to stop key-clientstack_cycle timer\n");
 }
 
 bool key_cycle_active(void){
@@ -161,7 +161,7 @@ static void buttonpress(XEvent *e){
 
 	click = ClkRootWin;
 
-	/* client_focus monitor if necessary */
+	/* clientstack_focus monitor if necessary */
 	if(ev->window == dwm.statusbar.win){
 		i = x = 0;
 
@@ -183,7 +183,7 @@ static void buttonpress(XEvent *e){
 			click = ClkWinTitle;
 	}
 	else if((c = client_from_win(ev->window))){
-		client_focus(c, true);
+		clientstack_focus(c, true);
 		XAllowEvents(dwm.dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
 		statusbar_raise();
@@ -232,12 +232,6 @@ static void configurerequest(XEvent *e){
 				geom->height = ev->height;
 			}
 
-			if((geom->x + geom->width) > m->x + m->width)
-				geom->x = m->x + (m->width / 2 - WIDTH(c) / 2);	/* center in x direction */
-
-			if((geom->y + geom->height) > m->y + m->height)
-				geom->y = m->y + (m->height / 2 - HEIGHT(c) / 2); /* center in y direction */
-
 			if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
 				win_configure(c->win, &c->geom);
 
@@ -281,8 +275,14 @@ static void destroynotify(XEvent *e){
 	client_t *c;
 
 
-	if((c = client_from_win(ev->window)))
-		client_cleanup(c, true);
+	c = client_from_win(ev->window);
+
+	if(c == 0x0)
+		return;
+
+	client_cleanup(c, true);
+	layout_arrange();
+	statusbar_raise();
 }
 
 static void expose(XEvent *e){
@@ -294,12 +294,12 @@ static void expose(XEvent *e){
 }
 
 static void focusin(XEvent *e){
-	/* there are some broken client_focus acquiring clients needing extra handling */
+	/* there are some broken clientstack_focus acquiring clients needing extra handling */
 	XFocusChangeEvent *ev = &e->xfocus;
 
 
 	if(dwm.focused && ev->window != dwm.focused->win)
-		client_focus(dwm.focused, false);
+		clientstack_focus(dwm.focused, false);
 }
 
 static void keypress(XEvent *e){
@@ -333,8 +333,11 @@ static void maprequest(XEvent *e){
 	if(!XGetWindowAttributes(dwm.dpy, ev->window, &wa) || wa.override_redirect)
 		return;
 
-	if(!client_from_win(ev->window))
-		client_init(ev->window, &wa);
+	if(client_from_win(ev->window))
+		return;
+
+	client_init(ev->window, &wa);
+	layout_arrange();
 }
 
 static void propertynotify(XEvent *e){
@@ -374,8 +377,13 @@ static void unmapnotify(XEvent *e){
 
 
 	if((c = client_from_win(ev->window))){
-		if(ev->send_event)	win_set_state(c->win, WithdrawnState);
-		else				client_cleanup(c, false);
+		if(!ev->send_event){
+			client_cleanup(c, false);
+			layout_arrange();
+			statusbar_raise();
+		}
+		else
+			win_set_state(c->win, WithdrawnState);
 	}
 }
 
