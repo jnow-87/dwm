@@ -4,7 +4,7 @@
 #define CONFIG_H
 
 
-#include <core/actions.h>
+#include <xlib/input.h>
 #include <core/layout.h>
 
 

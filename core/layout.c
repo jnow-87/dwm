@@ -1,8 +1,8 @@
-#include <xlib/client.h>
+#include <xlib/window.h>
 #include <core/dwm.h>
 #include <core/layout.h>
-#include <xlib/monitor.h>
-
+#include <core/monitor.h>
+#include <utils/list.h>
 
 
 /* global functions */
@@ -13,7 +13,13 @@ client_t *nexttiled(client_t *c){
 }
 
 void layout_arrange(void){
-	client_showhide();
+	client_t *c;
+
+
+	list_for_each(dwm.stack, c){
+		if(ISVISIBLE(c))	client_show(c);
+		else				client_hide(c);
+	}
 
 	if(dwm.layout->layout_arrange)
 		dwm.layout->layout_arrange();

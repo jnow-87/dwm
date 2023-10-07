@@ -1,4 +1,5 @@
 #include <core/dwm.h>
+#include <core/stack.h>
 #include <config.h>
 
 

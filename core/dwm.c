@@ -30,23 +30,23 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <xlib/client.h>
+#include <xlib/window.h>
 #include <core/scheme.h>
 #include <config.h>
 #include <core/dwm.h>
-#include <xlib/monitor.h>
+#include <core/monitor.h>
 #include <core/statusbar.h>
 #include <utils/math.h>
 #include <xlib/xinerama.h>
 #include <stdlib.h>
-#include <xlib/client.h>
+#include <xlib/window.h>
 #include <config.h>
 #include <config/config.h>
 #include <core/dwm.h>
 #include <core/xevents.h>
 #include <core/layout.h>
 #include <locale.h>
-#include <xlib/monitor.h>
+#include <core/monitor.h>
 #include <signal.h>
 #include <core/statusbar.h>
 #include <stdio.h>
@@ -58,7 +58,7 @@
 #include <version.h>
 #include <core/layout.h>
 #include <core/tags.h>
-#include <core/input.h>
+#include <xlib/input.h>
 #include <utils/log.h>
 
 
@@ -68,6 +68,7 @@
 static void scan(void);
 static void check_other_wm_running(void);
 static long getstate(Window w);
+static int startup_xerror_hdlr(Display *dpy, XErrorEvent *ee);
 
 
 /* static variables */
@@ -114,6 +115,7 @@ int dwm_setup(void){
 	dwm.screen_height = DisplayHeight(dwm.dpy, dwm.screen);
 	dwm.root = RootWindow(dwm.dpy, dwm.screen);
 	dwm.gfx = gfx_create(dwm.dpy, dwm.screen, dwm.root, dwm.screen_width, dwm.screen_height);
+	dwm.numlock_mask = input_get_numlock_mask();
 
 	if(dwm.gfx == 0x0)
 		return STRERROR("error creating grafix context");
@@ -183,7 +185,7 @@ int dwm_setup(void){
 
 	XChangeWindowAttributes(dwm.dpy, dwm.root, CWEventMask | CWCursor, &wa);
 	XSelectInput(dwm.dpy, dwm.root, wa.event_mask);
-	input_grab_keys();
+	input_register_key_mappings(keys, nkeys);
 
 	scan();
 
@@ -201,7 +203,7 @@ void dwm_cleanup(void){
 	dwm.layout = &foo;
 
 	while(dwm.stack)
-		client_cleanup(dwm.stack, 0);
+		client_cleanup(dwm.stack, false);
 
 	XUngrabKey(dwm.dpy, AnyKey, AnyModifier, dwm.root);
 
@@ -330,4 +332,11 @@ static long getstate(Window w){
 	XFree(p);
 
 	return result;
+}
+
+static int startup_xerror_hdlr(Display *dpy, XErrorEvent *ee){
+	// startup Error handler to check if another window manager is already running
+	dwm_die("dwm: another window manager is already running");
+
+	return -1;
 }

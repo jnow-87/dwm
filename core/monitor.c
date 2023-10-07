@@ -1,10 +1,10 @@
-#include <xlib/client.h>
+#include <xlib/window.h>
 #include <config.h>
 #include <config/config.h>
 #include <core/dwm.h>
 #include <core/layout.h>
 #include <core/statusbar.h>
-#include <xlib/monitor.h>
+#include <core/monitor.h>
 #include <xlib/xinerama.h>
 #include <utils/math.h>
 #include <utils/list.h>
@@ -48,7 +48,7 @@ void monitor_destroy(monitor_t *m){
 monitor_t *monitor_from_client(client_t *c){
 	int area = 0;
 	monitor_t *r = dwm.mons;
-	client_geom_t *geom = &c->geom;
+	win_geom_t *geom = &c->geom;
 	monitor_t *m;
 	int a;
 

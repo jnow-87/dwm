@@ -5,15 +5,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <xlib/client.h>
+#include <xlib/window.h>
 #include <config.h>
 #include <core/dwm.h>
 #include <core/layout.h>
-#include <xlib/monitor.h>
+#include <core/monitor.h>
 #include <core/statusbar.h>
 #include <utils/timer.h>
-#include <core/input.h>
+#include <xlib/input.h>
 #include <core/xevents.h>
+#include <core/stack.h>
 #include <utils/log.h>
 
 
@@ -114,17 +115,6 @@ int xerror_hdlr(Display *dpy, XErrorEvent *ee){
 	return dwm.xlib_xerror_hdlr(dwm.dpy, ee); /* may call exit */
 }
 
-int startup_xerror_hdlr(Display *dpy, XErrorEvent *ee){
-	// startup Error handler to check if another window manager is already running
-	dwm_die("dwm: another window manager is already running");
-
-	return -1;
-}
-
-int dummy_xerror_hdlr(Display *dpy, XErrorEvent *ee){
-	return 0;
-}
-
 void key_cycle_start(cycle_callback_t complete){
 	XkbStateRec state;
 
@@ -207,7 +197,7 @@ static void buttonpress(XEvent *e){
 
 static void configurerequest(XEvent *e){
 	client_t *c;
-	client_geom_t *geom;
+	win_geom_t *geom;
 	monitor_t *m;
 	XConfigureRequestEvent *ev = &e->xconfigurerequest;
 	XWindowChanges wc;
@@ -292,7 +282,7 @@ static void destroynotify(XEvent *e){
 
 
 	if((c = client_from_win(ev->window)))
-		client_cleanup(c, 1);
+		client_cleanup(c, true);
 }
 
 static void expose(XEvent *e){
@@ -332,7 +322,7 @@ static void mappingnotify(XEvent *e){
 	XRefreshKeyboardMapping(ev);
 
 	if(ev->request == MappingKeyboard)
-		input_grab_keys();
+		input_register_key_mappings(keys, nkeys);
 }
 
 static void maprequest(XEvent *e){
@@ -385,7 +375,7 @@ static void unmapnotify(XEvent *e){
 
 	if((c = client_from_win(ev->window))){
 		if(ev->send_event)	client_set_state(c, WithdrawnState);
-		else				client_cleanup(c, 0);
+		else				client_cleanup(c, false);
 	}
 }
 

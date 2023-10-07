@@ -1,15 +1,18 @@
 bin-y := dwm
 
 dwm-y := \
-	main.o \
-	input.o \
+	client.o \
 	dwm.o \
-	tags.o \
+	layout.o \
+	main.o \
+	monitor.o \
+	stack.o \
 	statusbar.o \
+	tags.o \
 	xevents.o \
 	action/ \
 	config/ \
-	layout/ \
+	layouts/ \
 	utils/ \
 	xlib/
 

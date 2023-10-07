@@ -4,8 +4,9 @@
 #include <utils/math.h>
 #include <core/dwm.h>
 #include <core/actions.h>
-#include <xlib/client.h>
-#include <core/input.h>
+#include <core/stack.h>
+#include <xlib/window.h>
+#include <xlib/input.h>
 #include <core/xevents.h>
 #include <core/statusbar.h>
 
@@ -91,7 +92,7 @@ void action_movemouse(action_arg_t const *arg){
 			else if(abs((dwm.mons->y + dwm.mons->height) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
 				ny = dwm.mons->y + dwm.mons->height - HEIGHT(c);
 
-			client_resize_with_hints(c, nx, ny, c->geom.width, c->geom.height, 1);
+			client_resize_with_hints(c, nx, ny, c->geom.width, c->geom.height, true);
 			break;
 		}
 	} while(ev.type != ButtonRelease);
@@ -102,7 +103,7 @@ void action_movemouse(action_arg_t const *arg){
 void action_moveclient(action_arg_t const *arg){
 	int nx, ny;
 	client_t *c;
-	client_geom_t *geom;
+	win_geom_t *geom;
 
 
 	if(!(c = dwm.focused))
@@ -132,14 +133,14 @@ void action_moveclient(action_arg_t const *arg){
 	// 	- move it to top-left
 	// 	- move it bottom-left
 	// 		=> client_focus moves to the other window
-	client_resize_with_hints(c, nx, ny, geom->width, geom->height, 1);
+	client_resize_with_hints(c, nx, ny, geom->width, geom->height, true);
 	statusbar_raise();
 }
 
 void action_reszclient(action_arg_t const *arg){
 	int nx, ny, nw, nh;
 	client_t *c;
-	client_geom_t *geom;
+	win_geom_t *geom;
 
 
 	if(!(c = dwm.focused))
@@ -194,7 +195,7 @@ void action_reszclient(action_arg_t const *arg){
 void action_resizemouse(action_arg_t const *arg){
 	int ocx, ocy, nw, nh;
 	client_t *c;
-	client_geom_t *geom;
+	win_geom_t *geom;
 	XEvent ev;
 	Time lasttime = 0;
 
@@ -229,7 +230,7 @@ void action_resizemouse(action_arg_t const *arg){
 			nw = MAX(ev.xmotion.x - ocx - 2 * geom->border_width + 1, 1);
 			nh = MAX(ev.xmotion.y - ocy - 2 * geom->border_width + 1, 1);
 
-			client_resize_with_hints(c, geom->x, geom->y, nw, nh, 1);
+			client_resize_with_hints(c, geom->x, geom->y, nw, nh, true);
 
 			break;
 		}

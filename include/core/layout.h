@@ -2,8 +2,8 @@
 #define LAYOUT_H
 
 
-#include <xlib/client.h>
-#include <xlib/monitor.h>
+#include <xlib/window.h>
+#include <core/monitor.h>
 
 
 /* types */

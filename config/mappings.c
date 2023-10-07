@@ -1,6 +1,6 @@
 #include <X11/X.h>
 #include <X11/keysym.h>
-#include <core/actions.h>
+#include <xlib/input.h>
 #include <config/config.h>
 #include <limits.h>
 #include <utils/math.h>

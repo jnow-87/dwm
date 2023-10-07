@@ -7,7 +7,7 @@
 #include <X11/Xatom.h>
 #include <X11/cursorfont.h>
 #include <xlib/gfx.h>
-#include <xlib/monitor.h>
+#include <core/monitor.h>
 #include <core/statusbar.h>
 #include <core/layout.h>
 

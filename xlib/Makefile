@@ -1,7 +1,7 @@
 obj-y := \
 	atoms.o \
-	client.o \
-	monitor.o \
-	gfx.o
+	gfx.o \
+	input.o \
+	window.o
 
 obj-$(CONFIG_XINERAMA) += xinerama.o

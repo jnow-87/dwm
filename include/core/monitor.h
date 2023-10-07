@@ -2,7 +2,8 @@
 #define MONITOR_H
 
 
-#include <xlib/client.h>
+#include <core/client.h>
+#include <xlib/window.h>
 
 
 /* types */

@@ -1,11 +1,8 @@
-#include <X11/extensions/Xinerama.h>
+#include <stdlib.h>
 #include <sys/types.h>
-#include <xlib/client.h>
-#include <xlib/monitor.h>
-#include <core/statusbar.h>
+#include <X11/extensions/Xinerama.h>
+#include <core/monitor.h>
 #include <core/dwm.h>
-#include <utils/math.h>
-#include <utils/log.h>
 
 
 /* local/static prototypes */
@@ -23,7 +20,6 @@ int xinerama_discover(void){
 
 
 	info = XineramaQueryScreens(dwm.dpy, &ninfo);
-	DEBUG("number of xinerama monitors: %d\n", ninfo);
 
 	if(info == 0x0)
 		return -1;
@@ -42,7 +38,6 @@ int xinerama_discover(void){
 
 	XFree(info);
 	ninfo = nunique;
-	DEBUG("number of unique geometries: %d\n", nunique);
 
 	/* allccate monitors */
 	for(i=0; i<ninfo; i++){
@@ -51,9 +46,6 @@ int xinerama_discover(void){
 
 		if(m == 0x0)
 			dwm_die("unable to create monitor\n");
-
-		DEBUG("init monitor %d:\n", i);
-		DEBUG("  screen area: %dx%d+%d+%d\n", m->x, m->y, m->width, m->height);
 	}
 
 	free(unique);

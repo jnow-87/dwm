@@ -23,21 +23,6 @@ typedef union{
 	void const *v;
 } action_arg_t;
 
-typedef struct{
-	unsigned int click;
-	unsigned int mask;
-	unsigned int button;
-	void (*func)(action_arg_t const *arg);
-	action_arg_t const arg;
-} button_map_t;
-
-typedef struct{
-	unsigned int mod;
-	KeySym keysym;
-	void (*func)(action_arg_t const *);
-	action_arg_t const arg;
-} key_map_t;
-
 
 /* prototypes */
 void action_focusstack(action_arg_t const *arg);

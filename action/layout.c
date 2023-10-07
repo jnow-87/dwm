@@ -1,7 +1,7 @@
 #include <config.h>
 #include <core/dwm.h>
 #include <core/actions.h>
-#include <xlib/client.h>
+#include <xlib/window.h>
 #include <core/statusbar.h>
 
 
