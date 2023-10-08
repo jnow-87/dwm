@@ -3,6 +3,7 @@
 #include <core/buttons.h>
 #include <core/scheme.h>
 #include <core/dwm.h>
+#include <core/statusbar.h>
 #include <xlib/atoms.h>
 #include <xlib/window.h>
 
@@ -23,6 +24,8 @@ void statusbar_init(unsigned int height){
 
 	bar->win = win_create(&bar->geom, CurNormal, "dwm");
 	win_raise(bar->win);
+
+	statusbar_update();
 }
 
 void statusbar_destroy(void){

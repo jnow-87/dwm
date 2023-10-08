@@ -2,6 +2,7 @@
 #include <signal.h>
 #include <core/dwm.h>
 #include <actions.h>
+#include <utils/log.h>
 
 
 /* global functions */
@@ -23,5 +24,5 @@ void action_spawn(action_arg_t const *arg){
 	sigaction(SIGCHLD, &sa, NULL);
 
 	execvp(((char **)arg->v)[0], (char **)arg->v);
-	dwm_die("dwm: execvp '%s' failed:", ((char **)arg->v)[0]);
+	ERROR("spawning %s\n", ((char **)arg->v)[0]);
 }

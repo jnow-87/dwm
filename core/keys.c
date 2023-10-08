@@ -5,6 +5,7 @@
 #include <core/keys.h>
 #include <xlib/input.h>
 #include <utils/timer.h>
+#include <utils/log.h>
 
 
 /* local/static prototypes */
@@ -24,10 +25,14 @@ int keys_init(void){
 	if(modifier_reset_timer == -1)
 		return -1;
 
+	input_keys_register(keys, nkeys);
+
 	return dwm_hdlr_add(modifier_reset_timer, modifier_reset_hdlr);
 }
 
 void keys_cleanup(void){
+	input_keys_release();
+
 	if(modifier_reset_timer != -1)
 		close(modifier_reset_timer);
 }
@@ -54,7 +59,7 @@ void keys_cycle_start(cycle_callback_t complete){
 	// the xlib KeyRelease event does not reliably report the release of modifier keys,
 	// hence use a timer to reset the modifier state manually
 	if(timer_set(modifier_reset_timer, 100) != 0)
-		dwm_die("unable to start key-clientstack_cycle timer\n");
+		EEXIT("starting key-cycle timer\n");
 
 	modifier_state = mods;
 	cycle_complete = complete;
@@ -68,7 +73,7 @@ void keys_cycle_complete(void){
 	cycle_complete = 0x0;
 
 	if(timer_set(modifier_reset_timer, 0) != 0)
-		dwm_die("unable to stop key-clientstack_cycle timer\n");
+		EEXIT("stopping key-cycle timer\n");
 }
 
 bool keys_cycle_active(void){

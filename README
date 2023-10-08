@@ -3,7 +3,11 @@ dwm - dynamic window manager
 dwm is an extremely fast, small, and dynamic window manager for X.
 
 This repository is a fork of the original dwm with a little more structure to
-the code to make navigation a little easier.
+the code to make navigation easier. In contrast to the original dwm, clients,
+tags and the statusbar are no longer managed per monitor but globally. Also the
+concept of (non-)floating clients has been dropped, instead each client is, what
+was known as a floating window and the layout-based arrangement of clients can
+be triggered by selecting a layout.
 
 
 Requirements

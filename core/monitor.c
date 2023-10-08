@@ -21,6 +21,12 @@ void monitor_discover(void){
 		monitor_create(0, 0, dwm.screen_width, dwm.screen_height);
 }
 
+void monitor_cleanup(void){
+	while(dwm.mons){
+		monitor_destroy(dwm.mons);
+	}
+}
+
 monitor_t *monitor_create(int x, int y, int width, int height){
 	monitor_t *m;
 

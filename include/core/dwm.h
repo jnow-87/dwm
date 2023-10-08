@@ -16,29 +16,47 @@
 
 
 /* types */
+typedef enum{
+	DWM_ERROR = -1,
+	DWM_SHUTDOWN,
+	DWM_RUN,
+	DWM_RESTART,
+} dwm_state_t;
+
 typedef struct{
-	monitor_t *mons;
+	// x-server connection
+	Display *dpy;
+	Window root,
+		   wmcheck;
+
+	int screen;
 	int screen_width,
 		screen_height;
-	int lrpad;	/* sum of left and right padding for text */
+
 	unsigned int numlock_mask;
-	gfx_t *gfx;
-	Display *dpy;
-	int screen;
+
 	Atom netatom[NetLast];
 	Atom wmatom[WMLast];
-	Window root;
 
-	int running;
+	// graphics
+	gfx_t *gfx;
+	cursor_t cursor[CurLast];
+	color_t **scheme;
+	int lrpad;	/* sum of left and right padding for text */
+
+	// dwm lifecycle
+	dwm_state_t state;
 	int event_fd;
 
+	// dwm components
+	monitor_t *mons;
+	statusbar_t statusbar;
+	layout_t const *layout;
+
+	// client handling
 	client_t *stack,
 			 *focused;
 
-	color_t **scheme;
-	cursor_t cursor[CurLast];
-	statusbar_t statusbar;
-	layout_t const *layout;
 	unsigned int tag_mask;
 } dwm_t;
 
@@ -49,7 +67,6 @@ typedef int (*event_hdlr_t)(void);
 int dwm_setup(void);
 void dwm_cleanup(void);
 void dwm_run(void);
-void dwm_die(char const *fmt, ...);
 
 int dwm_hdlr_add(int fd, event_hdlr_t hdlr);
 

@@ -11,7 +11,10 @@
 #include <string.h>
 #include <utils/math.h>
 #include <utils/list.h>
+#include <utils/log.h>
 
+
+/* macros */
 #define UTF_INVALID	0xFFFD
 #define UTF_SIZ		4
 
@@ -20,7 +23,7 @@
 static font_t *xfont_create(gfx_t *gfx, char const *fontname, FcPattern *fontpattern);
 static void xfont_free(font_t *font);
 
-static void color_create(gfx_t *gfx, color_t *dest, char const *name);
+static int color_create(gfx_t *gfx, color_t *dest, char const *name);
 
 static void font_extents(font_t *font, char const *text, unsigned int len, unsigned int *w, unsigned int *h);
 
@@ -39,7 +42,7 @@ static long const utfmax[UTF_SIZ + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF, 0x10FFFF
 /* global functions */
 gfx_t *gfx_create(Display *dpy, int screen, Window root, unsigned int w, unsigned int h){
 	gfx_t *gfx;
-	font_t *f;
+	font_t *font;
 
 
 	gfx = calloc(1, sizeof(gfx_t));
@@ -55,15 +58,17 @@ gfx_t *gfx_create(Display *dpy, int screen, Window root, unsigned int w, unsigne
 	gfx->drawable = XCreatePixmap(dpy, root, w, h, DefaultDepth(dpy, screen));
 	gfx->gc = XCreateGC(dpy, root, 0, 0x0);
 	XSetLineAttributes(dpy, gfx->gc, 1, LineSolid, CapButt, JoinMiter);
-	f = xfont_create(gfx, CONFIG_FONT, 0x0);
+	font = xfont_create(gfx, CONFIG_FONT, 0x0);
 
-	if(f == 0x0)
-		dwm_die("no fonts could be loaded.");
+	if(font == 0x0){
+		ERROR("loading fonts\n");
 
-	gfx->fonts = 0x0;
-	list_add_tail(gfx->fonts, f);
+		return 0x0;
+	}
 
-	dwm.lrpad = f->h;
+	list_add_tail(gfx->fonts, font);
+
+	dwm.lrpad = font->h;
 
 	return gfx;
 }
@@ -118,8 +123,10 @@ color_t *gfx_scm_create(gfx_t *gfx, char const *names[], size_t n){
 	if(c == 0x0)
 		return 0x0;
 
-	for(i=0; i<n; i++)
-		color_create(gfx, &c[i], names[i]);
+	for(i=0; i<n; i++){
+		if(color_create(gfx, &c[i], names[i]) != 0)
+			return 0x0;
+	}
 
 	return c;
 }
@@ -273,7 +280,7 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, unsigned 
 
 			if(!gfx->fonts->pattern){
 				/* Refer to the comment in xfont_create for more information. */
-				dwm_die("the first font in the cache must be loaded from a font string.");
+				EEXIT("the first font in the cache must be loaded from a font string\n");
 			}
 
 			fcpattern = FcPatternDuplicate(gfx->fonts->pattern);
@@ -381,13 +388,13 @@ static font_t *xfont_create(gfx_t *gfx, char const *fontname, FcPattern *fontpat
 		 * behaviour whereas the former just results in missing-character
 		 * rectangles being drawn, at least with some fonts. */
 		if(!(xfont = XftFontOpenName(gfx->dpy, gfx->screen, fontname))){
-			fprintf(stderr, "error, cannot load font from name: '%s'\n", fontname);
+			ERROR("loading font from name %s\n", fontname);
 
 			return 0x0;
 		}
 
 		if(!(pattern = FcNameParse((FcChar8*)fontname))){
-			fprintf(stderr, "error, cannot parse font name to pattern: '%s'\n", fontname);
+			ERROR("parsing font name to pattern '%s'\n", fontname);
 			XftFontClose(gfx->dpy, xfont);
 
 			return 0x0;
@@ -395,13 +402,16 @@ static font_t *xfont_create(gfx_t *gfx, char const *fontname, FcPattern *fontpat
 	}
 	else if(fontpattern){
 		if(!(xfont = XftFontOpenPattern(gfx->dpy, fontpattern))){
-			fprintf(stderr, "error, cannot load font from pattern.\n");
+			ERROR("loading font from pattern\n");
 
 			return 0x0;
 		}
 	}
-	else
-		dwm_die("no font specified.");
+	else{
+		ERROR("no font specified\n");
+
+		return 0x0;
+	}
 
 	font = calloc(1, sizeof(font_t));
 
@@ -427,12 +437,14 @@ static void xfont_free(font_t *font){
 	free(font);
 }
 
-static void color_create(gfx_t *gfx, color_t *dest, char const *name){
+static int color_create(gfx_t *gfx, color_t *dest, char const *name){
 	if(!gfx || !dest || !name)
-		return;
+		return -1;
 
 	if(!XftColorAllocName(gfx->dpy, DefaultVisual(gfx->dpy, gfx->screen), DefaultColormap(gfx->dpy, gfx->screen), name, dest))
-		dwm_die("error, cannot allocate color '%s'", name);
+		return ERROR("allocating color %s\n", name);
+
+	return 0;
 }
 
 static void font_extents(font_t *font, char const *text, unsigned int len, unsigned int *w, unsigned int *h){

@@ -13,7 +13,7 @@
 
 
 /* global functions */
-void input_register_key_mappings(key_map_t const *mappings, size_t n){
+void input_keys_register(key_map_t const *mappings, size_t n){
 	unsigned int modifiers[] = { 0, LockMask, dwm.numlock_mask, dwm.numlock_mask | LockMask };
 	int start,
 		end,
@@ -21,7 +21,7 @@ void input_register_key_mappings(key_map_t const *mappings, size_t n){
 	KeySym *syms;
 
 
-	XUngrabKey(dwm.dpy, AnyKey, AnyModifier, dwm.root);
+	input_keys_release();
 	XDisplayKeycodes(dwm.dpy, &start, &end);
 	syms = XGetKeyboardMapping(dwm.dpy, start, end - start + 1, &syms_per_keycode);
 
@@ -41,11 +41,15 @@ void input_register_key_mappings(key_map_t const *mappings, size_t n){
 	XFree(syms);
 }
 
-void input_register_button_mappings(Window win, button_map_t const *mappings, size_t n, int focused){
+void input_keys_release(void){
+	XUngrabKey(dwm.dpy, AnyKey, AnyModifier, dwm.root);
+}
+
+void input_buttons_register(Window win, button_map_t const *mappings, size_t n, int focused){
 	unsigned int modifiers[] = {0, LockMask, dwm.numlock_mask, dwm.numlock_mask | LockMask};
 
 
-	XUngrabButton(dwm.dpy, AnyButton, AnyModifier, win);
+	input_buttons_release(win);
 
 	if(!focused)
 		XGrabButton(dwm.dpy, AnyButton, AnyModifier, win, False, BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
@@ -56,6 +60,10 @@ void input_register_button_mappings(Window win, button_map_t const *mappings, si
 				XGrabButton(dwm.dpy, mappings[i].button, mappings[i].mask | modifiers[j], win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
 		}
 	}
+}
+
+void input_buttons_release(window_t win){
+	XUngrabButton(dwm.dpy, AnyButton, AnyModifier, win);
 }
 
 int input_pointer_grab(cursor_t cursor){

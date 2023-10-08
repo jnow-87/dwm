@@ -13,12 +13,14 @@
 
 
 /* types */
+// TODO rename
 typedef enum{
 	ColFg,
 	ColBg,
 	ColBorder
 } color_scheme_index_t;
 
+// TODO rename
 typedef enum{
 	CurNone = -1,
 	CurNormal,

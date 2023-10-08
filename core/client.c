@@ -13,9 +13,47 @@
 #include <utils/list.h>
 #include <utils/stack.h>
 #include <utils/math.h>
+#include <utils/log.h>
 
 
 /* global functions */
+int clients_init(void){
+	unsigned int n;
+	window_t *childs;
+	window_t dummy;
+	win_attr_t attr;
+
+
+	if(!XQueryTree(dwm.dpy, dwm.root, &dummy, &dummy, &childs, &n))
+		return ERROR("querying clients\n");
+
+	for(unsigned int i=0; i<n; i++){
+		if(win_get_attr(childs[i], &attr) != 0 || attr.override_redirect || XGetTransientForHint(dwm.dpy, childs[i], &dummy))
+			continue;
+
+		if(attr.map_state == IsViewable || win_get_state(childs[i]) == IconicState)
+			client_init(childs[i], &attr);
+	}
+
+	/* now the transients */
+	for(unsigned int i=0; i<n; i++){
+		if(win_get_attr(childs[i], &attr) != 0)
+			continue;
+
+		if(XGetTransientForHint(dwm.dpy, childs[i], &dummy) && (attr.map_state == IsViewable || win_get_state(childs[i]) == IconicState))
+			client_init(childs[i], &attr);
+	}
+
+	XFree(childs);
+
+	return 0;
+}
+
+void clients_cleanup(void){
+	while(dwm.stack)
+		client_cleanup(dwm.stack, false);
+}
+
 void client_init(window_t win, win_attr_t *attr){
 	monitor_t *m = dwm.mons;
 	client_t *c,
@@ -26,7 +64,7 @@ void client_init(window_t win, win_attr_t *attr){
 	c = calloc(1, sizeof(client_t));
 
 	if(c == 0x0)
-		dwm_die("unable to allocate new client\n");
+		EEXIT("allocating new client\n");
 
 	/* init client */
 	c->win = win;

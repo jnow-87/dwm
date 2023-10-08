@@ -3,13 +3,14 @@
 #include <string.h>
 #include <config.h>
 #include <core/dwm.h>
+#include <utils/log.h>
 
 
 /* global variables */
 dwm_t dwm = {
 	.stack = 0x0,
 	.layout = layouts + 0,
-	.running = 1,
+	.state = DWM_ERROR,
 	.numlock_mask = 0,
 	.tag_mask = 1,
 };
@@ -18,20 +19,19 @@ dwm_t dwm = {
 /* global functions */
 int main(int argc, char *argv[]){
 	if(argc == 2 && !strcmp("-v", argv[1]))
-		dwm_die("dwm-" VERSION);
+		return printf("dwm-" VERSION) != 0;
 
 	if(argc != 1)
-		dwm_die("usage: dwm [-v]");
+		return fprintf(stderr, "usage: dwm [-v]");
 
 	if(dwm_setup() != 0)
-		dwm_die("dwm_setup failed\n");
+		ERROR("setup failed\n");
 
 	dwm_run();
 	dwm_cleanup();
 
-	// restart
-	if(dwm.running < 0)
+	if(dwm.state == DWM_RESTART)
 		execvp(argv[0], argv);
 
-	return EXIT_SUCCESS;
+	return (dwm.state != DWM_SHUTDOWN);
 }

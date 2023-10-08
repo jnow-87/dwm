@@ -20,6 +20,7 @@ typedef struct monitor_t{
 
 /* prototypes */
 void monitor_discover(void);
+void monitor_cleanup(void);
 
 monitor_t *monitor_create(int x, int y, int width, int height);
 void monitor_destroy(monitor_t *mon);

@@ -189,7 +189,7 @@ void win_focus(window_t win){
 	XSetInputFocus(dwm.dpy, win, RevertToPointerRoot, CurrentTime);
 
 	if(win != dwm.root){
-		input_register_button_mappings(win, buttons, nbuttons, 1);
+		input_buttons_register(win, buttons, nbuttons, 1);
 		set_border(win, SchemeSel);
 
 		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(win), 1);
@@ -202,7 +202,7 @@ void win_focus(window_t win){
 
 void win_unfocus(window_t win){
 	// TODO why do the mappings need to be removed when unfocusing
-	input_register_button_mappings(win, buttons, nbuttons, 0);
+	input_buttons_register(win, buttons, nbuttons, 0);
 	set_border(win, SchemeNorm);
 }
 
@@ -222,6 +222,25 @@ int win_get_attr(window_t win, win_attr_t *attr){
 	attr->geom.border_width = wa.border_width;
 
 	return 0;
+}
+
+long win_get_state(window_t win){
+	int format;
+	long result = -1;
+	unsigned char *p = NULL;
+	unsigned long n, extra;
+	Atom real;
+
+
+	if(XGetWindowProperty(dwm.dpy, win, dwm.wmatom[WMState], 0L, 2L, False, dwm.wmatom[WMState], &real, &format, &n, &extra, (unsigned char **)&p) != Success)
+		return -1;
+
+	if(n != 0)
+		result = *p;
+
+	XFree(p);
+
+	return result;
 }
 
 window_t win_get_transient(window_t win){

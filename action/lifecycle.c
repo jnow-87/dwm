@@ -4,9 +4,9 @@
 
 /* global functions */
 void action_quit(action_arg_t const *arg){
-	dwm.running = 0;
+	dwm.state = DWM_SHUTDOWN;
 }
 
 void action_restart(action_arg_t const *arg){
-	dwm.running = -1;
+	dwm.state = DWM_RESTART;
 }

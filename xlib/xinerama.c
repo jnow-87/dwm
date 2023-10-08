@@ -3,6 +3,7 @@
 #include <X11/extensions/Xinerama.h>
 #include <core/monitor.h>
 #include <core/dwm.h>
+#include <utils/log.h>
 
 
 /* local/static prototypes */
@@ -29,7 +30,7 @@ int xinerama_discover(void){
 	unique = malloc(ninfo * sizeof(XineramaScreenInfo));
 
 	if(unique == 0x0)
-		dwm_die("out of memory\n");
+		return STRERROR("allocating monitors");
 
 	for(i=0; i<ninfo; i++){
 		if(is_unique(unique, nunique, &info[i]))
@@ -45,7 +46,7 @@ int xinerama_discover(void){
 		m = monitor_create(info->x_org, info->y_org, info->width, info->height);
 
 		if(m == 0x0)
-			dwm_die("unable to create monitor\n");
+			return STRERROR("creating monitor");
 	}
 
 	free(unique);

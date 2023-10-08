@@ -193,7 +193,7 @@ static void mapping_notify(xevent_t *e){
 	XRefreshKeyboardMapping(ev);
 
 	if(ev->request == MappingKeyboard)
-		input_register_key_mappings(keys, nkeys);
+		input_keys_register(keys, nkeys);
 }
 
 static void unmap_notify(xevent_t *e){
