@@ -2,6 +2,7 @@
 #define XLIB_H
 
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
 
@@ -17,7 +18,7 @@ void xlib_cleanup(void);
 
 void xlib_sync(void);
 
-int xlib_get_event(xevent_t *ev);
+int xlib_get_event(xevent_t *ev, bool blocking, long int mask);
 void xlib_release_events(void);
 
 void xlib_set_error_handler(xlib_error_hdlr hdlr);

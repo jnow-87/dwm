@@ -41,7 +41,7 @@ window_t win_create(win_geom_t *geom, cursor_type_t cursor, char *class){
 	);
 
 	if(cursor != CurNone)
-		XDefineCursor(dwm.dpy, win, dwm.cursor[cursor]->cursor);
+		XDefineCursor(dwm.dpy, win, dwm.cursor[cursor]);
 
 	if(class != 0x0)
 		XSetClassHint(dwm.dpy, win, &(XClassHint){class, class});

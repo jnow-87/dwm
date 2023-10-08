@@ -1,8 +1,8 @@
-#include <core/actions.h>
+#include <actions.h>
 #include <core/statusbar.h>
 
 
 /* global functions */
-void action_togglebar(action_arg_t const *arg){
+void action_statusbar_toggle(action_arg_t const *arg){
 	statusbar_toggle();
 }

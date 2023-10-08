@@ -124,26 +124,12 @@ color_t *gfx_scm_create(gfx_t *gfx, char const *names[], size_t n){
 	return c;
 }
 
-cursor_t *gfx_cur_create(gfx_t *gfx, int shape){
-	cursor_t *c;
-
-
-	c = calloc(1, sizeof(cursor_t));
-
-	if(c == 0x0)
-		return 0x0;
-
-	c->cursor = XCreateFontCursor(gfx->dpy, shape);
-
-	return c;
+cursor_t gfx_cursor_create(gfx_t *gfx, int shape){
+	return XCreateFontCursor(gfx->dpy, shape);
 }
 
-void gfx_cur_free(gfx_t *gfx, cursor_t *cursor){
-	if(!cursor)
-		return;
-
-	XFreeCursor(gfx->dpy, cursor->cursor);
-	free(cursor);
+void gfx_cursor_free(gfx_t *gfx, cursor_t cursor){
+	XFreeCursor(gfx->dpy, cursor);
 }
 
 void gfx_setscheme(gfx_t *gfx, color_t *scm){

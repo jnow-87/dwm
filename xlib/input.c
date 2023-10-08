@@ -3,11 +3,13 @@
 #include <core/dwm.h>
 #include <core/buttons.h>
 #include <xlib/input.h>
+#include <xlib/gfx.h>
 #include <utils/math.h>
 
 
 /* macros */
 #define BUTTONMASK (ButtonPressMask | ButtonReleaseMask)
+#define MOUSEMASK (BUTTONMASK | PointerMotionMask)
 
 
 /* global functions */
@@ -56,7 +58,23 @@ void input_register_button_mappings(Window win, button_map_t const *mappings, si
 	}
 }
 
-int input_get_root_pointer(int *x, int *y){
+int input_pointer_grab(cursor_t cursor){
+	return -(XGrabPointer(dwm.dpy, dwm.root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, cursor, CurrentTime) != GrabSuccess);
+}
+
+void input_pointer_release(void){
+	XEvent ev;
+
+
+	XUngrabPointer(dwm.dpy, CurrentTime);
+	while(XCheckMaskEvent(dwm.dpy, EnterWindowMask, &ev));
+}
+
+void input_pointer_move(window_t win, int x, int y){
+	XWarpPointer(dwm.dpy, None, win, 0, 0, 0, 0, x, y);
+}
+
+int input_pointer_coord(int *x, int *y){
 	int di;
 	unsigned int dui;
 	Window dummy;

@@ -1,3 +1,4 @@
+#include <X11/Xlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -61,7 +62,7 @@ int xevents_handle_events(void){
 
 
 	while(r > 0){
-		r = xlib_get_event(&ev);
+		r = xlib_get_event(&ev, false, 0);
 
 		if(r > 0)
 			xevents_handle_event(&ev);

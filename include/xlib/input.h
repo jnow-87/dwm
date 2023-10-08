@@ -4,8 +4,10 @@
 
 #include <stddef.h>
 #include <X11/X.h>
-#include <core/actions.h>
+#include <actions.h>
 #include <core/buttons.h>
+#include <xlib/gfx.h>
+#include <xlib/window.h>
 
 
 /* macros */
@@ -36,9 +38,13 @@ typedef struct{
 
 /* prototypes */
 void input_register_key_mappings(key_map_t const *mappings, size_t n);
-void input_register_button_mappings(Window win, button_map_t const *mappings, size_t n, int focused);
+void input_register_button_mappings(window_t win, button_map_t const *mappings, size_t n, int focused);
 
-int input_get_root_pointer(int *x, int *y);
+int input_pointer_grab(cursor_t cursor);
+void input_pointer_release(void);
+void input_pointer_move(window_t win, int x, int y);
+int input_pointer_coord(int *x, int *y);
+
 unsigned int input_get_numlock_mask(void);
 unsigned int input_get_mod_state(void);
 keysym_t input_keysym(unsigned int keycode);

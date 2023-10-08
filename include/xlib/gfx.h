@@ -28,10 +28,7 @@ typedef enum{
 } cursor_type_t;
 
 typedef XftColor color_t;
-
-typedef struct{
-	Cursor cursor;
-} cursor_t;
+typedef Cursor cursor_t;
 
 typedef struct font_t{
 	struct font_t *prev,
@@ -68,8 +65,8 @@ unsigned int gfx_fontset_getwidth(gfx_t *gfx, char const *text);
 color_t *gfx_scm_create(gfx_t *gfx, char const *names[], size_t n);
 
 // cursor abstraction
-cursor_t *gfx_cur_create(gfx_t *gfx, int shape);
-void gfx_cur_free(gfx_t *gfx, cursor_t *cursor);
+cursor_t gfx_cursor_create(gfx_t *gfx, int shape);
+void gfx_cursor_free(gfx_t *gfx, cursor_t cursor);
 
 // drawing context manipulation
 void gfx_setscheme(gfx_t *gfx, color_t *scm);

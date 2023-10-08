@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
@@ -23,9 +24,12 @@ void xlib_sync(void){
 	XSync(dwm.dpy, False);
 }
 
-int xlib_get_event(xevent_t *ev){
-	if(XPending(dwm.dpy) == 0)
+int xlib_get_event(xevent_t *ev, bool blocking, long int mask){
+	if(!blocking && XPending(dwm.dpy) == 0)
 		return 0;
+
+	if(mask != 0)
+		return (XMaskEvent(dwm.dpy, mask, ev) != 0) ? -1 : 1;
 
 	if(XNextEvent(dwm.dpy, ev))
 		return -1;

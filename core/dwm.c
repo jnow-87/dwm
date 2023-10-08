@@ -144,9 +144,9 @@ int dwm_setup(void){
 	dwm.netatom[NetClientList] = XInternAtom(dwm.dpy, "_NET_CLIENT_LIST", False);
 
 	/* init cursors */
-	dwm.cursor[CurNormal] = gfx_cur_create(dwm.gfx, XC_left_ptr);
-	dwm.cursor[CurResize] = gfx_cur_create(dwm.gfx, XC_sizing);
-	dwm.cursor[CurMove] = gfx_cur_create(dwm.gfx, XC_fleur);
+	dwm.cursor[CurNormal] = gfx_cursor_create(dwm.gfx, XC_left_ptr);
+	dwm.cursor[CurResize] = gfx_cursor_create(dwm.gfx, XC_sizing);
+	dwm.cursor[CurMove] = gfx_cursor_create(dwm.gfx, XC_fleur);
 
 	/* init appearance */
 	dwm.scheme = calloc(ncolors, sizeof(color_t*));
@@ -174,7 +174,7 @@ int dwm_setup(void){
 	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList]);
 
 	/* select events */
-	wa.cursor = dwm.cursor[CurNormal]->cursor;
+	wa.cursor = dwm.cursor[CurNormal];
 
 	// TODO
 	// 	the list doesn't seem correct, cf. notes
@@ -217,7 +217,7 @@ void dwm_cleanup(void){
 	}
 
 	for(i=0; i<CurLast; i++)
-		gfx_cur_free(dwm.gfx, dwm.cursor[i]);
+		gfx_cursor_free(dwm.gfx, dwm.cursor[i]);
 
 	for(i=0; i<ncolors; i++)
 		free(dwm.scheme[i]);

@@ -36,7 +36,7 @@ typedef struct{
 			 *focused;
 
 	color_t **scheme;
-	cursor_t *cursor[CurLast];
+	cursor_t cursor[CurLast];
 	statusbar_t statusbar;
 	layout_t const *layout;
 	unsigned int tag_mask;

@@ -1,9 +1,8 @@
 #include <config/config.h>
 #include <stdint.h>
-#include <X11/X.h>
 #include <utils/math.h>
 #include <core/dwm.h>
-#include <core/actions.h>
+#include <actions.h>
 #include <core/clientstack.h>
 #include <xlib/window.h>
 #include <xlib/input.h>
@@ -12,16 +11,12 @@
 #include <core/keys.h>
 
 
-/* macros */
-#define MOUSEMASK (ButtonPressMask | ButtonReleaseMask | PointerMotionMask)
-
-
 /* local/static prototypes */
-static void focusstack_complete(void);
+static void client_cycle_complete(void);
 
 
 /* global functions */
-void action_focusstack(action_arg_t const *arg){
+void action_client_cycle(action_arg_t const *arg){
 	client_t *c;
 
 
@@ -31,14 +26,13 @@ void action_focusstack(action_arg_t const *arg){
 		return;
 
 	if(!keys_cycle_active())
-		keys_cycle_start(focusstack_complete);
+		keys_cycle_start(client_cycle_complete);
 
 	clientstack_focus(c, false);
-
 	statusbar_raise();
 }
 
-void action_killclient(action_arg_t const *arg){
+void action_client_kill(action_arg_t const *arg){
 	if(!dwm.focused)
 		return;
 
@@ -46,62 +40,7 @@ void action_killclient(action_arg_t const *arg){
 		win_kill(dwm.focused->win);
 }
 
-void action_movemouse(action_arg_t const *arg){
-	int x, y, ocx, ocy, nx, ny;
-	client_t *c;
-	XEvent ev;
-	Time lasttime = 0;
-
-
-	if(!(c = dwm.focused))
-		return;
-
-	ocx = c->geom.x;
-	ocy = c->geom.y;
-
-	if(XGrabPointer(dwm.dpy, dwm.root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, dwm.cursor[CurMove]->cursor, CurrentTime) != GrabSuccess)
-		return;
-
-	if(!input_get_root_pointer(&x, &y))
-		return;
-
-	do{
-		XMaskEvent(dwm.dpy, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
-		switch(ev.type){
-		case ConfigureRequest:
-		case Expose:
-		case MapRequest:
-			xevents_handle_event(&ev);
-			break;
-
-		case MotionNotify:
-			if((ev.xmotion.time - lasttime) <= (1000 / 60))
-				continue;
-
-			lasttime = ev.xmotion.time;
-
-			nx = ocx + (ev.xmotion.x - x);
-			ny = ocy + (ev.xmotion.y - y);
-
-			if(abs(dwm.mons->x - nx) < CONFIG_SNAP_PIXEL)
-				nx = dwm.mons->x;
-			else if(abs((dwm.mons->x + dwm.mons->width) - (nx + WIDTH(c))) < CONFIG_SNAP_PIXEL)
-				nx = dwm.mons->x + dwm.mons->width - WIDTH(c);
-
-			if(abs(dwm.mons->y - ny) < CONFIG_SNAP_PIXEL)
-				ny = dwm.mons->y;
-			else if(abs((dwm.mons->y + dwm.mons->height) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
-				ny = dwm.mons->y + dwm.mons->height - HEIGHT(c);
-
-			client_resize(c, nx, ny, c->geom.width, c->geom.height);
-			break;
-		}
-	} while(ev.type != ButtonRelease);
-	
-	XUngrabPointer(dwm.dpy, CurrentTime);
-}
-
-void action_moveclient(action_arg_t const *arg){
+void action_client_move(action_arg_t const *arg){
 	int nx, ny;
 	client_t *c;
 	win_geom_t *geom;
@@ -138,7 +77,54 @@ void action_moveclient(action_arg_t const *arg){
 	statusbar_raise();
 }
 
-void action_reszclient(action_arg_t const *arg){
+void action_client_move_mouse(action_arg_t const *arg){
+	int x, y, ocx, ocy, nx, ny;
+	client_t *c;
+	xevent_t ev;
+	Time lasttime = 0;
+
+
+	if(!(c = dwm.focused))
+		return;
+
+	ocx = c->geom.x;
+	ocy = c->geom.y;
+
+	if(input_pointer_grab(dwm.cursor[CurMove]) != 0)
+		return;
+
+	if(!input_pointer_coord(&x, &y))
+		return;
+
+	while(xlib_get_event(&ev, true, PointerMotionMask | ButtonReleaseMask) >= 0){
+		if(ev.type != MotionNotify)
+			break;
+
+		if((ev.xmotion.time - lasttime) <= (1000 / 60))
+			continue;
+
+		lasttime = ev.xmotion.time;
+
+		nx = ocx + (ev.xmotion.x - x);
+		ny = ocy + (ev.xmotion.y - y);
+
+		if(abs(dwm.mons->x - nx) < CONFIG_SNAP_PIXEL)
+			nx = dwm.mons->x;
+		else if(abs((dwm.mons->x + dwm.mons->width) - (nx + WIDTH(c))) < CONFIG_SNAP_PIXEL)
+			nx = dwm.mons->x + dwm.mons->width - WIDTH(c);
+
+		if(abs(dwm.mons->y - ny) < CONFIG_SNAP_PIXEL)
+			ny = dwm.mons->y;
+		else if(abs((dwm.mons->y + dwm.mons->height) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
+			ny = dwm.mons->y + dwm.mons->height - HEIGHT(c);
+
+		client_resize(c, nx, ny, c->geom.width, c->geom.height);
+	}
+
+	input_pointer_release();
+}
+
+void action_client_resize(action_arg_t const *arg){
 	int nx, ny, nw, nh;
 	client_t *c;
 	win_geom_t *geom;
@@ -193,11 +179,11 @@ void action_reszclient(action_arg_t const *arg){
 	statusbar_raise();
 }
 
-void action_resizemouse(action_arg_t const *arg){
+void action_client_resize_mouse(action_arg_t const *arg){
 	int ocx, ocy, nw, nh;
 	client_t *c;
 	win_geom_t *geom;
-	XEvent ev;
+	xevent_t ev;
 	Time lasttime = 0;
 
 
@@ -208,48 +194,32 @@ void action_resizemouse(action_arg_t const *arg){
 	ocx = c->geom.x;
 	ocy = c->geom.y;
 
-	if(XGrabPointer(dwm.dpy, dwm.root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, dwm.cursor[CurResize]->cursor, CurrentTime) != GrabSuccess)
+	if(input_pointer_grab(dwm.cursor[CurResize]) != 0)
 		return;
 
-	XWarpPointer(dwm.dpy, None, c->win, 0, 0, 0, 0, geom->width + geom->border_width - 1, geom->height + geom->border_width - 1);
+	input_pointer_move(c->win, geom->width + geom->border_width - 1, geom->height + geom->border_width - 1);
 
-	do{
-		XMaskEvent(dwm.dpy, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
-		switch(ev.type){
-		case ConfigureRequest:
-		case Expose:
-		case MapRequest:
-			xevents_handle_event(&ev);
+	while(xlib_get_event(&ev, true, PointerMotionMask | ButtonReleaseMask) >= 0){
+		if(ev.type != MotionNotify)
 			break;
 
-		case MotionNotify:
-			if((ev.xmotion.time - lasttime) <= (1000 / 60))
-				continue;
+		if((ev.xmotion.time - lasttime) <= (1000 / 60))
+			continue;
 
-			lasttime = ev.xmotion.time;
+		lasttime = ev.xmotion.time;
 
-			nw = MAX(ev.xmotion.x - ocx - 2 * geom->border_width + 1, 1);
-			nh = MAX(ev.xmotion.y - ocy - 2 * geom->border_width + 1, 1);
+		nw = MAX(ev.xmotion.x - ocx - 2 * geom->border_width + 1, 1);
+		nh = MAX(ev.xmotion.y - ocy - 2 * geom->border_width + 1, 1);
 
-			client_resize(c, geom->x, geom->y, nw, nh);
+		client_resize(c, geom->x, geom->y, nw, nh);
+	}
 
-			break;
-		}
-	} while(ev.type != ButtonRelease);
-
-	XWarpPointer(dwm.dpy, None, c->win, 0, 0, 0, 0, geom->width + geom->border_width - 1, geom->height + geom->border_width - 1);
-	XUngrabPointer(dwm.dpy, CurrentTime);
-
-	while(XCheckMaskEvent(dwm.dpy, EnterWindowMask, &ev));
+	input_pointer_move(c->win, geom->width + geom->border_width - 1, geom->height + geom->border_width - 1);
+	input_pointer_release();
 }
 
 
 /* local functions */
-static void focusstack_complete(void){
-	client_t *c;
-
-
-	c = clientstack_cycle(0, CYCLE_END);
-
-	clientstack_focus(c, false);
+static void client_cycle_complete(void){
+	clientstack_focus(clientstack_cycle(0, CYCLE_END), false);
 }

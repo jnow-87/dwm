@@ -1,12 +1,12 @@
 #include <config.h>
 #include <core/dwm.h>
-#include <core/actions.h>
+#include <actions.h>
 #include <xlib/window.h>
 #include <core/statusbar.h>
 
 
 /* global functions */
-void action_setlayout(action_arg_t const *arg){
+void action_layout_select(action_arg_t const *arg){
 	if(arg == 0x0 || arg->v == 0x0){
 		for(unsigned int i=0; i<nlayouts; i++){
 			if(dwm.layout == layouts + i){

@@ -1,5 +1,5 @@
 #include <core/dwm.h>
-#include <core/actions.h>
+#include <actions.h>
 #include <core/tags.h>
 #include <xlib/window.h>
 
@@ -13,7 +13,7 @@ void action_tags_toggle(action_arg_t const *arg){
 	tags_toggle(&dwm.tag_mask, arg->ui);
 }
 
-void action_client_tags_set(action_arg_t const *arg){
+void action_tags_client_set(action_arg_t const *arg){
 	client_t *c = dwm.focused;
 
 
@@ -23,7 +23,7 @@ void action_client_tags_set(action_arg_t const *arg){
 	tags_set(&c->tags, arg->ui);
 }
 
-void action_client_tags_toggle(action_arg_t const *arg){
+void action_tags_client_toggle(action_arg_t const *arg){
 	client_t *c = dwm.focused;
 
 

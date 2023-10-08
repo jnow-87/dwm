@@ -20,8 +20,8 @@
 #define TAGKEYS(KEY, TAG) \
 	{ ControlMask,				KEY,	action_tags_view,			{.ui = 1 << TAG} }, \
 	{ ControlMask | ShiftMask,	KEY,	action_tags_toggle,			{.ui = 1 << TAG} }, \
-	{ MODKEY,					KEY,	action_client_tags_set,		{.ui = 1 << TAG} }, \
-	{ MODKEY | ShiftMask,		KEY,	action_client_tags_toggle,	{.ui = 1 << TAG} },
+	{ MODKEY,					KEY,	action_tags_client_set,		{.ui = 1 << TAG} }, \
+	{ MODKEY | ShiftMask,		KEY,	action_tags_client_toggle,	{.ui = 1 << TAG} },
 
 
 /* global variables */
@@ -36,31 +36,31 @@ key_map_t const keys[] = {
 	TAGKEYS(					XK_F4,	3)
 
 	// window movement
-	{ MODKEY,					XK_Up,		action_moveclient,	{ .v = (int[]){ 0, -30 } } },
-	{ MODKEY,					XK_Down,	action_moveclient,	{ .v = (int[]){ 0, 30 } } },
-	{ MODKEY,					XK_Left,	action_moveclient,	{ .v = (int[]){ -40, 0 } } },
-	{ MODKEY,					XK_Right,	action_moveclient,	{ .v = (int[]){ 40, 0 } } },
-	{ MODKEY | ShiftMask,		XK_Up,		action_moveclient,	{ .v = (int[]){ 0, -INT_MAX } } },
-	{ MODKEY | ShiftMask,		XK_Down,	action_moveclient,	{ .v = (int[]){ 0, INT_MAX } } },
-	{ MODKEY | ShiftMask,		XK_Left,	action_moveclient,	{ .v = (int[]){ -INT_MAX, 0 } } },
-	{ MODKEY | ShiftMask,		XK_Right,	action_moveclient,	{ .v = (int[]){ INT_MAX, 0 } } },
+	{ MODKEY,					XK_Up,		action_client_move,	{ .v = (int[]){ 0, -30 } } },
+	{ MODKEY,					XK_Down,	action_client_move,	{ .v = (int[]){ 0, 30 } } },
+	{ MODKEY,					XK_Left,	action_client_move,	{ .v = (int[]){ -40, 0 } } },
+	{ MODKEY,					XK_Right,	action_client_move,	{ .v = (int[]){ 40, 0 } } },
+	{ MODKEY | ShiftMask,		XK_Up,		action_client_move,	{ .v = (int[]){ 0, -INT_MAX } } },
+	{ MODKEY | ShiftMask,		XK_Down,	action_client_move,	{ .v = (int[]){ 0, INT_MAX } } },
+	{ MODKEY | ShiftMask,		XK_Left,	action_client_move,	{ .v = (int[]){ -INT_MAX, 0 } } },
+	{ MODKEY | ShiftMask,		XK_Right,	action_client_move,	{ .v = (int[]){ INT_MAX, 0 } } },
 
 	// window size
-	{ MODKEY,					XK_Next,	action_reszclient,	{ .v = (int []){ 0, 25 } } },
-	{ MODKEY,					XK_Prior,	action_reszclient,	{ .v = (int []){ 0, -25 } } },
-	{ MODKEY,					XK_End,		action_reszclient,	{ .v = (int []){ 25, 0 } } },
-	{ MODKEY,					XK_Home,	action_reszclient,	{ .v = (int []){ -25, 0 } } },
-	{ MODKEY | ALT | ShiftMask,	XK_Down,	action_reszclient,	{ .v = (int []){ 0, INT_MAX } } },
-	{ MODKEY | ALT | ShiftMask,	XK_Up,		action_reszclient,	{ .v = (int []){ 0, INT_MAX } } },
-	{ MODKEY | ALT | ShiftMask,	XK_Right,	action_reszclient,	{ .v = (int []){ INT_MAX, 0 } } },
-	{ MODKEY | ALT | ShiftMask,	XK_Left,	action_reszclient,	{ .v = (int []){ INT_MAX, 0 } } },
-	{ MODKEY | ALT | ShiftMask,	XK_Left,	action_reszclient,	{ .v = (int []){ INT_MAX, 0 } } },
-	{ MODKEY,					XK_Insert,	action_reszclient,	{ .v = (int []){ INT_MAX, INT_MAX } } },
+	{ MODKEY,					XK_Next,	action_client_resize,	{ .v = (int []){ 0, 25 } } },
+	{ MODKEY,					XK_Prior,	action_client_resize,	{ .v = (int []){ 0, -25 } } },
+	{ MODKEY,					XK_End,		action_client_resize,	{ .v = (int []){ 25, 0 } } },
+	{ MODKEY,					XK_Home,	action_client_resize,	{ .v = (int []){ -25, 0 } } },
+	{ MODKEY | ALT | ShiftMask,	XK_Down,	action_client_resize,	{ .v = (int []){ 0, INT_MAX } } },
+	{ MODKEY | ALT | ShiftMask,	XK_Up,		action_client_resize,	{ .v = (int []){ 0, INT_MAX } } },
+	{ MODKEY | ALT | ShiftMask,	XK_Right,	action_client_resize,	{ .v = (int []){ INT_MAX, 0 } } },
+	{ MODKEY | ALT | ShiftMask,	XK_Left,	action_client_resize,	{ .v = (int []){ INT_MAX, 0 } } },
+	{ MODKEY | ALT | ShiftMask,	XK_Left,	action_client_resize,	{ .v = (int []){ INT_MAX, 0 } } },
+	{ MODKEY,					XK_Insert,	action_client_resize,	{ .v = (int []){ INT_MAX, INT_MAX } } },
 
 	// window open/close/client_focus
-	{ ALT,						XK_F4,		action_killclient,	{ 0 } },
-	{ ALT,						XK_Tab,		action_focusstack,	{ .i = +1 } },
-	{ ALT | ShiftMask,			XK_Tab,		action_focusstack,	{ .i = -1 } },
+	{ ALT,						XK_F4,		action_client_kill,	{ 0 } },
+	{ ALT,						XK_Tab,		action_client_cycle,	{ .i = +1 } },
+	{ ALT | ShiftMask,			XK_Tab,		action_client_cycle,	{ .i = -1 } },
 
 	// dwm start/stop
 	// TODO call dmenu as menu asking for exit | restart
@@ -68,7 +68,7 @@ key_map_t const keys[] = {
 	{ ALT | ControlMask,		XK_Delete,	action_restart,		{ 0 } },
 
 	// launch programs
-	{ MODKEY,					XK_s,		action_togglebar,	{ 0 } },
+	{ MODKEY,					XK_s,		action_statusbar_toggle,	{ 0 } },
 	{ ALT,						XK_F2,		action_spawn,		{ .v = dmenucmd } },
 
 	// TODO pstree comparing starting xterm via spawn and via dmenu
@@ -99,11 +99,11 @@ unsigned int const nkeys = LENGTH(keys);
 /* click can be CLK_TAGBAR, CLK_LAYOUT, CLK_STATUS, ClkWinTitle, CLK_CLIENT, or CLK_ROOT */
 button_map_t const buttons[] = {
 	// window movement/size
-	{ CLK_CLIENT,	MODKEY,				Button1,	action_movemouse,	{0} },
-	{ CLK_CLIENT,	MODKEY | ShiftMask,	Button1,	action_resizemouse,	{0} },
+	{ CLK_CLIENT,	MODKEY,				Button1,	action_client_move_mouse,	{0} },
+	{ CLK_CLIENT,	MODKEY | ShiftMask,	Button1,	action_client_resize_mouse,	{0} },
 
 	// status bar actions
-	{ CLK_LAYOUT,	0,					Button1,	action_setlayout,	{0} },
+	{ CLK_LAYOUT,	0,					Button1,	action_layout_select,	{0} },
 };
 
 unsigned int const nbuttons = LENGTH(buttons);
