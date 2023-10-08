@@ -38,6 +38,13 @@ typedef struct{
 	int border_width;
 } win_geom_t;
 
+typedef struct{
+	bool override_redirect;
+	int map_state;
+
+	win_geom_t geom;
+} win_attr_t;
+
 
 /* prototypes */
 window_t win_create(win_geom_t *geom, cursor_type_t cursor, char *class);
@@ -58,6 +65,7 @@ void win_hide(window_t win, win_geom_t *geom);
 void win_focus(window_t win);
 void win_unfocus(window_t win);
 
+int win_get_attr(window_t win, win_attr_t *attr);
 window_t win_get_transient(window_t win);
 void win_update_wmhints(window_t win, win_hints_t *hints, bool isfocused);
 void win_update_sizehints(window_t win, win_hints_t *hints);

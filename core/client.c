@@ -7,6 +7,7 @@
 #include <core/monitor.h>
 #include <core/scheme.h>
 #include <core/clientstack.h>
+#include <xlib/window.h>
 #include <xlib/input.h>
 #include <xlib/atoms.h>
 #include <utils/list.h>
@@ -15,7 +16,7 @@
 
 
 /* global functions */
-void client_init(window_t win, XWindowAttributes *wa){
+void client_init(window_t win, win_attr_t *attr){
 	monitor_t *m = dwm.mons;
 	client_t *c,
 			 *trans;
@@ -34,14 +35,12 @@ void client_init(window_t win, XWindowAttributes *wa){
 	c->tags = (trans != 0x0) ? trans->tags : dwm.tag_mask;
 
 	geom = &c->geom;
-	geom->x = MAX(wa->x, m->x);
-	geom->y = MAX(wa->y, m->y);
-	geom->width = wa->width;
-	geom->height = wa->height;
+	*geom = attr->geom;
+	geom->x = MAX(geom->x, m->x);
+	geom->y = MAX(geom->y, m->y);
 	geom->border_width = CONFIG_BORDER_PIXEL;
 
-	c->geom_store = *geom;
-	c->geom_store.border_width = wa->border_width;
+	c->geom_store = attr->geom;
 
 	win_init(win, &c->geom, &c->hints);
 

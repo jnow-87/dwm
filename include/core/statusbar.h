@@ -4,6 +4,7 @@
 
 #include <stdbool.h>
 #include <xlib/window.h>
+#include <core/buttons.h>
 
 
 /* types */
@@ -24,6 +25,8 @@ void statusbar_update(void);
 void statusbar_raise(void);
 
 void statusbar_toggle(void);
+
+click_t statusbar_element(int x, int y);
 
 
 #endif // STATUSBAR_H

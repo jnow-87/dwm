@@ -28,7 +28,7 @@ typedef struct client_t{
 
 
 /* prototypes */
-void client_init(window_t win, XWindowAttributes *wa);
+void client_init(window_t win, win_attr_t *attr);
 void client_cleanup(client_t *c, bool destroyed);
 
 client_t *client_from_win(window_t win);

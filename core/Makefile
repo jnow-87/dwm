@@ -1,9 +1,11 @@
 bin-y := dwm
 
 dwm-y := \
+	buttons.o \
 	client.o \
 	clientstack.o \
 	dwm.o \
+	keys.o \
 	layout.o \
 	main.o \
 	monitor.o \

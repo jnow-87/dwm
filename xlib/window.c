@@ -6,6 +6,7 @@
 #include <core/xevents.h>
 #include <xlib/window.h>
 #include <xlib/input.h>
+#include <xlib/xlib.h>
 #include <utils/math.h>
 
 
@@ -72,13 +73,13 @@ void win_init(window_t win, win_geom_t *geom, win_hints_t *hints){
 
 void win_kill(window_t win){
 	XGrabServer(dwm.dpy);
-	XSetErrorHandler(dummy_xerror_hdlr);
+	xlib_set_error_handler(dummy_xerror_hdlr);
 	XSetCloseDownMode(dwm.dpy, DestroyAll);
 
 	XKillClient(dwm.dpy, win);
-	XSync(dwm.dpy, False);
+	xlib_sync();
 
-	XSetErrorHandler(xerror_hdlr);
+	xlib_set_error_handler(0x0);
 	XUngrabServer(dwm.dpy);
 }
 
@@ -89,15 +90,15 @@ void win_release(window_t win, win_geom_t *original){
 	wc.border_width = original->border_width;
 
 	XGrabServer(dwm.dpy); /* avoid race conditions */
-	XSetErrorHandler(dummy_xerror_hdlr);
+	xlib_set_error_handler(dummy_xerror_hdlr);
 
 	XSelectInput(dwm.dpy, win, NoEventMask);
 	XConfigureWindow(dwm.dpy, win, CWBorderWidth, &wc); /* restore border */
 	XUngrabButton(dwm.dpy, AnyButton, AnyModifier, win);
 	win_set_state(win, WithdrawnState);
-	XSync(dwm.dpy, False);
+	xlib_sync();
 
-	XSetErrorHandler(xerror_hdlr);
+	xlib_set_error_handler(0x0);
 	XUngrabServer(dwm.dpy);
 }
 
@@ -134,7 +135,7 @@ void win_resize(window_t win, win_geom_t *geom, win_hints_t *hints){
 
 	XConfigureWindow(dwm.dpy, win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
 	win_configure(win, geom);
-	XSync(dwm.dpy, False);
+	xlib_sync();
 }
 
 void win_raise(window_t win){
@@ -200,8 +201,27 @@ void win_focus(window_t win){
 }
 
 void win_unfocus(window_t win){
+	// TODO why do the mappings need to be removed when unfocusing
 	input_register_button_mappings(win, buttons, nbuttons, 0);
 	set_border(win, SchemeNorm);
+}
+
+int win_get_attr(window_t win, win_attr_t *attr){
+	XWindowAttributes wa;
+
+
+	if(!XGetWindowAttributes(dwm.dpy, win, &wa))
+		return -1;
+
+	attr->map_state = wa.map_state;
+	attr->override_redirect = !!wa.override_redirect;
+	attr->geom.x = wa.x;
+	attr->geom.y = wa.y;
+	attr->geom.width = wa.width;
+	attr->geom.height = wa.height;
+	attr->geom.border_width = wa.border_width;
+
+	return 0;
 }
 
 window_t win_get_transient(window_t win){

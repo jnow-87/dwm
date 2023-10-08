@@ -4,6 +4,7 @@
 #include <X11/Xlib.h>
 #include <config/config.h>
 #include <xlib/gfx.h>
+#include <xlib/xlib.h>
 #include <core/dwm.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -327,7 +328,7 @@ void gfx_map(gfx_t *gfx, Window win, int x, int y, unsigned int w, unsigned int 
 		return;
 
 	XCopyArea(gfx->dpy, gfx->drawable, win, gfx->gc, x, y, w, h, x, y);
-	XSync(gfx->dpy, False);
+	xlib_sync();
 }
 
 

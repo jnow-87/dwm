@@ -1,7 +1,3 @@
-#include <X11/Xatom.h>
-#include <X11/Xlib.h>
-#include <X11/Xproto.h>
-#include <X11/XKBlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -13,231 +9,115 @@
 #include <core/statusbar.h>
 #include <utils/timer.h>
 #include <xlib/input.h>
+#include <xlib/xlib.h>
 #include <core/xevents.h>
 #include <core/clientstack.h>
+#include <core/buttons.h>
+#include <core/keys.h>
 #include <utils/log.h>
 
 
-/* macros */
-#define CLEANMASK(mask) (mask & ~(dwm.numlock_mask | LockMask) & (ShiftMask | ControlMask | Mod1Mask | Mod2Mask | Mod3Mask | Mod4Mask | Mod5Mask))
-
-
 /* local/static prototypes */
-static void buttonpress(XEvent *e);
-static void configurerequest(XEvent *e);
-static void configurenotify(XEvent *e);
-static void destroynotify(XEvent *e);
-static void expose(XEvent *e);
-static void focusin(XEvent *e);
-static void keypress(XEvent *e);
-static void mappingnotify(XEvent *e);
-static void maprequest(XEvent *e);
-static void propertynotify(XEvent *e);
-static void unmapnotify(XEvent *e);
+static void destroy_notify(xevent_t *e);
 
-static int modifier_reset_hdlr(void);
+static void configure_request(xevent_t *e);
+static void configure_notify(xevent_t *e);
+static void property_notify(xevent_t *e);
+
+static void map_request(xevent_t *e);
+static void mapping_notify(xevent_t *e);
+static void unmap_notify(xevent_t *e);
+
+static void expose(xevent_t *e);
+static void focus_in(xevent_t *e);
+
+static void key_press(xevent_t *e);
+static void button_press(xevent_t *e);
 
 
 /* static variables */
-static void (*handler[LASTEvent])(XEvent*) = {
-	[ButtonPress] = buttonpress,
+static void (*handler[LASTEvent])(xevent_t*) = {
+	[DestroyNotify] = destroy_notify,
 	[ClientMessage] = 0x0,
-	[ConfigureRequest] = configurerequest,
-	[ConfigureNotify] = configurenotify,
-	[DestroyNotify] = destroynotify,
+	[ConfigureRequest] = configure_request,
+	[ConfigureNotify] = configure_notify,
+	[PropertyNotify] = property_notify,
 	[EnterNotify] = 0x0,
-	[Expose] = expose,
-	[FocusIn] = focusin,
-	[KeyPress] = keypress,
-	[MappingNotify] = mappingnotify,
-	[MapRequest] = maprequest,
+	[MapRequest] = map_request,
+	[MappingNotify] = mapping_notify,
+	[UnmapNotify] = unmap_notify,
 	[MotionNotify] = 0x0,
-	[PropertyNotify] = propertynotify,
-	[UnmapNotify] = unmapnotify
+	[Expose] = expose,
+	[FocusIn] = focus_in,
+	[KeyPress] = key_press,
+	[ButtonPress] = button_press,
 };
-
-static unsigned char modifier_state = 0;
-static int modifier_reset_timer = -1;
-static cycle_callback_t cycle_complete = 0x0;
 
 
 /* global functions */
-int xlib_events_init(void){
-	modifier_reset_timer = timer_init();
-
-	if(modifier_reset_timer == -1)
-		return -1;
-
-	return dwm_hdlr_add(modifier_reset_timer, modifier_reset_hdlr);
-}
-
-void xlib_cleanup(void){
-	if(modifier_reset_timer != -1)
-		close(modifier_reset_timer);
-}
-
-int xlib_events_hdlr(void){
-	XEvent ev;
+int xevents_handle_events(void){
+	int r = 1;
+	xevent_t ev;
 
 
-	while(XPending(dwm.dpy) != 0){
-		if(XNextEvent(dwm.dpy, &ev))
-			return -1;
+	while(r > 0){
+		r = xlib_get_event(&ev);
 
-		xlib_event_handle(&ev);
+		if(r > 0)
+			xevents_handle_event(&ev);
 	}
 
-	return 0;
+	return r;
 }
 
-void xlib_event_handle(XEvent *ev){
+void xevents_handle_event(xevent_t *ev){
 	if(handler[ev->type] != 0x0)
 		handler[ev->type](ev);
 }
 
-int xerror_hdlr(Display *dpy, XErrorEvent *ee){
-	// There's no way to check accesses to destroyed windows, thus those cases are
-	// ignored (especially on UnmapNotify's). Other types of errors call Xlibs
-	// default error handler, which may call exit.
-	if(ee->error_code == BadWindow
-	|| (ee->request_code == X_SetInputFocus && ee->error_code == BadMatch)
-	|| (ee->request_code == X_PolyText8 && ee->error_code == BadDrawable)
-	|| (ee->request_code == X_PolyFillRectangle && ee->error_code == BadDrawable)
-	|| (ee->request_code == X_PolySegment && ee->error_code == BadDrawable)
-	|| (ee->request_code == X_ConfigureWindow && ee->error_code == BadMatch)
-	|| (ee->request_code == X_GrabButton && ee->error_code == BadAccess)
-	|| (ee->request_code == X_GrabKey && ee->error_code == BadAccess)
-	|| (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
-		return 0;
-
-	fprintf(stderr, "dwm: fatal error: request code=%d, error code=%d\n", ee->request_code, ee->error_code);
-
-	return dwm.xlib_xerror_hdlr(dwm.dpy, ee); /* may call exit */
-}
-
-void key_cycle_start(cycle_callback_t complete){
-	XkbStateRec state;
-
-
-	XkbGetState(dwm.dpy, XkbUseCoreKbd, &state);
-
-	if(state.mods == 0)
-		return;
-
-	key_cycle_complete();
-
-	// the xlib KeyRelease event does not reliably report the release of modifier keys,
-	// hence use a timer to reset the modifier state manually
-	if(timer_set(modifier_reset_timer, 100) != 0)
-		dwm_die("unable to start key-clientstack_cycle timer\n");
-
-	modifier_state = state.mods;
-	cycle_complete = complete;
-}
-
-void key_cycle_complete(void){
-	if(cycle_complete != 0x0)
-		cycle_complete();
-
-	modifier_state = 0;
-	cycle_complete = 0x0;
-
-	if(timer_set(modifier_reset_timer, 0) != 0)
-		dwm_die("unable to stop key-clientstack_cycle timer\n");
-}
-
-bool key_cycle_active(void){
-	return (modifier_state != 0);
-}
-
 
 /* local functions */
-static void buttonpress(XEvent *e){
-	unsigned int i, x, click;
-	action_arg_t arg = {0};
+static void destroy_notify(xevent_t *e){
+	XDestroyWindowEvent *ev = &e->xdestroywindow;
 	client_t *c;
-	XButtonPressedEvent *ev = &e->xbutton;
 
 
-	click = ClkRootWin;
+	c = client_from_win(ev->window);
 
-	/* clientstack_focus monitor if necessary */
-	if(ev->window == dwm.statusbar.win){
-		i = x = 0;
+	if(c == 0x0)
+		return;
 
-		do{
-			x += TEXTW(tags[i]);
-		} while(ev->x >= x && ++i < ntags);
-
-		if(i < ntags){
-			click = ClkTagBar;
-			arg.ui = 1 << i;
-		}
-		else if(ev->x < x + TEXTW(dwm.layout->symbol)){
-			click = ClkLtSymbol;
-		}
-		else if(ev->x > dwm.mons->width - (int)TEXTW(dwm.statusbar.status)){
-			click = ClkStatusText;
-		}
-		else
-			click = ClkWinTitle;
-	}
-	else if((c = client_from_win(ev->window))){
-		clientstack_focus(c, true);
-		XAllowEvents(dwm.dpy, ReplayPointer, CurrentTime);
-		click = ClkClientWin;
-		statusbar_raise();
-	}
-
-	for(i=0; i<nbuttons; i++){
-		if(click == buttons[i].click && buttons[i].func && buttons[i].button == ev->button && CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state))
-			buttons[i].func(click == ClkTagBar && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
-	}
+	client_cleanup(c, true);
+	layout_arrange();
+	statusbar_raise();
 }
 
-static void configurerequest(XEvent *e){
+static void configure_request(xevent_t *e){
+	XConfigureRequestEvent *ev = &e->xconfigurerequest;
 	client_t *c;
 	win_geom_t *geom;
 	monitor_t *m;
-	XConfigureRequestEvent *ev = &e->xconfigurerequest;
 	XWindowChanges wc;
 
 
-	if((c = client_from_win(ev->window))){
+	c = client_from_win(ev->window);
+
+	if(c != 0x0){
 		geom = &c->geom;
+		c->geom_store = c->geom;
 
-		if(ev->value_mask & CWBorderWidth){
-			geom->border_width = ev->border_width;
-		}
-		else{
-			m = monitor_from_client(c);
+		m = monitor_from_client(c);
 
-			if(ev->value_mask & CWX){
-				c->geom_store.x = geom->x;
-				geom->x = m->x + ev->x;
-			}
+		if(ev->value_mask & CWBorderWidth)	geom->border_width = ev->border_width;
+		if(ev->value_mask & CWX)			geom->x = m->x + ev->x;
+		if(ev->value_mask & CWY)			geom->y = m->y + ev->y;
+		if(ev->value_mask & CWWidth)		geom->width = ev->width;
+		if(ev->value_mask & CWHeight)		geom->height = ev->height;
 
-			if(ev->value_mask & CWY){
-				c->geom_store.y = geom->y;
-				geom->y = m->y + ev->y;
-			}
+		win_configure(c->win, &c->geom);
 
-			if(ev->value_mask & CWWidth){
-				c->geom_store.width = geom->width;
-				geom->width = ev->width;
-			}
-
-			if(ev->value_mask & CWHeight){
-				c->geom_store.height = geom->height;
-				geom->height = ev->height;
-			}
-
-			if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
-				win_configure(c->win, &c->geom);
-
-			if(ISVISIBLE(c))
-				XMoveResizeWindow(dwm.dpy, c->win, geom->x, geom->y, geom->width, geom->height);
-		}
+		if(ISVISIBLE(c))
+			win_resize(c->win, &c->geom, &c->hints);
 	}
 	else{
 		wc.x = ev->x;
@@ -247,13 +127,14 @@ static void configurerequest(XEvent *e){
 		wc.border_width = ev->border_width;
 		wc.sibling = ev->above;
 		wc.stack_mode = ev->detail;
+
 		XConfigureWindow(dwm.dpy, ev->window, ev->value_mask, &wc);
 	}
 
-	XSync(dwm.dpy, False);
+	xlib_sync();
 }
 
-static void configurenotify(XEvent *e){
+static void configure_notify(xevent_t *e){
 	XConfigureEvent *ev = &e->xconfigure;
 
 
@@ -270,80 +151,9 @@ static void configurenotify(XEvent *e){
 	layout_arrange();
 }
 
-static void destroynotify(XEvent *e){
-	XDestroyWindowEvent *ev = &e->xdestroywindow;
-	client_t *c;
-
-
-	c = client_from_win(ev->window);
-
-	if(c == 0x0)
-		return;
-
-	client_cleanup(c, true);
-	layout_arrange();
-	statusbar_raise();
-}
-
-static void expose(XEvent *e){
-	XExposeEvent *ev = &e->xexpose;
-
-
-	if(ev->window == dwm.statusbar.win && ev->count == 0)
-		statusbar_update();
-}
-
-static void focusin(XEvent *e){
-	/* there are some broken clientstack_focus acquiring clients needing extra handling */
-	XFocusChangeEvent *ev = &e->xfocus;
-
-
-	if(dwm.focused && ev->window != dwm.focused->win)
-		clientstack_focus(dwm.focused, false);
-}
-
-static void keypress(XEvent *e){
-	XKeyEvent *ev = &e->xkey;
-	KeySym keysym;
-
-
-	keysym = XKeycodeToKeysym(dwm.dpy, (KeyCode)ev->keycode, 0);
-
-	for(unsigned int i=0; i<nkeys; i++){
-		if(keysym == keys[i].keysym && CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) && keys[i].func)
-			keys[i].func(&(keys[i].arg));
-	}
-}
-
-static void mappingnotify(XEvent *e){
-	XMappingEvent *ev = &e->xmapping;
-
-
-	XRefreshKeyboardMapping(ev);
-
-	if(ev->request == MappingKeyboard)
-		input_register_key_mappings(keys, nkeys);
-}
-
-static void maprequest(XEvent *e){
-	XWindowAttributes wa;
-	XMapRequestEvent *ev = &e->xmaprequest;
-
-
-	if(!XGetWindowAttributes(dwm.dpy, ev->window, &wa) || wa.override_redirect)
-		return;
-
-	if(client_from_win(ev->window))
-		return;
-
-	client_init(ev->window, &wa);
-	layout_arrange();
-}
-
-static void propertynotify(XEvent *e){
+static void property_notify(xevent_t *e){
 	XPropertyEvent *ev = &e->xproperty;
 	client_t *c;
-//	Window trans;
 
 
 	if(ev->state == PropertyDelete)
@@ -354,24 +164,38 @@ static void propertynotify(XEvent *e){
 	}
 	else if((c = client_from_win(ev->window))){
 		switch(ev->atom){
-		// TODO check if the following is still needed with isfloating being removed
-//		case XA_WM_TRANSIENT_FOR:
-//			if(!c->isfloating && (XGetTransientForHint(dwm.dpy, c->win, &trans)) && (c->isfloating = (client_from_win(trans)) != NULL))
-//				layout_arrange(c->mon);
-//			break;
-
-		case XA_WM_NORMAL_HINTS:
-			win_update_sizehints(c->win, &c->hints);
-			break;
-
-		case XA_WM_HINTS:
-			win_update_wmhints(c->win, &c->hints, c == dwm.focused);
-			break;
+		case XA_WM_NORMAL_HINTS:	win_update_sizehints(c->win, &c->hints); break;
+		case XA_WM_HINTS:			win_update_wmhints(c->win, &c->hints, c == dwm.focused); break;
 		}
 	}
 }
 
-static void unmapnotify(XEvent *e){
+static void map_request(xevent_t *e){
+	XMapRequestEvent *ev = &e->xmaprequest;
+	win_attr_t attr;
+
+
+	if(win_get_attr(ev->window, &attr) != 0 || attr.override_redirect)
+		return;
+
+	if(client_from_win(ev->window))
+		return;
+
+	client_init(ev->window, &attr);
+	layout_arrange();
+}
+
+static void mapping_notify(xevent_t *e){
+	XMappingEvent *ev = &e->xmapping;
+
+
+	XRefreshKeyboardMapping(ev);
+
+	if(ev->request == MappingKeyboard)
+		input_register_key_mappings(keys, nkeys);
+}
+
+static void unmap_notify(xevent_t *e){
 	XUnmapEvent *ev = &e->xunmap;
 	client_t *c;
 
@@ -387,18 +211,48 @@ static void unmapnotify(XEvent *e){
 	}
 }
 
-static int modifier_reset_hdlr(void){
-	uint64_t data;
-	XkbStateRec state;
+static void expose(xevent_t *e){
+	XExposeEvent *ev = &e->xexpose;
 
 
-	read(modifier_reset_timer, &data, sizeof(data));
+	if(ev->window == dwm.statusbar.win && ev->count == 0)
+		statusbar_update();
+}
 
-	XkbGetState(dwm.dpy, XkbUseCoreKbd, &state);
-	modifier_state &= state.mods;
+static void focus_in(xevent_t *e){
+	XFocusChangeEvent *ev = &e->xfocus;
 
-	if(modifier_state == 0)
-		key_cycle_complete();
 
-	return 0;
+	if(dwm.focused && ev->window != dwm.focused->win)
+		clientstack_focus(dwm.focused, false);
+}
+
+static void key_press(xevent_t *e){
+	XKeyEvent *ev = &e->xkey;
+
+
+	keys_handle(input_keysym(ev->keycode), ev->state);
+}
+
+static void button_press(xevent_t *e){
+	click_t click = CLK_ROOT;
+	XButtonPressedEvent *ev = &e->xbutton;
+	client_t *c;
+
+
+	if(ev->window != dwm.statusbar.win){
+		c = client_from_win(ev->window);
+
+		if(c != 0x0){
+			click = CLK_CLIENT;
+			xlib_release_events();
+
+			clientstack_focus(c, true);
+			statusbar_raise();
+		}
+	}
+	else
+		click = statusbar_element(ev->x, ev->y);
+
+	buttons_handle(click, ev->button, ev->state);
 }

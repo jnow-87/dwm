@@ -2,25 +2,12 @@
 #define EVENTS_H
 
 
-#include <X11/Xlib.h>
-
-
-/* types */
-typedef void (*cycle_callback_t)(void);
+#include <xlib/xlib.h>
 
 
 /* prototypes */
-int xlib_events_init(void);
-void xlib_cleanup(void);
-
-int xlib_events_hdlr(void);
-void xlib_event_handle(XEvent *ev);
-
-int xerror_hdlr(Display *dpy, XErrorEvent *ee);
-
-void key_cycle_start(cycle_callback_t complete);
-void key_cycle_complete(void);
-bool key_cycle_active(void);
+int xevents_handle_events(void);
+void xevents_handle_event(xevent_t *ev);
 
 
 #endif // EVENTS_H

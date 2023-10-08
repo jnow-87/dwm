@@ -5,9 +5,14 @@
 #include <X11/X.h>
 #include <xlib/gfx.h>
 #include <xlib/atoms.h>
+#include <xlib/input.h>
 #include <core/monitor.h>
 #include <core/statusbar.h>
 #include <core/layout.h>
+
+
+/* macros */
+#define CLEANMODS(mods) (mods & ~(dwm.numlock_mask | LOCKS_MASK) & (MODS_MASK))
 
 
 /* types */
@@ -23,8 +28,6 @@ typedef struct{
 	Atom netatom[NetLast];
 	Atom wmatom[WMLast];
 	Window root;
-
-	int (*xlib_xerror_hdlr)(Display *, XErrorEvent *); // default error handler used by xlib
 
 	int running;
 	int event_fd;

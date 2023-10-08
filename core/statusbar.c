@@ -1,5 +1,6 @@
 #include <config/config.h>
 #include <config.h>
+#include <core/buttons.h>
 #include <core/scheme.h>
 #include <core/dwm.h>
 #include <xlib/atoms.h>
@@ -99,4 +100,28 @@ void statusbar_toggle(void){
 	else			win_hide(bar->win, &bar->geom);
 
 	bar->hidden = !bar->hidden;
+}
+
+click_t statusbar_element(int x, int y){
+	unsigned int pos = 0;
+	statusbar_t *bar = &dwm.statusbar;
+
+
+	if(y < bar->geom.y || y >= bar->geom.y + bar->geom.height)
+		return CLK_UNKNOWN;
+
+	for(size_t i=0; i<ntags; i++){
+		pos += TEXTW(tags[i]);
+
+		if(pos > x)
+			return CLK_TAGBAR;
+	}
+
+	if(x < pos + TEXTW(dwm.layout->symbol))
+		return CLK_LAYOUT;
+
+	if(x > dwm.mons->width - (int)TEXTW(bar->status))
+		return CLK_STATUS;
+
+	return CLK_UNKNOWN;
 }

@@ -60,6 +60,8 @@
 #include <core/layout.h>
 #include <core/tags.h>
 #include <xlib/input.h>
+#include <xlib/xlib.h>
+#include <core/keys.h>
 #include <utils/log.h>
 
 
@@ -69,6 +71,7 @@
 static void scan(void);
 static void check_other_wm_running(void);
 static long getstate(Window w);
+static int xevent_hdlr(void);
 static int startup_xerror_hdlr(Display *dpy, XErrorEvent *ee);
 
 
@@ -121,10 +124,10 @@ int dwm_setup(void){
 	if(dwm.gfx == 0x0)
 		return STRERROR("error creating grafix context");
 
-	if(dwm_hdlr_add(ConnectionNumber(dwm.dpy), xlib_events_hdlr))
+	if(dwm_hdlr_add(ConnectionNumber(dwm.dpy), xevent_hdlr))
 		dwm_die("error adding xlib event handler\n");
 
-	xlib_events_init();
+	keys_init();
 	monitor_discover();
 
 	/* init atoms */
@@ -191,7 +194,7 @@ int dwm_setup(void){
 	scan();
 	layout_arrange();
 
-	XSync(dwm.dpy, False);
+	xlib_sync();
 
 	return 0;
 }
@@ -222,12 +225,12 @@ void dwm_cleanup(void){
 	free(dwm.scheme);
 	XDestroyWindow(dwm.dpy, wmcheckwin);
 	gfx_free(dwm.gfx);
-	XSync(dwm.dpy, False);
+	xlib_sync();
 	XSetInputFocus(dwm.dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow]);
 	XCloseDisplay(dwm.dpy);
 
-	xlib_cleanup();
+	keys_cleanup();
 	close(dwm.event_fd);
 	log_cleanup();
 }
@@ -238,7 +241,10 @@ void dwm_run(void){
 
 
 	while(dwm.running > 0){
-		xlib_events_hdlr();
+		// handle xevents that occured after the last epoll notification
+		// and haven't been processed yet
+		xevents_handle_events();
+
 		n = epoll_wait(dwm.event_fd, evts, LENGTH(evts), -1);
 
 		for(; n>0; n--){
@@ -280,41 +286,41 @@ int dwm_hdlr_add(int fd, event_hdlr_t hdlr){
 /* local functions */
 static void scan(void){
 	unsigned int nchilds;
-	Window dummy;
-	Window *childs;
-	XWindowAttributes wa;
+	window_t dummy;
+	window_t *childs;
+	win_attr_t attr;
 
 
 	if(!XQueryTree(dwm.dpy, dwm.root, &dummy, &dummy, &childs, &nchilds) || childs == 0x0)
 		return;
 
 	for(unsigned int i=0; i<nchilds; i++){
-		if(!XGetWindowAttributes(dwm.dpy, childs[i], &wa) || wa.override_redirect || XGetTransientForHint(dwm.dpy, childs[i], &dummy))
+		if(win_get_attr(childs[i], &attr) != 0 || attr.override_redirect || XGetTransientForHint(dwm.dpy, childs[i], &dummy))
 			continue;
 
-		if(wa.map_state == IsViewable || getstate(childs[i]) == IconicState)
-			client_init(childs[i], &wa);
+		if(attr.map_state == IsViewable || getstate(childs[i]) == IconicState)
+			client_init(childs[i], &attr);
 	}
 
 	for(unsigned int i=0; i<nchilds; i++){ /* now the transients */
-		if(!XGetWindowAttributes(dwm.dpy, childs[i], &wa))
+		if(win_get_attr(childs[i], &attr) != 0)
 			continue;
 
-		if(XGetTransientForHint(dwm.dpy, childs[i], &dummy) && (wa.map_state == IsViewable || getstate(childs[i]) == IconicState))
-			client_init(childs[i], &wa);
+		if(XGetTransientForHint(dwm.dpy, childs[i], &dummy) && (attr.map_state == IsViewable || getstate(childs[i]) == IconicState))
+			client_init(childs[i], &attr);
 	}
 
 	XFree(childs);
 }
 
 static void check_other_wm_running(void){
-	dwm.xlib_xerror_hdlr = XSetErrorHandler(startup_xerror_hdlr);
+	xlib_set_error_handler(startup_xerror_hdlr);
 
 	/* this causes an error if some other window manager is dwm.running */
 	XSelectInput(dwm.dpy, DefaultRootWindow(dwm.dpy), SubstructureRedirectMask);
-	XSync(dwm.dpy, False);
-	XSetErrorHandler(xerror_hdlr);
-	XSync(dwm.dpy, False);
+	xlib_sync();
+	xlib_set_error_handler(0x0);
+	xlib_sync();
 }
 
 static long getstate(Window w){
@@ -334,6 +340,10 @@ static long getstate(Window w){
 	XFree(p);
 
 	return result;
+}
+
+static int xevent_hdlr(void){
+	return xevents_handle_events();
 }
 
 static int startup_xerror_hdlr(Display *dpy, XErrorEvent *ee){

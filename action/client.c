@@ -9,6 +9,7 @@
 #include <xlib/input.h>
 #include <core/xevents.h>
 #include <core/statusbar.h>
+#include <core/keys.h>
 
 
 /* macros */
@@ -24,13 +25,13 @@ void action_focusstack(action_arg_t const *arg){
 	client_t *c;
 
 
-	c = clientstack_cycle(arg->i, key_cycle_active() ? CYCLE_CONT : CYCLE_START);
+	c = clientstack_cycle(arg->i, keys_cycle_active() ? CYCLE_CONT : CYCLE_START);
 
 	if(c == 0x0)
 		return;
 
-	if(!key_cycle_active())
-		key_cycle_start(focusstack_complete);
+	if(!keys_cycle_active())
+		keys_cycle_start(focusstack_complete);
 
 	clientstack_focus(c, false);
 
@@ -70,7 +71,7 @@ void action_movemouse(action_arg_t const *arg){
 		case ConfigureRequest:
 		case Expose:
 		case MapRequest:
-			xlib_event_handle(&ev);
+			xevents_handle_event(&ev);
 			break;
 
 		case MotionNotify:
@@ -218,7 +219,7 @@ void action_resizemouse(action_arg_t const *arg){
 		case ConfigureRequest:
 		case Expose:
 		case MapRequest:
-			xlib_event_handle(&ev);
+			xevents_handle_event(&ev);
 			break;
 
 		case MotionNotify:

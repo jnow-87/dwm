@@ -1,5 +1,7 @@
 #include <X11/X.h>
+#include <X11/XKBlib.h>
 #include <core/dwm.h>
+#include <core/buttons.h>
 #include <xlib/input.h>
 #include <utils/math.h>
 
@@ -47,7 +49,7 @@ void input_register_button_mappings(Window win, button_map_t const *mappings, si
 		XGrabButton(dwm.dpy, AnyButton, AnyModifier, win, False, BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
 
 	for(size_t i=0; i<n; i++){
-		if(mappings[i].click == ClkClientWin){
+		if(mappings[i].click == CLK_CLIENT){
 			for(size_t j=0; j<LENGTH(modifiers); j++)
 				XGrabButton(dwm.dpy, mappings[i].button, mappings[i].mask | modifiers[j], win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
 		}
@@ -82,4 +84,17 @@ unsigned int input_get_numlock_mask(void){
 	XFreeModifiermap(modmap);
 
 	return mask;
+}
+
+unsigned int input_get_mod_state(void){
+	XkbStateRec state;
+
+
+	XkbGetState(dwm.dpy, XkbUseCoreKbd, &state);
+
+	return state.mods;
+}
+
+keysym_t input_keysym(unsigned int keycode){
+	return XKeycodeToKeysym(dwm.dpy, (KeyCode)keycode, 0);
 }

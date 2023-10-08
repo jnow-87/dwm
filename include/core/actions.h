@@ -2,20 +2,7 @@
 #define ACTION_H
 
 
-#include <X11/X.h>
-
-
 /* types */
-typedef enum{
-	ClkTagBar,
-	ClkLtSymbol,
-	ClkStatusText,
-	ClkWinTitle,
-	ClkClientWin,
-	ClkRootWin,
-	ClkLast
-} clicks_t;
-
 typedef union{
 	int i;
 	unsigned int ui;

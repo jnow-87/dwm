@@ -1,6 +1,7 @@
 #include <X11/X.h>
 #include <X11/keysym.h>
 #include <xlib/input.h>
+#include <core/buttons.h>
 #include <config/config.h>
 #include <limits.h>
 #include <utils/math.h>
@@ -95,16 +96,14 @@ key_map_t const keys[] = {
 
 unsigned int const nkeys = LENGTH(keys);
 
-/* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
+/* click can be CLK_TAGBAR, CLK_LAYOUT, CLK_STATUS, ClkWinTitle, CLK_CLIENT, or CLK_ROOT */
 button_map_t const buttons[] = {
 	// window movement/size
-	{ ClkClientWin,	MODKEY,				Button1,	action_movemouse,	{0} },
-	{ ClkClientWin,	MODKEY | ShiftMask,	Button1,	action_resizemouse,	{0} },
+	{ CLK_CLIENT,	MODKEY,				Button1,	action_movemouse,	{0} },
+	{ CLK_CLIENT,	MODKEY | ShiftMask,	Button1,	action_resizemouse,	{0} },
 
 	// status bar actions
-	{ ClkLtSymbol,	0,					Button1,	action_setlayout,	{0} },
-	{ ClkTagBar,	0,					Button1,	action_tags_view,	{0} },
-	{ ClkTagBar,	ShiftMask,			Button1,	action_tags_toggle,	{0} },
+	{ CLK_LAYOUT,	0,					Button1,	action_setlayout,	{0} },
 };
 
 unsigned int const nbuttons = LENGTH(buttons);
