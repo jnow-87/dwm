@@ -5,9 +5,12 @@
 #include <stdbool.h>
 #include <X11/X.h>
 #include <core/scheme.h>
+#include <xlib/gfx.h>
 
 
 /* types */
+typedef Window window_t;
+
 typedef struct{
 	// size hints
 	float aspect_min,
@@ -37,23 +40,27 @@ typedef struct{
 
 
 /* prototypes */
-void win_init(Window win, win_geom_t *geom, win_hints_t *hints);
-void win_kill(Window win);
-void win_release(Window win, win_geom_t *original);
+window_t win_create(win_geom_t *geom, cursor_type_t cursor, char *class);
+void win_destroy(window_t win);
 
-void win_configure(Window win, win_geom_t *geom);
-void win_resize(Window win, win_geom_t *geom, win_hints_t *hints);
-void win_set_state(Window win, long state);
-bool win_send_event(Window win, Atom proto);
+void win_init(window_t win, win_geom_t *geom, win_hints_t *hints);
+void win_kill(window_t win);
+void win_release(window_t win, win_geom_t *original);
 
-void win_show(Window win, win_geom_t *geom);
-void win_hide(Window win, win_geom_t *geom);
-void win_focus(Window win);
-void win_unfocus(Window win);
+void win_configure(window_t win, win_geom_t *geom);
+void win_resize(window_t win, win_geom_t *geom, win_hints_t *hints);
+void win_raise(window_t win);
+void win_set_state(window_t win, long state);
+bool win_send_event(window_t win, Atom proto);
 
-Window win_get_transient(Window win);
-void win_update_wmhints(Window win, win_hints_t *hints, bool isfocused);
-void win_update_sizehints(Window win, win_hints_t *hints);
+void win_show(window_t win, win_geom_t *geom);
+void win_hide(window_t win, win_geom_t *geom);
+void win_focus(window_t win);
+void win_unfocus(window_t win);
+
+window_t win_get_transient(window_t win);
+void win_update_wmhints(window_t win, win_hints_t *hints, bool isfocused);
+void win_update_sizehints(window_t win, win_hints_t *hints);
 
 
 #endif // WINDOW_H

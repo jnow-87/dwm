@@ -3,16 +3,16 @@
 
 
 #include <stdbool.h>
-#include <X11/X.h>
+#include <xlib/window.h>
 
 
 /* types */
 typedef struct{
 	char status[256];
+	bool hidden;
 
-	Window win;
-	unsigned int height;
-	int y;
+	window_t win;
+	win_geom_t geom;
 } statusbar_t;
 
 

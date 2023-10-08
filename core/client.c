@@ -1,6 +1,5 @@
 #include <config/config.h>
 #include <stdlib.h>
-#include <X11/X.h>
 #include <X11/Xlib.h>
 #include <config.h>
 #include <core/client.h>
@@ -16,7 +15,7 @@
 
 
 /* global functions */
-void client_init(Window win, XWindowAttributes *wa){
+void client_init(window_t win, XWindowAttributes *wa){
 	monitor_t *m = dwm.mons;
 	client_t *c,
 			 *trans;
@@ -72,7 +71,7 @@ void client_cleanup(client_t *c, bool destroyed){
 		atoms_netatom_append(NetClientList, (unsigned char*)&c->win);
 }
 
-client_t *client_from_win(Window win){
+client_t *client_from_win(window_t win){
 	client_t *c;
 
 

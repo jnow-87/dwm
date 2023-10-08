@@ -11,13 +11,6 @@
 
 
 /* types */
-typedef enum{
-	CurNormal,
-	CurResize,
-	CurMove,
-	CurLast
-} cursor_type_t;
-
 typedef struct{
 	monitor_t *mons;
 	int screen_width,

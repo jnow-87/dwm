@@ -19,6 +19,14 @@ typedef enum{
 	ColBorder
 } color_scheme_index_t;
 
+typedef enum{
+	CurNone = -1,
+	CurNormal,
+	CurResize,
+	CurMove,
+	CurLast
+} cursor_type_t;
+
 typedef XftColor color_t;
 
 typedef struct{

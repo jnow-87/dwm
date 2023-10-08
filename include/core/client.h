@@ -3,7 +3,6 @@
 
 
 #include <stdbool.h>
-#include <X11/X.h>
 #include <X11/Xlib.h>
 #include <xlib/window.h>
 
@@ -21,7 +20,7 @@ typedef struct client_t{
 
 	unsigned int tags;
 
-	Window win;
+	window_t win;
 	win_geom_t geom,
 			   geom_store;
 	win_hints_t hints;
@@ -29,10 +28,10 @@ typedef struct client_t{
 
 
 /* prototypes */
-void client_init(Window win, XWindowAttributes *wa);
+void client_init(window_t win, XWindowAttributes *wa);
 void client_cleanup(client_t *c, bool destroyed);
 
-client_t *client_from_win(Window win);
+client_t *client_from_win(window_t win);
 
 void client_resize(client_t *c, int x, int y, int width, int height);
 
