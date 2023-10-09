@@ -28,7 +28,7 @@
 
 /* global variables */
 char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-char const *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", CONFIG_FONT, "-nb", CONFIG_COL_INACT_BG, "-nf", CONFIG_COL_INACT_FG, "-sb", CONFIG_COL_ACT_BG, "-sf", CONFIG_COL_ACT_FG, NULL };
+char const *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", CONFIG_FONT, "-nb", CONFIG_COL_INACT_BG, "-nf", CONFIG_COL_INACT_FG, "-sb", CONFIG_COL_ACT_BG, "-sf", CONFIG_COL_ACT_FG, 0x0 };
 
 key_map_t const keys[] = {
 	// tag control

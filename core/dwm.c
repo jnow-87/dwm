@@ -64,10 +64,10 @@ int dwm_setup(void){
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT | SA_RESTART;
 	sa.sa_handler = SIG_IGN;
-	sigaction(SIGCHLD, &sa, NULL);
+	sigaction(SIGCHLD, &sa, 0x0);
 
 	/* clean up any zombies (inherited from .xinitrc etc) immediately */
-	while(waitpid(-1, NULL, WNOHANG) > 0);
+	while(waitpid(-1, 0x0, WNOHANG) > 0);
 
 	/* init xlib components */
 	if(xlib_init() != 0)
@@ -101,7 +101,7 @@ int dwm_setup(void){
 }
 
 void dwm_cleanup(void){
-	layout_t nop = { "", NULL };
+	layout_t nop = { "", 0x0 };
 
 
 	tags_set(&dwm.tag_mask, ~0);

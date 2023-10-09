@@ -29,7 +29,7 @@ int xlib_init(void){
 	if(!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		INFO("warning: no locale support\n");
 
-	dwm.dpy = XOpenDisplay(NULL);
+	dwm.dpy = XOpenDisplay(0x0);
 
 	if(dwm.dpy == 0)
 		return ERROR("opening display\n");

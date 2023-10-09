@@ -227,7 +227,7 @@ int win_get_attr(window_t win, win_attr_t *attr){
 long win_get_state(window_t win){
 	int format;
 	long result = -1;
-	unsigned char *p = NULL;
+	unsigned char *p = 0x0;
 	unsigned long n, extra;
 	Atom real;
 

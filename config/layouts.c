@@ -6,7 +6,7 @@
 /* global variables */
 layout_t const layouts[] = {
 	/* symbol     layout_arrange function */
-	{ "☯", NULL },
+	{ "☯", 0x0 },
 	{ "⚏", layout_tile },
 	{ "❍", layout_monocle },
 };
