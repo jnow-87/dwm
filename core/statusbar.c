@@ -29,7 +29,7 @@ void statusbar_init(unsigned int height){
 	bar->geom.height = height;
 	bar->geom.border_width = 0;
 
-	bar->win = win_create(&bar->geom, CurNormal, "dwm");
+	bar->win = win_create(&bar->geom, CUR_NORM, "dwm");
 	win_raise(bar->win);
 
 	statusbar_update();
@@ -58,11 +58,11 @@ void statusbar_update(void){
 
 	/* draw status spacer */
 	w = TEXTW(CONFIG_STATUSBAR_SPACER_RIGHT) - PADDING;
-	x = gfx_text(dwm.gfx, m->width - status_width - w, 0, w, bar_height, SchemeSpacer, 0, CONFIG_STATUSBAR_SPACER_RIGHT, 0);
+	x = gfx_text(dwm.gfx, m->width - status_width - w, 0, w, bar_height, SCM_SPACER, 0, CONFIG_STATUSBAR_SPACER_RIGHT, 0);
 
 	/* draw status text */
 	// draw status first so it can be overdrawn by tags later
-	gfx_text(dwm.gfx, x, 0, status_width, bar_height, SchemeNorm, 0, bar->status, 0);
+	gfx_text(dwm.gfx, x, 0, status_width, bar_height, SCM_NORM, 0, bar->status, 0);
 	status_width += w;
 
 	/* draw tags */
@@ -70,22 +70,22 @@ void statusbar_update(void){
 
 	for(size_t i=0; i<ntags; i++){
 		w = TEXTW(tags[i]);
-		gfx_text(dwm.gfx, x, 0, w, bar_height, (dwm.tag_mask & (1 << i)) ? SchemeSel : SchemeNorm, PADDING / 2, tags[i], 0);
+		gfx_text(dwm.gfx, x, 0, w, bar_height, (dwm.tag_mask & (1 << i)) ? SCM_FOCUS : SCM_NORM, PADDING / 2, tags[i], 0);
 
 		x += w;
 	}
 
 	/* draw layout symbol */
 	w = TEXTW(dwm.layout->symbol);
-	x = gfx_text(dwm.gfx, x, 0, w, bar_height, SchemeNorm, PADDING / 2, dwm.layout->symbol, 0);
+	x = gfx_text(dwm.gfx, x, 0, w, bar_height, SCM_NORM, PADDING / 2, dwm.layout->symbol, 0);
 
 	/* draw layout spacer */
 	w = TEXTW(CONFIG_STATUSBAR_SPACER_LEFT) - PADDING;
-	x = gfx_text(dwm.gfx, x, 0, w, bar_height, SchemeSpacer, 0, CONFIG_STATUSBAR_SPACER_LEFT, 0);
+	x = gfx_text(dwm.gfx, x, 0, w, bar_height, SCM_SPACER, 0, CONFIG_STATUSBAR_SPACER_LEFT, 0);
 
 	/* draw space */
 	if((w = m->width - status_width - x) > bar_height){
-		gfx_rect(dwm.gfx, x, 0, w, bar_height, SchemeSel, 1, 1);
+		gfx_rect(dwm.gfx, x, 0, w, bar_height, SCM_FOCUS, 1, 1);
 	}
 
 	gfx_map(dwm.gfx, bar->win, 0, 0, m->width, bar_height);

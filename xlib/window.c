@@ -40,7 +40,7 @@ window_t win_create(win_geom_t *geom, cursor_type_t cursor, char *class){
 		}
 	);
 
-	if(cursor != CurNone)
+	if(cursor != CUR_NONE)
 		XDefineCursor(dwm.dpy, win, dwm.gfx->cursors[cursor]);
 
 	if(class != 0x0)
@@ -63,7 +63,7 @@ void win_init(window_t win, win_geom_t *geom, win_hints_t *hints){
 	XSelectInput(dwm.dpy, win, FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
 	XMoveResizeWindow(dwm.dpy, win, geom->x + 2 * dwm.screen_width, geom->y, geom->width, geom->height); //some windows require this
 
-	set_border(win, SchemeNorm);
+	set_border(win, SCM_NORM);
 	win_update_sizehints(win, hints);
 	win_update_wmhints(win, hints, false);
 	win_set_state(win, NormalState);
@@ -146,7 +146,7 @@ void win_set_state(window_t win, long state){
 	long data[] = {state, None};
 
 
-	XChangeProperty(dwm.dpy, win, dwm.wmatom[WMState], dwm.wmatom[WMState], 32, PropModeReplace, (unsigned char *)data, 2);
+	XChangeProperty(dwm.dpy, win, dwm.wmatom[WM_STATE], dwm.wmatom[WM_STATE], 32, PropModeReplace, (unsigned char *)data, 2);
 }
 
 bool win_send_event(window_t win, Atom proto){
@@ -168,7 +168,7 @@ bool win_send_event(window_t win, Atom proto){
 
 	ev.type = ClientMessage;
 	ev.xclient.window = win;
-	ev.xclient.message_type = dwm.wmatom[WMProtocols];
+	ev.xclient.message_type = dwm.wmatom[WM_PROTOCOLS];
 	ev.xclient.format = 32;
 	ev.xclient.data.l[0] = proto;
 	ev.xclient.data.l[1] = CurrentTime;
@@ -190,20 +190,20 @@ void win_focus(window_t win){
 
 	if(win != dwm.root){
 		input_buttons_register(win, buttons, nbuttons, 1);
-		set_border(win, SchemeSel);
+		set_border(win, SCM_FOCUS);
 
-		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(win), 1);
+		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NET_ACTIVEWINDOW], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(win), 1);
 		XRaiseWindow(dwm.dpy, win);
-		win_send_event(win, dwm.wmatom[WMTakeFocus]);
+		win_send_event(win, dwm.wmatom[WM_TAKEFOCUS]);
 	}
 	else
-		XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow]);
+		XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NET_ACTIVEWINDOW]);
 }
 
 void win_unfocus(window_t win){
 	// TODO why do the mappings need to be removed when unfocusing
 	input_buttons_register(win, buttons, nbuttons, 0);
-	set_border(win, SchemeNorm);
+	set_border(win, SCM_NORM);
 }
 
 int win_get_attr(window_t win, win_attr_t *attr){
@@ -232,7 +232,7 @@ long win_get_state(window_t win){
 	Atom real;
 
 
-	if(XGetWindowProperty(dwm.dpy, win, dwm.wmatom[WMState], 0L, 2L, False, dwm.wmatom[WMState], &real, &format, &n, &extra, (unsigned char **)&p) != Success)
+	if(XGetWindowProperty(dwm.dpy, win, dwm.wmatom[WM_STATE], 0L, 2L, False, dwm.wmatom[WM_STATE], &real, &format, &n, &extra, (unsigned char **)&p) != Success)
 		return -1;
 
 	if(n != 0)
@@ -327,7 +327,7 @@ void win_update_sizehints(window_t win, win_hints_t *hints){
 
 /* local functions */
 static void set_border(window_t win, scheme_t scheme){
-	XSetWindowBorder(dwm.dpy, win, dwm.gfx->scheme[scheme][ColBorder].pixel);
+	XSetWindowBorder(dwm.dpy, win, dwm.gfx->scheme[scheme][SCOL_BORDER].pixel);
 }
 
 static void apply_sizehints(window_t win, win_geom_t *geom, win_hints_t *hints){

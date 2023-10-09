@@ -82,7 +82,7 @@ void client_init(window_t win, win_attr_t *attr){
 	win_init(win, &c->geom, &c->hints);
 
 	/* update client list */
-	atoms_netatom_append(NetClientList, (unsigned char*)&win);
+	atoms_netatom_append(NET_CLIENTLIST, (unsigned char*)&win);
 
 	/* update clientstack */
 	stack_push(dwm.stack, c);
@@ -101,10 +101,10 @@ void client_cleanup(client_t *c, bool destroyed){
 	free(c);
 
 	/* update client list */
-	atoms_netatom_delete(NetClientList);
+	atoms_netatom_delete(NET_CLIENTLIST);
 
 	list_for_each(dwm.stack, c)
-		atoms_netatom_append(NetClientList, (unsigned char*)&c->win);
+		atoms_netatom_append(NET_CLIENTLIST, (unsigned char*)&c->win);
 }
 
 client_t *client_from_win(window_t win){

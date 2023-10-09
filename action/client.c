@@ -36,7 +36,7 @@ void action_client_kill(action_arg_t const *arg){
 	if(!dwm.focused)
 		return;
 
-	if(!win_send_event(dwm.focused->win, dwm.wmatom[WMDelete]))
+	if(!win_send_event(dwm.focused->win, dwm.wmatom[WM_DELETE]))
 		win_kill(dwm.focused->win);
 }
 
@@ -90,7 +90,7 @@ void action_client_move_mouse(action_arg_t const *arg){
 	ocx = c->geom.x;
 	ocy = c->geom.y;
 
-	if(input_pointer_grab(dwm.gfx->cursors[CurMove]) != 0)
+	if(input_pointer_grab(dwm.gfx->cursors[CUR_MOVE]) != 0)
 		return;
 
 	if(!input_pointer_coord(&x, &y))
@@ -194,7 +194,7 @@ void action_client_resize_mouse(action_arg_t const *arg){
 	ocx = c->geom.x;
 	ocy = c->geom.y;
 
-	if(input_pointer_grab(dwm.gfx->cursors[CurResize]) != 0)
+	if(input_pointer_grab(dwm.gfx->cursors[CUR_RESIZE]) != 0)
 		return;
 
 	input_pointer_move(c->win, geom->width + geom->border_width - 1, geom->height + geom->border_width - 1);

@@ -9,9 +9,12 @@
 #include <xlib/xlib.h>
 #include <utils/list.h>
 #include <utils/log.h>
+#include <config.h>
 
 
 /* macros */
+#define NOMATCHES_LEN	64
+
 #define UTF_INVALID	0xFFFD
 #define UTF_SIZ		4
 
@@ -44,7 +47,7 @@ static long const utfmax[UTF_SIZ + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF, 0x10FFFF
 
 
 /* global functions */
-gfx_t *gfx_create(unsigned int w, unsigned int h, char const *scheme[][ColLast], size_t n){
+gfx_t *gfx_create(unsigned int w, unsigned int h){
 	gfx_t *gfx;
 	font_t *font;
 
@@ -68,13 +71,13 @@ gfx_t *gfx_create(unsigned int w, unsigned int h, char const *scheme[][ColLast],
 	list_add_tail(gfx->fonts, font);
 
 	/* init color schemes */
-	gfx->scheme = malloc(n * sizeof(color_t*));
+	gfx->scheme = malloc(NSCMS * sizeof(color_t*));
 
 	if(gfx->scheme == 0x0)
 		goto err_1;
 
-	for(size_t i=0; i<n; i++){
-		gfx->scheme[i] = scheme_create(gfx, scheme[i], ColLast);
+	for(size_t i=0; i<NSCMS; i++){
+		gfx->scheme[i] = scheme_create(gfx, colors[i], NSCOLORS);
 
 		if(gfx->scheme[i] == 0x0)
 			goto err_1;
@@ -83,9 +86,9 @@ gfx_t *gfx_create(unsigned int w, unsigned int h, char const *scheme[][ColLast],
 	}
 
 	/* init cursors */
-	gfx->cursors[CurNormal] = cursor_create(dwm.gfx, XC_left_ptr);
-	gfx->cursors[CurResize] = cursor_create(dwm.gfx, XC_sizing);
-	gfx->cursors[CurMove] = cursor_create(dwm.gfx, XC_fleur);
+	gfx->cursors[CUR_NORM] = cursor_create(dwm.gfx, XC_left_ptr);
+	gfx->cursors[CUR_RESIZE] = cursor_create(dwm.gfx, XC_sizing);
+	gfx->cursors[CUR_MOVE] = cursor_create(dwm.gfx, XC_fleur);
 
 	return gfx;
 
@@ -101,11 +104,11 @@ void gfx_free(gfx_t *gfx){
 	font_t *font;
 
 
-	for(size_t i=0; i<CurLast; i++)
+	for(size_t i=0; i<NCURSORS; i++)
 		cursor_free(dwm.gfx, gfx->cursors[i]);
 
 	for(size_t i=0; i<gfx->nscheme; i++)
-		scheme_destroy(gfx, gfx->scheme[i], ColLast);
+		scheme_destroy(gfx, gfx->scheme[i], NSCOLORS);
 
 	free(gfx->scheme);
 
@@ -128,14 +131,14 @@ void gfx_resize(gfx_t *gfx, unsigned int w, unsigned int h){
 }
 
 size_t gfx_text_width(gfx_t *gfx, char const *text){
-	return gfx_text(gfx, 0, 0, 0, 0, SchemeNorm, 0, text, 0);
+	return gfx_text(gfx, 0, 0, 0, 0, SCM_NORM, 0, text, 0);
 }
 
 void gfx_rect(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t scheme, int filled, int invert){
 	color_t *scm = gfx->scheme[scheme];
 
 
-	XSetForeground(dwm.dpy, gfx->gc, invert ? scm[ColBg].pixel : scm[ColFg].pixel);
+	XSetForeground(dwm.dpy, gfx->gc, invert ? scm[SCOL_BB].pixel : scm[SCOL_FB].pixel);
 
 	if(filled)	XFillRectangle(dwm.dpy, gfx->drawable, gfx->gc, x, y, w, h);
 	else		XDrawRectangle(dwm.dpy, gfx->drawable, gfx->gc, x, y, w - 1, h - 1);
@@ -157,13 +160,8 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t 
 	int charexists = 0, overflow = 0;
 
 
-	/* keep track of a couple codepoints for which we have no match. */
-	enum{
-		nomatches_len = 64
-	};
-
 	static struct{
-		long codepoint[nomatches_len];
+		long codepoint[NOMATCHES_LEN];
 		unsigned int idx;
 	} nomatches;
 
@@ -176,7 +174,7 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t 
 		w = invert ? invert : ~invert;
 	}
 	else{
-		XSetForeground(dwm.dpy, gfx->gc, scm[invert ? ColFg : ColBg].pixel);
+		XSetForeground(dwm.dpy, gfx->gc, scm[invert ? SCOL_FB : SCOL_BB].pixel);
 		XFillRectangle(dwm.dpy, gfx->drawable, gfx->gc, x, y, w, h);
 		d = XftDrawCreate(dwm.dpy, gfx->drawable, DefaultVisual(dwm.dpy, dwm.screen), DefaultColormap(dwm.dpy, dwm.screen));
 		x += lpad;
@@ -236,7 +234,7 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t 
 		if(utf8strlen){
 			if(render){
 				ty = y + (h - font_height(usedfont)) / 2 + usedfont->xfont->ascent;
-				XftDrawStringUtf8(d, &scm[invert ? ColBg : ColFg], usedfont->xfont, x, ty, (XftChar8*)utf8str, utf8strlen);
+				XftDrawStringUtf8(d, &scm[invert ? SCOL_BB : SCOL_FB], usedfont->xfont, x, ty, (XftChar8*)utf8str, utf8strlen);
 			}
 
 			x += ew;
@@ -257,7 +255,7 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t 
 			 * character must be drawn. */
 			charexists = 1;
 
-			for(i=0; i<nomatches_len; ++i){
+			for(i=0; i<NOMATCHES_LEN; ++i){
 				/* avoid calling XftFontMatch if we know we won't find a match */
 				if(utf8codepoint == nomatches.codepoint[i])
 					goto no_match;
@@ -290,7 +288,7 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t 
 				}
 				else{
 					font_free(usedfont);
-					nomatches.codepoint[++nomatches.idx % nomatches_len] = utf8codepoint;
+					nomatches.codepoint[++nomatches.idx % NOMATCHES_LEN] = utf8codepoint;
 no_match:
 					usedfont = gfx->fonts;
 				}

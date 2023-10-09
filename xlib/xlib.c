@@ -5,10 +5,10 @@
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
 #include <core/dwm.h>
-#include <xlib/xlib.h>
 #include <xlib/gfx.h>
+#include <xlib/input.h>
+#include <xlib/xlib.h>
 #include <utils/log.h>
-#include <config.h>
 
 
 /* local/static prototypes */
@@ -40,7 +40,7 @@ int xlib_init(void){
 	dwm.screen_height = DisplayHeight(dwm.dpy, dwm.screen);
 	dwm.root = RootWindow(dwm.dpy, dwm.screen);
 
-	dwm.gfx = gfx_create(dwm.screen_width, dwm.screen_height, colors, ncolors);
+	dwm.gfx = gfx_create(dwm.screen_width, dwm.screen_height);
 
 	if(dwm.gfx == 0x0)
 		return STRERROR("creating grafix context");
@@ -49,31 +49,31 @@ int xlib_init(void){
 
 	/* init atoms */
 	utf8string = XInternAtom(dwm.dpy, "UTF8_STRING", False);
-	dwm.wmatom[WMProtocols] = XInternAtom(dwm.dpy, "WM_PROTOCOLS", False);
-	dwm.wmatom[WMDelete] = XInternAtom(dwm.dpy, "WM_DELETE_WINDOW", False);
-	dwm.wmatom[WMState] = XInternAtom(dwm.dpy, "WM_STATE", False);
-	dwm.wmatom[WMTakeFocus] = XInternAtom(dwm.dpy, "WM_TAKE_FOCUS", False);
+	dwm.wmatom[WM_PROTOCOLS] = XInternAtom(dwm.dpy, "WM_PROTOCOLS", False);
+	dwm.wmatom[WM_DELETE] = XInternAtom(dwm.dpy, "WM_DELETE_WINDOW", False);
+	dwm.wmatom[WM_STATE] = XInternAtom(dwm.dpy, "WM_STATE", False);
+	dwm.wmatom[WM_TAKEFOCUS] = XInternAtom(dwm.dpy, "WM_TAKE_FOCUS", False);
 
-	dwm.netatom[NetActiveWindow] = XInternAtom(dwm.dpy, "_NET_ACTIVE_WINDOW", False);
-	dwm.netatom[NetSupported] = XInternAtom(dwm.dpy, "_NET_SUPPORTED", False);
-	dwm.netatom[NetWMName] = XInternAtom(dwm.dpy, "_NET_WM_NAME", False);
-	dwm.netatom[NetWMCheck] = XInternAtom(dwm.dpy, "_NET_SUPPORTING_WM_CHECK", False);
-	dwm.netatom[NetClientList] = XInternAtom(dwm.dpy, "_NET_CLIENT_LIST", False);
+	dwm.netatom[NET_ACTIVEWINDOW] = XInternAtom(dwm.dpy, "_NET_ACTIVE_WINDOW", False);
+	dwm.netatom[NET_SUPPORTED] = XInternAtom(dwm.dpy, "_NET_SUPPORTED", False);
+	dwm.netatom[NET_WMNAME] = XInternAtom(dwm.dpy, "_NET_WM_NAME", False);
+	dwm.netatom[NET_WMCHECK] = XInternAtom(dwm.dpy, "_NET_SUPPORTING_WM_CHECK", False);
+	dwm.netatom[NET_CLIENTLIST] = XInternAtom(dwm.dpy, "_NET_CLIENT_LIST", False);
 
-	/* supporting window for NetWMCheck */
+	/* supporting window for NET_WMCHECK */
 	// this is a requirement to indicate a conforming window manager, cf.
 	// https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html#idm45771211439200
 	dwm.wmcheck = XCreateSimpleWindow(dwm.dpy, dwm.root, 0, 0, 1, 1, 0, 0, 0);
-	XChangeProperty(dwm.dpy, dwm.wmcheck, dwm.netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&dwm.wmcheck, 1);
-	XChangeProperty(dwm.dpy, dwm.wmcheck, dwm.netatom[NetWMName], utf8string, 8, PropModeReplace, (unsigned char *)"dwm", 3);
-	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&dwm.wmcheck, 1);
+	XChangeProperty(dwm.dpy, dwm.wmcheck, dwm.netatom[NET_WMCHECK], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&dwm.wmcheck, 1);
+	XChangeProperty(dwm.dpy, dwm.wmcheck, dwm.netatom[NET_WMNAME], utf8string, 8, PropModeReplace, (unsigned char *)"dwm", 3);
+	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NET_WMCHECK], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&dwm.wmcheck, 1);
 
 	/* extended window manager hints (EWMH) support per view */
-	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NetSupported], XA_ATOM, 32, PropModeReplace, (unsigned char *)dwm.netatom, NetLast);
-	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList]);
+	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NET_SUPPORTED], XA_ATOM, 32, PropModeReplace, (unsigned char *)dwm.netatom, NNETATOMS);
+	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NET_CLIENTLIST]);
 
 	/* select events */
-	wa.cursor = dwm.gfx->cursors[CurNormal];
+	wa.cursor = dwm.gfx->cursors[CUR_NORM];
 
 	// TODO
 	// 	the list doesn't seem correct, cf. notes
@@ -100,7 +100,7 @@ void xlib_cleanup(void){
 	xlib_sync();
 
 	XSetInputFocus(dwm.dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
-	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetActiveWindow]);
+	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NET_ACTIVEWINDOW]);
 
 	XCloseDisplay(dwm.dpy);
 }

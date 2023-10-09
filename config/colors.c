@@ -5,11 +5,9 @@
 
 
 /* global variables */
-char const *colors[][3] = {
+char const *colors[NSCMS][3] = {
 	/*               fg         bg         border   */
-	[SchemeNorm] = { CONFIG_COL_INACT_FG, CONFIG_COL_INACT_BG, CONFIG_COL_INACT_BORDER },
-	[SchemeSel] = { CONFIG_COL_ACT_FG, CONFIG_COL_ACT_BG, CONFIG_COL_ACT_BORDER },
-	[SchemeSpacer] = { CONFIG_COL_INACT_BG, CONFIG_COL_ACT_BG, CONFIG_COL_ACT_BORDER },
+	[SCM_NORM] = { CONFIG_COL_INACT_FG, CONFIG_COL_INACT_BG, CONFIG_COL_INACT_BORDER },
+	[SCM_FOCUS] = { CONFIG_COL_ACT_FG, CONFIG_COL_ACT_BG, CONFIG_COL_ACT_BORDER },
+	[SCM_SPACER] = { CONFIG_COL_INACT_BG, CONFIG_COL_ACT_BG, CONFIG_COL_ACT_BORDER },
 };
-
-size_t ncolors = LENGTH(colors);

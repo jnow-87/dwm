@@ -9,20 +9,20 @@
 
 /* types */
 typedef enum{
-	NetSupported,
-	NetWMName,
-	NetWMCheck,
-	NetActiveWindow,
-	NetClientList,
-	NetLast
+	NET_SUPPORTED,
+	NET_WMNAME,
+	NET_WMCHECK,
+	NET_ACTIVEWINDOW,
+	NET_CLIENTLIST,
+	NNETATOMS
 } net_atom_t;
 
 typedef enum{
-	WMProtocols,
-	WMDelete,
-	WMState,
-	WMTakeFocus,
-	WMLast
+	WM_PROTOCOLS,
+	WM_DELETE,
+	WM_STATE,
+	WM_TAKEFOCUS,
+	NWMATOMS
 } wm_atoms_t;
 
 

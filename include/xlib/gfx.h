@@ -11,27 +11,26 @@
 
 
 /* types */
-// TODO rename
 typedef enum{
-	ColFg,
-	ColBg,
-	ColBorder,
-	ColLast
+	SCOL_FB,
+	SCOL_BB,
+	SCOL_BORDER,
+	NSCOLORS
 } scheme_index_t;
 
 typedef enum{
-	SchemeNorm,
-	SchemeSel,
-	SchemeSpacer,
+	SCM_NORM,
+	SCM_FOCUS,
+	SCM_SPACER,
+	NSCMS
 } scheme_t;
 
-// TODO rename
 typedef enum{
-	CurNone = -1,
-	CurNormal,
-	CurResize,
-	CurMove,
-	CurLast
+	CUR_NONE = -1,
+	CUR_NORM,
+	CUR_RESIZE,
+	CUR_MOVE,
+	NCURSORS
 } cursor_type_t;
 
 typedef XftColor color_t;
@@ -50,15 +49,14 @@ typedef struct{
 	GC gc;
 
 	font_t *fonts;
-	cursor_t cursors[CurLast];
+	cursor_t cursors[NCURSORS];
 	color_t **scheme;
 	size_t nscheme;
 } gfx_t;
 
 
 /* prototypes */
-// drawable abstraction
-gfx_t *gfx_create(unsigned int w, unsigned int h, char const *scheme[][ColLast], size_t n);
+gfx_t *gfx_create(unsigned int w, unsigned int h);
 void gfx_free(gfx_t *gfx);
 void gfx_resize(gfx_t *gfx, unsigned int w, unsigned int h);
 
