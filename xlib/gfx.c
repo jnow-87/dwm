@@ -22,6 +22,7 @@ static font_t *xfont_create(gfx_t *gfx, char const *fontname, FcPattern *fontpat
 static void xfont_free(font_t *font);
 
 static int color_create(gfx_t *gfx, color_t *dest, char const *name);
+static void color_destroy(gfx_t *gfx, color_t *c);
 
 static void font_extents(font_t *font, char const *text, unsigned int len, unsigned int *w, unsigned int *h);
 
@@ -108,7 +109,6 @@ unsigned int gfx_fontset_getwidth(gfx_t *gfx, char const *text){
 color_t *gfx_scm_create(gfx_t *gfx, char const *names[], size_t n){
 	/* Wrapper to create color schemes. The caller has to call free(3) on the
 	 * returned color scheme when done using it. */
-	size_t i;
 	color_t *c;
 
 
@@ -121,12 +121,19 @@ color_t *gfx_scm_create(gfx_t *gfx, char const *names[], size_t n){
 	if(c == 0x0)
 		return 0x0;
 
-	for(i=0; i<n; i++){
-		if(color_create(gfx, &c[i], names[i]) != 0)
+	for(size_t i=0; i<n; i++){
+		if(color_create(gfx, c + i, names[i]) != 0)
 			return 0x0;
 	}
 
 	return c;
+}
+
+void gfx_scm_destroy(gfx_t *gfx, color_t *scm, size_t n){
+	for(size_t i=0; i<n; i++)
+		color_destroy(gfx, scm + i);
+
+	free(scm);
 }
 
 cursor_t gfx_cursor_create(gfx_t *gfx, int shape){
@@ -443,6 +450,10 @@ static int color_create(gfx_t *gfx, color_t *dest, char const *name){
 		return ERROR("allocating color %s\n", name);
 
 	return 0;
+}
+
+static void color_destroy(gfx_t *gfx, color_t *c){
+	XftColorFree(gfx->dpy, DefaultVisual(gfx->dpy, gfx->screen), DefaultColormap(gfx->dpy, gfx->screen), c);
 }
 
 static void font_extents(font_t *font, char const *text, unsigned int len, unsigned int *w, unsigned int *h){

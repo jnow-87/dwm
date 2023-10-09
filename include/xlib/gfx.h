@@ -67,6 +67,7 @@ unsigned int gfx_fontset_getwidth(gfx_t *gfx, char const *text);
 
 // color scheme abstraction
 color_t *gfx_scm_create(gfx_t *gfx, char const *names[], size_t n);
+void gfx_scm_destroy(gfx_t *gfx, color_t *scm, size_t n);
 
 // cursor abstraction
 cursor_t gfx_cursor_create(gfx_t *gfx, int shape);

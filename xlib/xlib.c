@@ -119,7 +119,7 @@ void xlib_cleanup(void){
 		gfx_cursor_free(dwm.gfx, dwm.cursor[i]);
 
 	for(size_t i=0; i<ncolors; i++)
-		free(dwm.scheme[i]);
+		gfx_scm_destroy(dwm.gfx, dwm.scheme[i], 3);
 
 	free(dwm.scheme);
 
