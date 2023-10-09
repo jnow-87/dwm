@@ -41,8 +41,6 @@ typedef struct{
 
 	// graphics
 	gfx_t *gfx;
-	cursor_t cursor[CurLast];
-	color_t **scheme;
 	int lrpad;	/* sum of left and right padding for text */
 
 	// dwm lifecycle

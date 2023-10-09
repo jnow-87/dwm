@@ -8,6 +8,10 @@ config STATUSBAR_TOP
 	bool "show statusbar at the top"
 	default y
 
+config STATUSBAR_HEIGHT
+	int "statusbar height"
+	default 20
+
 config STATUSBAR_SPACER_LEFT
 	qstring "statusbar spacer (left)"
 	default ""

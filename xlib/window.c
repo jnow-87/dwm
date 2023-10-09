@@ -2,8 +2,8 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <core/dwm.h>
-#include <core/scheme.h>
 #include <xlib/input.h>
+#include <xlib/gfx.h>
 #include <xlib/window.h>
 #include <xlib/xlib.h>
 #include <utils/utils.h>
@@ -41,7 +41,7 @@ window_t win_create(win_geom_t *geom, cursor_type_t cursor, char *class){
 	);
 
 	if(cursor != CurNone)
-		XDefineCursor(dwm.dpy, win, dwm.cursor[cursor]);
+		XDefineCursor(dwm.dpy, win, dwm.gfx->cursors[cursor]);
 
 	if(class != 0x0)
 		XSetClassHint(dwm.dpy, win, &(XClassHint){class, class});
@@ -327,7 +327,7 @@ void win_update_sizehints(window_t win, win_hints_t *hints){
 
 /* local functions */
 static void set_border(window_t win, scheme_t scheme){
-	XSetWindowBorder(dwm.dpy, win, dwm.scheme[scheme][ColBorder].pixel);
+	XSetWindowBorder(dwm.dpy, win, dwm.gfx->scheme[scheme][ColBorder].pixel);
 }
 
 static void apply_sizehints(window_t win, win_geom_t *geom, win_hints_t *hints){

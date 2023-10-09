@@ -1,6 +1,6 @@
 #include <config/config.h>
 #include <stddef.h>
-#include <core/scheme.h>
+#include <xlib/gfx.h>
 #include <utils/utils.h>
 
 

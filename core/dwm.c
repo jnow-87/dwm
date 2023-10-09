@@ -85,7 +85,7 @@ int dwm_setup(void){
 	/* init core components */
 	// TODO add consistent return values and handling
 	monitor_discover();
-	statusbar_init(dwm.gfx->fonts->h + 2);
+	statusbar_init(CONFIG_STATUSBAR_HEIGHT);
 	r |= keys_init();
 	r |= clients_init();
 

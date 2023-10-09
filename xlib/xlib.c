@@ -4,7 +4,6 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
-#include <X11/cursorfont.h>
 #include <core/dwm.h>
 #include <xlib/xlib.h>
 #include <xlib/gfx.h>
@@ -41,7 +40,7 @@ int xlib_init(void){
 	dwm.screen_height = DisplayHeight(dwm.dpy, dwm.screen);
 	dwm.root = RootWindow(dwm.dpy, dwm.screen);
 
-	dwm.gfx = gfx_create(dwm.dpy, dwm.screen, dwm.root, dwm.screen_width, dwm.screen_height);
+	dwm.gfx = gfx_create(dwm.screen_width, dwm.screen_height, colors, ncolors);
 
 	if(dwm.gfx == 0x0)
 		return STRERROR("creating grafix context");
@@ -61,24 +60,6 @@ int xlib_init(void){
 	dwm.netatom[NetWMCheck] = XInternAtom(dwm.dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	dwm.netatom[NetClientList] = XInternAtom(dwm.dpy, "_NET_CLIENT_LIST", False);
 
-	/* init cursors */
-	dwm.cursor[CurNormal] = gfx_cursor_create(dwm.gfx, XC_left_ptr);
-	dwm.cursor[CurResize] = gfx_cursor_create(dwm.gfx, XC_sizing);
-	dwm.cursor[CurMove] = gfx_cursor_create(dwm.gfx, XC_fleur);
-
-	/* init color scheme */
-	dwm.scheme = calloc(ncolors, sizeof(color_t*));
-
-	if(dwm.scheme == 0x0)
-		return STRERROR("allocating color scheme");
-
-	for(size_t i=0; i<ncolors; i++){
-		dwm.scheme[i] = gfx_scm_create(dwm.gfx, colors[i], 3);
-
-		if(dwm.scheme[i] == 0x0)
-			return STRERROR("allocating color");
-	}
-
 	/* supporting window for NetWMCheck */
 	// this is a requirement to indicate a conforming window manager, cf.
 	// https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html#idm45771211439200
@@ -92,7 +73,7 @@ int xlib_init(void){
 	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NetClientList]);
 
 	/* select events */
-	wa.cursor = dwm.cursor[CurNormal];
+	wa.cursor = dwm.gfx->cursors[CurNormal];
 
 	// TODO
 	// 	the list doesn't seem correct, cf. notes
@@ -114,14 +95,6 @@ int xlib_init(void){
 void xlib_cleanup(void){
 	XUngrabKey(dwm.dpy, AnyKey, AnyModifier, dwm.root);
 	XDestroyWindow(dwm.dpy, dwm.wmcheck);
-
-	for(size_t i=0; i<CurLast; i++)
-		gfx_cursor_free(dwm.gfx, dwm.cursor[i]);
-
-	for(size_t i=0; i<ncolors; i++)
-		gfx_scm_destroy(dwm.gfx, dwm.scheme[i], 3);
-
-	free(dwm.scheme);
 
 	gfx_free(dwm.gfx);
 	xlib_sync();

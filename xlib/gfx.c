@@ -1,6 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 #include <config/config.h>
 #include <stdlib.h>
+#include <X11/cursorfont.h>
 #include <X11/Xft/Xft.h>
 #include <X11/Xlib.h>
 #include <core/dwm.h>
@@ -18,13 +19,17 @@
 
 
 /* local/static prototypes */
-static font_t *xfont_create(gfx_t *gfx, char const *fontname, FcPattern *fontpattern);
-static void xfont_free(font_t *font);
-
-static int color_create(gfx_t *gfx, color_t *dest, char const *name);
-static void color_destroy(gfx_t *gfx, color_t *c);
-
+static font_t *font_create_from_name(gfx_t *gfx, char const *name);
+static font_t *font_create_from_pattern(gfx_t *gfx, FcPattern *pattern);
+static void font_free(font_t *font);
 static void font_extents(font_t *font, char const *text, unsigned int len, unsigned int *w, unsigned int *h);
+static unsigned int font_height(font_t *font);
+
+static cursor_t cursor_create(gfx_t *gfx, int shape);
+static void cursor_free(gfx_t *gfx, cursor_t cursor);
+
+static color_t *scheme_create(gfx_t *gfx, char const *names[], size_t n);
+static void scheme_destroy(gfx_t *gfx, color_t *scm, size_t n);
 
 static size_t utf8_decode(char const *c, long *u, size_t clen);
 static long utf8_decode_byte(char const c, size_t *i);
@@ -39,133 +44,112 @@ static long const utfmax[UTF_SIZ + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF, 0x10FFFF
 
 
 /* global functions */
-gfx_t *gfx_create(Display *dpy, int screen, Window root, unsigned int w, unsigned int h){
+gfx_t *gfx_create(unsigned int w, unsigned int h, char const *scheme[][ColLast], size_t n){
 	gfx_t *gfx;
 	font_t *font;
 
 
+	/* init gfx */
 	gfx = calloc(1, sizeof(gfx_t));
 
 	if(gfx == 0x0)
-		return 0x0;
+		goto err_0;
 
-	gfx->dpy = dpy;
-	gfx->screen = screen;
-	gfx->root = root;
-	gfx->w = w;
-	gfx->h = h;
-	gfx->drawable = XCreatePixmap(dpy, root, w, h, DefaultDepth(dpy, screen));
-	gfx->gc = XCreateGC(dpy, root, 0, 0x0);
-	XSetLineAttributes(dpy, gfx->gc, 1, LineSolid, CapButt, JoinMiter);
-	font = xfont_create(gfx, CONFIG_FONT, 0x0);
+	gfx->drawable = XCreatePixmap(dwm.dpy, dwm.root, w, h, DefaultDepth(dwm.dpy, dwm.screen));
+	gfx->gc = XCreateGC(dwm.dpy, dwm.root, 0, 0x0);
+	XSetLineAttributes(dwm.dpy, gfx->gc, 1, LineSolid, CapButt, JoinMiter);
 
-	if(font == 0x0){
-		ERROR("loading fonts\n");
+	/* init fonts */
+	font = font_create_from_name(gfx, CONFIG_FONT);
 
-		return 0x0;
-	}
+	if(font == 0x0)
+		goto err_1;
 
+	dwm.lrpad = font_height(font);
 	list_add_tail(gfx->fonts, font);
 
-	dwm.lrpad = font->h;
+	/* init color schemes */
+	gfx->scheme = malloc(n * sizeof(color_t*));
+
+	if(gfx->scheme == 0x0)
+		goto err_1;
+
+	for(size_t i=0; i<n; i++){
+		gfx->scheme[i] = scheme_create(gfx, scheme[i], ColLast);
+
+		if(gfx->scheme[i] == 0x0)
+			goto err_1;
+
+		gfx->nscheme = i;
+	}
+
+	/* init cursors */
+	gfx->cursors[CurNormal] = cursor_create(dwm.gfx, XC_left_ptr);
+	gfx->cursors[CurResize] = cursor_create(dwm.gfx, XC_sizing);
+	gfx->cursors[CurMove] = cursor_create(dwm.gfx, XC_fleur);
 
 	return gfx;
-}
 
-void gfx_resize(gfx_t *gfx, unsigned int w, unsigned int h){
-	if(!gfx)
-		return;
 
-	gfx->w = w;
-	gfx->h = h;
-	if(gfx->drawable)
-		XFreePixmap(gfx->dpy, gfx->drawable);
+err_1:
+	gfx_free(gfx);
 
-	gfx->drawable = XCreatePixmap(gfx->dpy, gfx->root, w, h, DefaultDepth(gfx->dpy, gfx->screen));
+err_0:
+	return 0x0;
 }
 
 void gfx_free(gfx_t *gfx){
-	font_t *f;
+	font_t *font;
 
 
-	XFreePixmap(gfx->dpy, gfx->drawable);
-	XFreeGC(gfx->dpy, gfx->gc);
+	for(size_t i=0; i<CurLast; i++)
+		cursor_free(dwm.gfx, gfx->cursors[i]);
 
-	list_for_each(gfx->fonts, f){
-		list_rm(gfx->fonts, f);
-		xfont_free(f);
+	for(size_t i=0; i<gfx->nscheme; i++)
+		scheme_destroy(gfx, gfx->scheme[i], ColLast);
+
+	free(gfx->scheme);
+
+	list_for_each(gfx->fonts, font){
+		list_rm(gfx->fonts, font);
+		font_free(font);
 	}
+
+	XFreePixmap(dwm.dpy, gfx->drawable);
+	XFreeGC(dwm.dpy, gfx->gc);
 
 	free(gfx);
 }
 
+void gfx_resize(gfx_t *gfx, unsigned int w, unsigned int h){
+	if(gfx->drawable)
+		XFreePixmap(dwm.dpy, gfx->drawable);
+
+	gfx->drawable = XCreatePixmap(dwm.dpy, dwm.root, w, h, DefaultDepth(dwm.dpy, dwm.screen));
+}
+
 unsigned int gfx_fontset_getwidth(gfx_t *gfx, char const *text){
-	if(!gfx || !gfx->fonts || !text)
-		return 0;
-
-	return gfx_text(gfx, 0, 0, 0, 0, 0, text, 0);
+	return gfx_text(gfx, 0, 0, 0, 0, SchemeNorm, 0, text, 0);
 }
 
-color_t *gfx_scm_create(gfx_t *gfx, char const *names[], size_t n){
-	/* Wrapper to create color schemes. The caller has to call free(3) on the
-	 * returned color scheme when done using it. */
-	color_t *c;
+void gfx_rect(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t scheme, int filled, int invert){
+	color_t *scm = gfx->scheme[scheme];
 
 
-	/* need at least two colors for a scheme */
-	if(n < 2)
-		return 0x0;
+	XSetForeground(dwm.dpy, gfx->gc, invert ? scm[ColBg].pixel : scm[ColFg].pixel);
 
-	c = calloc(n, sizeof(XftColor));
-
-	if(c == 0x0)
-		return 0x0;
-
-	for(size_t i=0; i<n; i++){
-		if(color_create(gfx, c + i, names[i]) != 0)
-			return 0x0;
-	}
-
-	return c;
+	if(filled)	XFillRectangle(dwm.dpy, gfx->drawable, gfx->gc, x, y, w, h);
+	else		XDrawRectangle(dwm.dpy, gfx->drawable, gfx->gc, x, y, w - 1, h - 1);
 }
 
-void gfx_scm_destroy(gfx_t *gfx, color_t *scm, size_t n){
-	for(size_t i=0; i<n; i++)
-		color_destroy(gfx, scm + i);
-
-	free(scm);
-}
-
-cursor_t gfx_cursor_create(gfx_t *gfx, int shape){
-	return XCreateFontCursor(gfx->dpy, shape);
-}
-
-void gfx_cursor_free(gfx_t *gfx, cursor_t cursor){
-	XFreeCursor(gfx->dpy, cursor);
-}
-
-void gfx_setscheme(gfx_t *gfx, color_t *scm){
-	if(gfx)
-		gfx->scheme = scm;
-}
-
-void gfx_rect(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, int filled, int invert){
-	if(!gfx || !gfx->scheme)
-		return;
-
-	XSetForeground(gfx->dpy, gfx->gc, invert ? gfx->scheme[ColBg].pixel : gfx->scheme[ColFg].pixel);
-
-	if(filled)	XFillRectangle(gfx->dpy, gfx->drawable, gfx->gc, x, y, w, h);
-	else		XDrawRectangle(gfx->dpy, gfx->drawable, gfx->gc, x, y, w - 1, h - 1);
-}
-
-int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, char const *text, int invert){
+int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t scheme, unsigned int lpad, char const *text, int invert){
 	int i, ty, ellipsis_x = 0;
 	unsigned int tmpw, ew, ellipsis_w = 0, ellipsis_len;
-	XftDraw *d = 0x0;
-	font_t *usedfont, *curfont, *nextfont;
 	int utf8strlen, utf8charlen, render = x || y || w || h;
 	long utf8codepoint = 0;
+	XftDraw *d = 0x0;
+	color_t *scm = gfx->scheme[scheme];
+	font_t *usedfont, *curfont, *nextfont;
 	char const *utf8str;
 	FcCharSet *fccharset;
 	FcPattern *fcpattern;
@@ -186,16 +170,16 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, unsigned 
 
 	static unsigned int ellipsis_width = 0;
 
-	if(!gfx || (render && (!gfx->scheme || !w)) || !text || !gfx->fonts)
+	if(render && !w)
 		return 0;
 
 	if(!render){
 		w = invert ? invert : ~invert;
 	}
 	else{
-		XSetForeground(gfx->dpy, gfx->gc, gfx->scheme[invert ? ColFg : ColBg].pixel);
-		XFillRectangle(gfx->dpy, gfx->drawable, gfx->gc, x, y, w, h);
-		d = XftDrawCreate(gfx->dpy, gfx->drawable, DefaultVisual(gfx->dpy, gfx->screen), DefaultColormap(gfx->dpy, gfx->screen));
+		XSetForeground(dwm.dpy, gfx->gc, scm[invert ? ColFg : ColBg].pixel);
+		XFillRectangle(dwm.dpy, gfx->drawable, gfx->gc, x, y, w, h);
+		d = XftDrawCreate(dwm.dpy, gfx->drawable, DefaultVisual(dwm.dpy, dwm.screen), DefaultColormap(dwm.dpy, dwm.screen));
 		x += lpad;
 		w -= lpad;
 	}
@@ -214,7 +198,7 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, unsigned 
 			utf8charlen = utf8_decode(text, &utf8codepoint, UTF_SIZ);
 
 			list_for_each(gfx->fonts, curfont){
-				charexists = charexists || XftCharExists(gfx->dpy, curfont->xfont, utf8codepoint);
+				charexists = charexists || XftCharExists(dwm.dpy, curfont->xfont, utf8codepoint);
 
 				if(charexists){
 					font_extents(curfont, text, utf8charlen, &tmpw, 0x0);
@@ -252,15 +236,15 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, unsigned 
 
 		if(utf8strlen){
 			if(render){
-				ty = y + (h - usedfont->h) / 2 + usedfont->xfont->ascent;
-				XftDrawStringUtf8(d, &gfx->scheme[invert ? ColBg : ColFg], usedfont->xfont, x, ty, (XftChar8*)utf8str, utf8strlen);
+				ty = y + (h - font_height(usedfont)) / 2 + usedfont->xfont->ascent;
+				XftDrawStringUtf8(d, &scm[invert ? ColBg : ColFg], usedfont->xfont, x, ty, (XftChar8*)utf8str, utf8strlen);
 			}
 
 			x += ew;
 			w -= ew;
 		}
 		if(render && overflow)
-			gfx_text(gfx, ellipsis_x, y, ellipsis_w, h, 0, "...", invert);
+			gfx_text(gfx, ellipsis_x, y, ellipsis_w, h, scheme, 0, "...", invert);
 
 		if(!*text || overflow)
 			break;
@@ -294,19 +278,19 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, unsigned 
 
 			FcConfigSubstitute(0x0, fcpattern, FcMatchPattern);
 			FcDefaultSubstitute(fcpattern);
-			match = XftFontMatch(gfx->dpy, gfx->screen, fcpattern, &result);
+			match = XftFontMatch(dwm.dpy, dwm.screen, fcpattern, &result);
 
 			FcCharSetDestroy(fccharset);
 			FcPatternDestroy(fcpattern);
 
 			if(match){
-				usedfont = xfont_create(gfx, 0x0, match);
+				usedfont = font_create_from_pattern(gfx, match);
 
-				if(usedfont && XftCharExists(gfx->dpy, usedfont->xfont, utf8codepoint)){
+				if(usedfont && XftCharExists(dwm.dpy, usedfont->xfont, utf8codepoint)){
 					list_add_tail(gfx->fonts, usedfont);
 				}
 				else{
-					xfont_free(usedfont);
+					font_free(usedfont);
 					nomatches.codepoint[++nomatches.idx % nomatches_len] = utf8codepoint;
 no_match:
 					usedfont = gfx->fonts;
@@ -322,15 +306,147 @@ no_match:
 }
 
 void gfx_map(gfx_t *gfx, Window win, int x, int y, unsigned int w, unsigned int h){
-	if(!gfx)
-		return;
-
-	XCopyArea(gfx->dpy, gfx->drawable, win, gfx->gc, x, y, w, h, x, y);
+	XCopyArea(dwm.dpy, gfx->drawable, win, gfx->gc, x, y, w, h, x, y);
 	xlib_sync();
 }
 
 
 /* local functions */
+static font_t *font_create_from_name(gfx_t *gfx, char const *name){
+	font_t *font;
+
+
+	font = malloc(sizeof(font_t));
+
+	if(font == 0x0)
+		goto err_0;
+
+	/* Using the pattern found at font->xfont->pattern does not yield the
+	 * same substitution results as using the pattern returned by
+	 * FcNameParse; using the latter results in the desired fallback
+	 * behaviour whereas the former just results in missing-character
+	 * rectangles being drawn, at least with some fonts. */
+	font->xfont = XftFontOpenName(dwm.dpy, dwm.screen, name);
+
+	if(font->xfont == 0x0)
+		goto err_1;
+
+	font->pattern = FcNameParse((FcChar8*)name);
+
+	if(font->pattern == 0x0)
+		goto err_1;
+
+	return font;
+
+
+err_1:
+	ERROR("parsing font name to pattern\n");
+	font_free(font);
+
+err_0:
+	ERROR("loading font %s\n", name);
+
+	return font;
+}
+
+static font_t *font_create_from_pattern(gfx_t *gfx, FcPattern *pattern){
+	font_t *font;
+
+
+	font = malloc(sizeof(font_t));
+
+	if(font == 0x0)
+		goto err_0;
+
+	font->pattern = 0x0;
+	font->xfont = XftFontOpenPattern(dwm.dpy, pattern);
+
+	if(font->xfont == 0x0)
+		goto err_1;
+
+	return font;
+
+
+err_1:
+	ERROR("parsing font name to pattern\n");
+	font_free(font);
+
+err_0:
+	ERROR("loading font from pattern\n");
+
+	return 0x0;
+}
+
+static void font_free(font_t *font){
+	if(font->pattern != 0x0)
+		FcPatternDestroy(font->pattern);
+
+	if(font->xfont != 0x0)
+		XftFontClose(dwm.dpy, font->xfont);
+
+	free(font);
+}
+
+static void font_extents(font_t *font, char const *text, unsigned int len, unsigned int *w, unsigned int *h){
+	XGlyphInfo ext;
+
+
+	XftTextExtentsUtf8(dwm.dpy, font->xfont, (XftChar8*)text, len, &ext);
+
+	if(w)
+		*w = ext.xOff;
+
+	if(h)
+		*h = font_height(font);
+}
+
+static unsigned int font_height(font_t *font){
+	return font->xfont->ascent + font->xfont->descent;
+}
+
+cursor_t cursor_create(gfx_t *gfx, int shape){
+	return XCreateFontCursor(dwm.dpy, shape);
+}
+
+void cursor_free(gfx_t *gfx, cursor_t cursor){
+	XFreeCursor(dwm.dpy, cursor);
+}
+
+static color_t *scheme_create(gfx_t *gfx, char const *names[], size_t n){
+	Visual *visual = DefaultVisual(dwm.dpy, dwm.screen);
+	Colormap colmap = DefaultColormap(dwm.dpy, dwm.screen);
+	color_t *c;
+	size_t i;
+
+
+	c = calloc(n, sizeof(XftColor));
+
+	if(c == 0x0)
+		goto err_0;
+
+	for(i=0; i<n; i++){
+		if(!XftColorAllocName(dwm.dpy, visual, colmap, names[i], c + i))
+			goto err_1;
+	}
+
+	return c;
+
+
+err_1:
+	for(; i>0; i--)
+		XftColorFree(dwm.dpy, visual, colmap, c + i - 1);
+
+err_0:
+	return 0x0;
+}
+
+static void scheme_destroy(gfx_t *gfx, color_t *scm, size_t n){
+	for(size_t i=0; i<n; i++)
+		XftColorFree(dwm.dpy, DefaultVisual(dwm.dpy, dwm.screen), DefaultColormap(dwm.dpy, dwm.screen), scm + i);
+
+	free(scm);
+}
+
 static size_t utf8_decode(char const *c, long *u, size_t clen){
 	size_t i, j, len, type;
 	long udecoded;
@@ -378,96 +494,4 @@ static size_t utf8_validate(long *u, size_t i){
 	for(i=1; *u>utfmax[i]; ++i);
 
 	return i;
-}
-
-static font_t *xfont_create(gfx_t *gfx, char const *fontname, FcPattern *fontpattern){
-	font_t *font;
-	XftFont *xfont = 0x0;
-	FcPattern *pattern = 0x0;
-
-
-	if(fontname){
-		/* Using the pattern found at font->xfont->pattern does not yield the
-		 * same substitution results as using the pattern returned by
-		 * FcNameParse; using the latter results in the desired fallback
-		 * behaviour whereas the former just results in missing-character
-		 * rectangles being drawn, at least with some fonts. */
-		if(!(xfont = XftFontOpenName(gfx->dpy, gfx->screen, fontname))){
-			ERROR("loading font from name %s\n", fontname);
-
-			return 0x0;
-		}
-
-		if(!(pattern = FcNameParse((FcChar8*)fontname))){
-			ERROR("parsing font name to pattern '%s'\n", fontname);
-			XftFontClose(gfx->dpy, xfont);
-
-			return 0x0;
-		}
-	}
-	else if(fontpattern){
-		if(!(xfont = XftFontOpenPattern(gfx->dpy, fontpattern))){
-			ERROR("loading font from pattern\n");
-
-			return 0x0;
-		}
-	}
-	else{
-		ERROR("no font specified\n");
-
-		return 0x0;
-	}
-
-	font = calloc(1, sizeof(font_t));
-
-	if(font == 0x0)
-		return 0x0;
-
-	font->xfont = xfont;
-	font->pattern = pattern;
-	font->h = xfont->ascent + xfont->descent;
-	font->dpy = gfx->dpy;
-
-	return font;
-}
-
-static void xfont_free(font_t *font){
-	if(!font)
-		return;
-
-	if(font->pattern)
-		FcPatternDestroy(font->pattern);
-
-	XftFontClose(font->dpy, font->xfont);
-	free(font);
-}
-
-static int color_create(gfx_t *gfx, color_t *dest, char const *name){
-	if(!gfx || !dest || !name)
-		return -1;
-
-	if(!XftColorAllocName(gfx->dpy, DefaultVisual(gfx->dpy, gfx->screen), DefaultColormap(gfx->dpy, gfx->screen), name, dest))
-		return ERROR("allocating color %s\n", name);
-
-	return 0;
-}
-
-static void color_destroy(gfx_t *gfx, color_t *c){
-	XftColorFree(gfx->dpy, DefaultVisual(gfx->dpy, gfx->screen), DefaultColormap(gfx->dpy, gfx->screen), c);
-}
-
-static void font_extents(font_t *font, char const *text, unsigned int len, unsigned int *w, unsigned int *h){
-	XGlyphInfo ext;
-
-
-	if(!font || !text)
-		return;
-
-	XftTextExtentsUtf8(font->dpy, font->xfont, (XftChar8*)text, len, &ext);
-
-	if(w)
-		*w = ext.xOff;
-
-	if(h)
-		*h = font->h;
 }
