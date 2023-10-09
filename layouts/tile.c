@@ -23,7 +23,7 @@ void layout_tile(void){
 	win_geom_t *geom;
 
 
-	for(n=0, c=nexttiled(dwm.stack); c; c=nexttiled(c->next), n++);
+	for(n=0, c=layout_next_tiled(dwm.stack); c; c=layout_next_tiled(c->next), n++);
 
 	if(n == 0)
 		return;
@@ -31,7 +31,7 @@ void layout_tile(void){
 	if(n > NMASTER)	w = NMASTER ? m->width * (CONFIG_LAYOUT_MASTER_RATIO / 100.0) : 0;
 	else			w = m->width;
 
-	for(i=y=ty=0, c=nexttiled(dwm.stack); c; c=nexttiled(c->next), i++){
+	for(i=y=ty=0, c=layout_next_tiled(dwm.stack); c; c=layout_next_tiled(c->next), i++){
 		geom = &c->geom;
 
 		if(i < NMASTER){

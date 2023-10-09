@@ -14,7 +14,7 @@ typedef struct layout_t{
 
 
 /* prototypes */
-client_t *nexttiled(client_t *c);
+client_t *layout_next_tiled(client_t *c);
 void layout_arrange(void);
 
 void layout_tile(void);

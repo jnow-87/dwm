@@ -30,16 +30,16 @@ void log_cleanup(void){
 		fclose(log_fp);
 }
 
-void plog(log_lvl_t lvl, char const *file, size_t line, char const *fmt, ...){
+void log_print(log_lvl_t lvl, char const *file, size_t line, char const *fmt, ...){
 	va_list lst;
 
 
 	va_start(lst, fmt);
-	vplog(lvl, file, line, fmt, lst);
+	log_vprint(lvl, file, line, fmt, lst);
 	va_end(lst);
 }
 
-void vplog(log_lvl_t lvl, char const *file, size_t line, char const *fmt, va_list lst){
+void log_vprint(log_lvl_t lvl, char const *file, size_t line, char const *fmt, va_list lst){
 	if(lvl == LOG_DEBUG && !log_debug)
 		return;
 

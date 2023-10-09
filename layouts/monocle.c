@@ -17,7 +17,7 @@ void layout_monocle(void){
 			n++;
 	}
 
-	for(c=nexttiled(dwm.stack); c; c=nexttiled(c->next)){
+	for(c=layout_next_tiled(dwm.stack); c; c=layout_next_tiled(c->next)){
 		m = monitor_from_client(c);
 
 		client_resize(c, m->x, m->y, m->width - 2 * c->geom.border_width, m->height - 2 * c->geom.border_width);

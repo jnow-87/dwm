@@ -5,7 +5,7 @@
 
 
 /* global functions */
-client_t *nexttiled(client_t *c){
+client_t *layout_next_tiled(client_t *c){
 	for(; c && !ISVISIBLE(c); c=c->next);
 
 	return c;

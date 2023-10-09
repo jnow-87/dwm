@@ -42,7 +42,6 @@ void input_keys_release(void);
 void input_buttons_register(window_t win, button_map_t const *mappings, size_t n, int focused);
 void input_buttons_release(window_t win);
 
-
 int input_pointer_grab(cursor_t cursor);
 void input_pointer_release(void);
 void input_pointer_move(window_t win, int x, int y);
