@@ -4,6 +4,7 @@
 #define GFX_H
 
 
+#include <fontconfig/fontconfig.h>
 #include <X11/X.h>
 #include <X11/Xft/Xft.h>
 
@@ -42,6 +43,7 @@ typedef struct font_t{
 	FcPattern *pattern;
 } font_t;
 
+// TODO are all member still needed
 typedef struct{
 	unsigned int w, h;
 	Display *dpy;

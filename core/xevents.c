@@ -1,21 +1,17 @@
-#include <X11/Xlib.h>
-#include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
-#include <xlib/window.h>
-#include <config.h>
+#include <X11/Xlib.h>
+#include <core/buttons.h>
+#include <core/clientstack.h>
 #include <core/dwm.h>
+#include <core/keys.h>
 #include <core/layout.h>
 #include <core/monitor.h>
 #include <core/statusbar.h>
-#include <utils/timer.h>
-#include <xlib/input.h>
-#include <xlib/xlib.h>
 #include <core/xevents.h>
-#include <core/clientstack.h>
-#include <core/buttons.h>
-#include <core/keys.h>
-#include <utils/log.h>
+#include <xlib/input.h>
+#include <xlib/window.h>
+#include <xlib/xlib.h>
+#include <config.h>
 
 
 /* local/static prototypes */

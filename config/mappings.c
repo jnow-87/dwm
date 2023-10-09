@@ -1,10 +1,12 @@
-#include <X11/X.h>
-#include <X11/keysym.h>
-#include <xlib/input.h>
-#include <core/buttons.h>
 #include <config/config.h>
+#include <stddef.h>
 #include <limits.h>
-#include <utils/math.h>
+#include <X11/X.h>
+#include <X11/keysymdef.h>
+#include <core/buttons.h>
+#include <core/keys.h>
+#include <utils/utils.h>
+#include <actions.h>
 
 
 /* macros */
@@ -94,7 +96,7 @@ key_map_t const keys[] = {
 //	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
 };
 
-unsigned int const nkeys = LENGTH(keys);
+size_t nkeys = LENGTH(keys);
 
 /* click can be CLK_TAGBAR, CLK_LAYOUT, CLK_STATUS, ClkWinTitle, CLK_CLIENT, or CLK_ROOT */
 button_map_t const buttons[] = {
@@ -106,4 +108,4 @@ button_map_t const buttons[] = {
 	{ CLK_LAYOUT,	0,					Button1,	action_layout_select,	{0} },
 };
 
-unsigned int const nbuttons = LENGTH(buttons);
+size_t nbuttons = LENGTH(buttons);

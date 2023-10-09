@@ -10,6 +10,8 @@ typedef union{
 	void const *v;
 } action_arg_t;
 
+typedef void (*action_t)(action_arg_t const *);
+
 
 /* prototypes */
 void action_quit(action_arg_t const *arg);

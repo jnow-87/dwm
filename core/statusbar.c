@@ -1,11 +1,14 @@
 #include <config/config.h>
-#include <config.h>
 #include <core/buttons.h>
-#include <core/scheme.h>
 #include <core/dwm.h>
+#include <core/monitor.h>
+#include <core/scheme.h>
 #include <core/statusbar.h>
+#include <core/tags.h>
 #include <xlib/atoms.h>
+#include <xlib/gfx.h>
 #include <xlib/window.h>
+#include <config.h>
 
 
 /* global functions */
@@ -63,7 +66,7 @@ void statusbar_update(void){
 	/* draw tags */
 	x = 0;
 
-	for(unsigned int i=0; i<ntags; i++){
+	for(size_t i=0; i<ntags; i++){
 		w = TEXTW(tags[i]);
 		gfx_setscheme(dwm.gfx, dwm.scheme[(dwm.tag_mask & (1 << i)) ? SchemeSel : SchemeNorm]);
 		gfx_text(dwm.gfx, x, 0, w, bar_height, dwm.lrpad / 2, tags[i], 0);

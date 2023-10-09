@@ -3,8 +3,8 @@
 
 
 #include <stdbool.h>
-#include <xlib/window.h>
 #include <core/buttons.h>
+#include <xlib/window.h>
 
 
 /* types */

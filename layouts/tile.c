@@ -1,8 +1,10 @@
 #include <config/config.h>
-#include <xlib/window.h>
+#include <core/client.h>
 #include <core/dwm.h>
 #include <core/layout.h>
-#include <utils/math.h>
+#include <core/monitor.h>
+#include <xlib/window.h>
+#include <utils/utils.h>
 
 
 /* macros */

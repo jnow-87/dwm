@@ -1,4 +1,3 @@
-#include <config.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <locale.h>
@@ -10,6 +9,7 @@
 #include <xlib/xlib.h>
 #include <xlib/gfx.h>
 #include <utils/log.h>
+#include <config.h>
 
 
 /* local/static prototypes */
@@ -72,7 +72,7 @@ int xlib_init(void){
 	if(dwm.scheme == 0x0)
 		return STRERROR("allocating color scheme");
 
-	for(int i=0; i<ncolors; i++){
+	for(size_t i=0; i<ncolors; i++){
 		dwm.scheme[i] = gfx_scm_create(dwm.gfx, colors[i], 3);
 
 		if(dwm.scheme[i] == 0x0)

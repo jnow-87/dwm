@@ -1,14 +1,14 @@
 #include <config/config.h>
 #include <stdint.h>
-#include <utils/math.h>
-#include <core/dwm.h>
-#include <actions.h>
 #include <core/clientstack.h>
-#include <xlib/window.h>
-#include <xlib/input.h>
-#include <core/xevents.h>
-#include <core/statusbar.h>
+#include <core/dwm.h>
 #include <core/keys.h>
+#include <core/statusbar.h>
+#include <core/xevents.h>
+#include <xlib/input.h>
+#include <xlib/window.h>
+#include <utils/utils.h>
+#include <actions.h>
 
 
 /* local/static prototypes */

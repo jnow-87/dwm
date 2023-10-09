@@ -1,8 +1,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <core/dwm.h>
-#include <actions.h>
 #include <utils/log.h>
+#include <actions.h>
 
 
 /* global functions */

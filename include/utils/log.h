@@ -2,15 +2,14 @@
 #define LOG_H
 
 
+#include <stddef.h>
 #include <stdbool.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
-#include <sys/types.h>
 
 
 /* macros */
-// log
 #define ERROR(fmt, ...)		({ plog(LOG_ERROR, __FILE__, __LINE__, "error: " fmt, ##__VA_ARGS__); -1; })
 #define STRERROR(fmt, ...)	ERROR(fmt ": %s\n", ##__VA_ARGS__, strerror(errno))
 #define EEXIT(fmt, ...)		{ ERROR(fmt, ##__VA_ARGS__); exit(1); }

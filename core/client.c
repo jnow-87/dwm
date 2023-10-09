@@ -1,19 +1,17 @@
 #include <config/config.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <X11/Xlib.h>
-#include <config.h>
 #include <core/client.h>
+#include <core/clientstack.h>
 #include <core/dwm.h>
 #include <core/monitor.h>
-#include <core/scheme.h>
-#include <core/clientstack.h>
-#include <xlib/window.h>
-#include <xlib/input.h>
 #include <xlib/atoms.h>
+#include <xlib/window.h>
 #include <utils/list.h>
-#include <utils/stack.h>
-#include <utils/math.h>
 #include <utils/log.h>
+#include <utils/stack.h>
+#include <utils/utils.h>
 
 
 /* global functions */
@@ -27,8 +25,9 @@ int clients_init(void){
 	if(!XQueryTree(dwm.dpy, dwm.root, &dummy, &dummy, &childs, &n))
 		return ERROR("querying clients\n");
 
+	// TODO what is the transient check for
 	for(unsigned int i=0; i<n; i++){
-		if(win_get_attr(childs[i], &attr) != 0 || attr.override_redirect || XGetTransientForHint(dwm.dpy, childs[i], &dummy))
+		if(win_get_attr(childs[i], &attr) != 0 || attr.override_redirect || win_get_transient(childs[i]) != None)
 			continue;
 
 		if(attr.map_state == IsViewable || win_get_state(childs[i]) == IconicState)
@@ -40,7 +39,7 @@ int clients_init(void){
 		if(win_get_attr(childs[i], &attr) != 0)
 			continue;
 
-		if(XGetTransientForHint(dwm.dpy, childs[i], &dummy) && (attr.map_state == IsViewable || win_get_state(childs[i]) == IconicState))
+		if(win_get_transient(childs[i]) != None && (attr.map_state == IsViewable || win_get_state(childs[i]) == IconicState))
 			client_init(childs[i], &attr);
 	}
 

@@ -1,6 +1,7 @@
 #include <core/client.h>
 #include <core/dwm.h>
 #include <core/clientstack.h>
+#include <xlib/window.h>
 #include <utils/list.h>
 #include <utils/stack.h>
 

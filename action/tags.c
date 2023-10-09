@@ -1,7 +1,6 @@
 #include <core/dwm.h>
-#include <actions.h>
 #include <core/tags.h>
-#include <xlib/window.h>
+#include <actions.h>
 
 
 /* global functions */

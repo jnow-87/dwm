@@ -4,7 +4,6 @@
 
 #include <stdbool.h>
 #include <X11/X.h>
-#include <core/scheme.h>
 #include <xlib/gfx.h>
 
 

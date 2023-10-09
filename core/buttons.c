@@ -1,7 +1,6 @@
-#include <config.h>
 #include <core/dwm.h>
 #include <core/buttons.h>
-#include <xlib/input.h>
+#include <config.h>
 
 
 /* global functions */

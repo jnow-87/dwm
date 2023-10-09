@@ -1,8 +1,9 @@
+#include <stddef.h>
 #include <stdlib.h>
-#include <sys/types.h>
+#include <string.h>
 #include <X11/extensions/Xinerama.h>
-#include <core/monitor.h>
 #include <core/dwm.h>
+#include <core/monitor.h>
 #include <utils/log.h>
 
 

@@ -1,13 +1,13 @@
-#include <config.h>
 #include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <core/dwm.h>
-#include <core/xevents.h>
-#include <xlib/window.h>
+#include <core/scheme.h>
 #include <xlib/input.h>
+#include <xlib/window.h>
 #include <xlib/xlib.h>
-#include <utils/math.h>
+#include <utils/utils.h>
+#include <config.h>
 
 
 /* local/static prototypes */

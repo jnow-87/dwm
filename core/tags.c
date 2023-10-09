@@ -1,6 +1,11 @@
-#include <core/dwm.h>
 #include <core/clientstack.h>
+#include <core/layout.h>
+#include <core/statusbar.h>
 #include <config.h>
+
+
+/* macros */
+#define TAGMASK ((1 << ntags) - 1)
 
 
 /* global functions */

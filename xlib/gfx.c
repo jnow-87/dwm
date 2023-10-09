@@ -1,15 +1,11 @@
 /* See LICENSE file for copyright and license details. */
+#include <config/config.h>
 #include <stdlib.h>
 #include <X11/Xft/Xft.h>
 #include <X11/Xlib.h>
-#include <config/config.h>
+#include <core/dwm.h>
 #include <xlib/gfx.h>
 #include <xlib/xlib.h>
-#include <core/dwm.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <utils/math.h>
 #include <utils/list.h>
 #include <utils/log.h>
 
@@ -17,6 +13,8 @@
 /* macros */
 #define UTF_INVALID	0xFFFD
 #define UTF_SIZ		4
+
+#define BETWEEN(X, A, B)	((A) <= (X) && (X) <= (B))
 
 
 /* local/static prototypes */

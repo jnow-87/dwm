@@ -4,6 +4,7 @@
 
 #include <X11/X.h>
 #include <X11/Xatom.h>
+#include <xlib/window.h>
 
 
 /* types */
@@ -22,11 +23,11 @@ typedef enum{
 	WMState,
 	WMTakeFocus,
 	WMLast
-} default_atoms_t;
+} wm_atoms_t;
 
 
 /* prototypes */
-int atoms_text_prop(Window win, Atom atom, char *text, unsigned int size);
+int atoms_text_prop(window_t win, Atom atom, char *text, unsigned int size);
 
 void atoms_netatom_append(net_atom_t atom, unsigned char *value);
 void atoms_netatom_delete(net_atom_t atom);

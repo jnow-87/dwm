@@ -1,4 +1,3 @@
-#include <config.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <core/dwm.h>
@@ -6,6 +5,7 @@
 #include <xlib/input.h>
 #include <utils/timer.h>
 #include <utils/log.h>
+#include <config.h>
 
 
 /* local/static prototypes */

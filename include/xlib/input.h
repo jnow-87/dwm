@@ -4,10 +4,10 @@
 
 #include <stddef.h>
 #include <X11/X.h>
-#include <actions.h>
 #include <core/buttons.h>
 #include <xlib/gfx.h>
 #include <xlib/window.h>
+#include <actions.h>
 
 
 /* macros */
@@ -23,7 +23,7 @@ typedef struct{
 	unsigned int mask;
 	unsigned int button;
 
-	void (*func)(action_arg_t const *arg);
+	action_t func;
 	action_arg_t const arg;
 } button_map_t;
 
@@ -31,7 +31,7 @@ typedef struct{
 	unsigned int mod;
 	keysym_t keysym;
 
-	void (*func)(action_arg_t const *);
+	action_t func;
 	action_arg_t const arg;
 } key_map_t;
 

@@ -1,5 +1,6 @@
+#include <stddef.h>
 #include <core/layout.h>
-#include <utils/math.h>
+#include <utils/utils.h>
 
 
 /* global variables */
@@ -10,4 +11,4 @@ layout_t const layouts[] = {
 	{ "❍", layout_monocle },
 };
 
-unsigned int const nlayouts = LENGTH(layouts);
+size_t nlayouts = LENGTH(layouts);

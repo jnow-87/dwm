@@ -3,12 +3,13 @@
 
 
 #include <X11/X.h>
-#include <xlib/gfx.h>
 #include <xlib/atoms.h>
-#include <xlib/input.h>
+#include <xlib/gfx.h>
+#include <xlib/window.h>
+#include <core/client.h>
+#include <core/layout.h>
 #include <core/monitor.h>
 #include <core/statusbar.h>
-#include <core/layout.h>
 
 
 /* macros */
@@ -26,8 +27,8 @@ typedef enum{
 typedef struct{
 	// x-server connection
 	Display *dpy;
-	Window root,
-		   wmcheck;
+	window_t root,
+			 wmcheck;
 
 	int screen;
 	int screen_width,

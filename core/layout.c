@@ -1,7 +1,6 @@
-#include <xlib/window.h>
+#include <core/client.h>
 #include <core/dwm.h>
-#include <core/layout.h>
-#include <core/monitor.h>
+#include <xlib/window.h>
 #include <utils/list.h>
 
 
@@ -21,6 +20,6 @@ void layout_arrange(void){
 		else				win_hide(c->win, &c->geom);
 	}
 
-	if(dwm.layout->layout_arrange)
-		dwm.layout->layout_arrange();
+	if(dwm.layout->arrange)
+		dwm.layout->arrange();
 }

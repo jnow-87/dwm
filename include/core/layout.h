@@ -2,14 +2,14 @@
 #define LAYOUT_H
 
 
+#include <core/client.h>
 #include <xlib/window.h>
-#include <core/monitor.h>
 
 
 /* types */
 typedef struct layout_t{
 	char const *symbol;
-	void (*layout_arrange)(void);
+	void (*arrange)(void);
 } layout_t;
 
 

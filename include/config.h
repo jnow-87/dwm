@@ -4,12 +4,9 @@
 #define CONFIG_H
 
 
-#include <xlib/input.h>
+#include <stddef.h>
 #include <core/layout.h>
-
-
-/* macros */
-#define TAGMASK ((1 << ntags) - 1)
+#include <xlib/input.h>
 
 
 /* external variables */
@@ -20,11 +17,11 @@ extern button_map_t const buttons[];
 extern layout_t const layouts[];
 extern char const *colors[][3];
 
-extern unsigned int ntags;
-extern unsigned int const nkeys;
-extern unsigned int const nbuttons;
-extern unsigned int nlayouts;
-extern unsigned int ncolors;
+extern size_t nlayouts,
+			  ncolors,
+			  nkeys,
+			  nbuttons,
+			  ntags;
 
 
 #endif // CONFIG_H

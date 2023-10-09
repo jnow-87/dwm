@@ -3,7 +3,7 @@
 
 
 #include <stdbool.h>
-#include <X11/Xlib.h>
+#include <core/client.h>
 #include <xlib/window.h>
 
 

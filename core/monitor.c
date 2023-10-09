@@ -1,21 +1,15 @@
-#include <xlib/window.h>
-#include <config.h>
-#include <config/config.h>
+#include <stdlib.h>
 #include <core/dwm.h>
-#include <core/layout.h>
-#include <core/statusbar.h>
 #include <core/monitor.h>
+#include <xlib/window.h>
 #include <xlib/xinerama.h>
-#include <utils/math.h>
 #include <utils/list.h>
+#include <utils/utils.h>
 
 
 /* global functions */
 void monitor_discover(void){
-	/* free existing monitors */
-	while(dwm.mons){
-		monitor_destroy(dwm.mons);
-	}
+	monitor_cleanup();
 
 	if(xinerama_discover() < 0)
 		monitor_create(0, 0, dwm.screen_width, dwm.screen_height);

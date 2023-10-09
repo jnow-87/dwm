@@ -1,10 +1,10 @@
 #include <X11/X.h>
 #include <X11/XKBlib.h>
-#include <core/dwm.h>
 #include <core/buttons.h>
+#include <core/dwm.h>
 #include <xlib/input.h>
 #include <xlib/gfx.h>
-#include <utils/math.h>
+#include <utils/utils.h>
 
 
 /* macros */

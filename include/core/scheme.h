@@ -1,5 +1,5 @@
-#ifndef COLORS_H
-#define COLORS_H
+#ifndef SCHEME_H
+#define SCHEME_H
 
 
 /* types */
@@ -10,4 +10,4 @@ typedef enum{
 } scheme_t;
 
 
-#endif // COLORS_H
+#endif // SCHEME_H

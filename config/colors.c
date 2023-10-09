@@ -1,6 +1,7 @@
-#include <core/scheme.h>
 #include <config/config.h>
-#include <utils/math.h>
+#include <stddef.h>
+#include <core/scheme.h>
+#include <utils/utils.h>
 
 
 /* global variables */
@@ -11,4 +12,4 @@ char const *colors[][3] = {
 	[SchemeSpacer] = { CONFIG_COL_INACT_BG, CONFIG_COL_ACT_BG, CONFIG_COL_ACT_BORDER },
 };
 
-unsigned int ncolors = LENGTH(colors);
+size_t ncolors = LENGTH(colors);

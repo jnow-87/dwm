@@ -1,17 +1,3 @@
-/**
- * Copyright (C) 2016 Jan Nowotsch
- * Author Jan Nowotsch	<jan.nowotsch@gmail.com>
- *
- * Released under the terms of the GNU GPL v2.0
- *
- * \brief	set of to interface the double-linked list implementation
- * 			including checks for type compatibility to ensure the memory
- * 			layout of list2_t match the actual datatypes that are used
- * 			as list elements
- */
-
-
-
 #ifndef LIST_H
 #define LIST_H
 

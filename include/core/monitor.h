@@ -3,7 +3,6 @@
 
 
 #include <core/client.h>
-#include <xlib/window.h>
 
 
 /* types */
