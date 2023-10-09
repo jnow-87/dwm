@@ -10,6 +10,11 @@
 #include <config.h>
 
 
+/* macros */
+#define PADDING		CONFIG_STATUSBAR_PADDING
+#define TEXTW(s)	(gfx_text_width(dwm.gfx, s) + PADDING)
+
+
 /* global functions */
 void statusbar_init(unsigned int height){
 	statusbar_t *bar = &dwm.statusbar;
@@ -49,10 +54,10 @@ void statusbar_update(void){
 	statusbar_raise();
 
 	atoms_text_prop(dwm.root, XA_WM_NAME, bar->status, sizeof(bar->status));
-	status_width = TEXTW(bar->status) - dwm.lrpad + 2; // 2px right padding
+	status_width = TEXTW(bar->status) - PADDING + 2;
 
 	/* draw status spacer */
-	w = TEXTW(CONFIG_STATUSBAR_SPACER_RIGHT) - dwm.lrpad;
+	w = TEXTW(CONFIG_STATUSBAR_SPACER_RIGHT) - PADDING;
 	x = gfx_text(dwm.gfx, m->width - status_width - w, 0, w, bar_height, SchemeSpacer, 0, CONFIG_STATUSBAR_SPACER_RIGHT, 0);
 
 	/* draw status text */
@@ -65,17 +70,17 @@ void statusbar_update(void){
 
 	for(size_t i=0; i<ntags; i++){
 		w = TEXTW(tags[i]);
-		gfx_text(dwm.gfx, x, 0, w, bar_height, (dwm.tag_mask & (1 << i)) ? SchemeSel : SchemeNorm, dwm.lrpad / 2, tags[i], 0);
+		gfx_text(dwm.gfx, x, 0, w, bar_height, (dwm.tag_mask & (1 << i)) ? SchemeSel : SchemeNorm, PADDING / 2, tags[i], 0);
 
 		x += w;
 	}
 
 	/* draw layout symbol */
 	w = TEXTW(dwm.layout->symbol);
-	x = gfx_text(dwm.gfx, x, 0, w, bar_height, SchemeNorm, dwm.lrpad / 2, dwm.layout->symbol, 0);
+	x = gfx_text(dwm.gfx, x, 0, w, bar_height, SchemeNorm, PADDING / 2, dwm.layout->symbol, 0);
 
 	/* draw layout spacer */
-	w = TEXTW(CONFIG_STATUSBAR_SPACER_LEFT) - dwm.lrpad;
+	w = TEXTW(CONFIG_STATUSBAR_SPACER_LEFT) - PADDING;
 	x = gfx_text(dwm.gfx, x, 0, w, bar_height, SchemeSpacer, 0, CONFIG_STATUSBAR_SPACER_LEFT, 0);
 
 	/* draw space */

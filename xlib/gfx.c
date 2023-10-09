@@ -65,7 +65,6 @@ gfx_t *gfx_create(unsigned int w, unsigned int h, char const *scheme[][ColLast],
 	if(font == 0x0)
 		goto err_1;
 
-	dwm.lrpad = font_height(font);
 	list_add_tail(gfx->fonts, font);
 
 	/* init color schemes */
@@ -128,7 +127,7 @@ void gfx_resize(gfx_t *gfx, unsigned int w, unsigned int h){
 	gfx->drawable = XCreatePixmap(dwm.dpy, dwm.root, w, h, DefaultDepth(dwm.dpy, dwm.screen));
 }
 
-unsigned int gfx_fontset_getwidth(gfx_t *gfx, char const *text){
+size_t gfx_text_width(gfx_t *gfx, char const *text){
 	return gfx_text(gfx, 0, 0, 0, 0, SchemeNorm, 0, text, 0);
 }
 
@@ -168,7 +167,7 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t 
 		unsigned int idx;
 	} nomatches;
 
-	static unsigned int ellipsis_width = 0;
+	static size_t ellipsis_width = 0;
 
 	if(render && !w)
 		return 0;
@@ -187,7 +186,7 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t 
 	usedfont = gfx->fonts;
 
 	if(!ellipsis_width && render)
-		ellipsis_width = gfx_fontset_getwidth(gfx, "...");
+		ellipsis_width = gfx_text_width(gfx, "...");
 
 	while(1){
 		ew = ellipsis_len = utf8strlen = 0;

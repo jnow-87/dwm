@@ -39,9 +39,7 @@ typedef struct{
 	Atom netatom[NetLast];
 	Atom wmatom[WMLast];
 
-	// graphics
 	gfx_t *gfx;
-	int lrpad;	/* sum of left and right padding for text */
 
 	// dwm lifecycle
 	dwm_state_t state;

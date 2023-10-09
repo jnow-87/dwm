@@ -4,13 +4,10 @@
 #define GFX_H
 
 
+#include <stddef.h>
 #include <fontconfig/fontconfig.h>
 #include <X11/X.h>
 #include <X11/Xft/Xft.h>
-
-
-/* macros */
-#define TEXTW(X)	(gfx_fontset_getwidth(dwm.gfx, (X)) + dwm.lrpad)
 
 
 /* types */
@@ -65,7 +62,7 @@ gfx_t *gfx_create(unsigned int w, unsigned int h, char const *scheme[][ColLast],
 void gfx_free(gfx_t *gfx);
 void gfx_resize(gfx_t *gfx, unsigned int w, unsigned int h);
 
-unsigned int gfx_fontset_getwidth(gfx_t *gfx, char const *text);
+size_t gfx_text_width(gfx_t *gfx, char const *text);
 
 void gfx_rect(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t scheme, int filled, int invert);
 int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t scheme, unsigned int lpad, char const *text, int invert);

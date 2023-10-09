@@ -12,6 +12,10 @@ config STATUSBAR_HEIGHT
 	int "statusbar height"
 	default 20
 
+config STATUSBAR_PADDING
+	int "padding between statusbar elements"
+	default 2
+
 config STATUSBAR_SPACER_LEFT
 	qstring "statusbar spacer (left)"
 	default ""
