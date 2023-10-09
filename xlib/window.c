@@ -1,17 +1,17 @@
 #include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
+#include <core/buttons.h>
 #include <core/dwm.h>
 #include <xlib/input.h>
 #include <xlib/gfx.h>
 #include <xlib/window.h>
 #include <xlib/xlib.h>
 #include <utils/utils.h>
-#include <config.h>
 
 
 /* local/static prototypes */
-static void set_border(window_t win, scheme_t scheme);
+static void set_border(window_t win, scheme_id_t scheme);
 static void apply_sizehints(window_t win, win_geom_t *geom, win_hints_t *hints);
 static int dummy_xerror_hdlr(Display *dpy, XErrorEvent *ee);
 
@@ -189,7 +189,7 @@ void win_focus(window_t win){
 	XSetInputFocus(dwm.dpy, win, RevertToPointerRoot, CurrentTime);
 
 	if(win != dwm.root){
-		input_buttons_register(win, buttons, nbuttons, 1);
+		input_buttons_register(win, __start_buttons, __stop_buttons - __start_buttons, 1);
 		set_border(win, SCM_FOCUS);
 
 		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NET_ACTIVEWINDOW], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(win), 1);
@@ -202,7 +202,7 @@ void win_focus(window_t win){
 
 void win_unfocus(window_t win){
 	// TODO why do the mappings need to be removed when unfocusing
-	input_buttons_register(win, buttons, nbuttons, 0);
+	input_buttons_register(win, __start_buttons, __stop_buttons - __start_buttons, 0);
 	set_border(win, SCM_NORM);
 }
 
@@ -326,8 +326,8 @@ void win_update_sizehints(window_t win, win_hints_t *hints){
 
 
 /* local functions */
-static void set_border(window_t win, scheme_t scheme){
-	XSetWindowBorder(dwm.dpy, win, dwm.gfx->scheme[scheme][SCOL_BORDER].pixel);
+static void set_border(window_t win, scheme_id_t scheme){
+	XSetWindowBorder(dwm.dpy, win, dwm.gfx->schemes[scheme].border.pixel);
 }
 
 static void apply_sizehints(window_t win, win_geom_t *geom, win_hints_t *hints){

@@ -40,30 +40,6 @@ config LAYOUT_MASTER_WINDOWS
 	int "number of windows in master area"
 	default 1
 
-config COL_ACT_FG
-	qstring "active foreground color"
-	default "#eeeeee"
-
-config COL_ACT_BG
-	qstring "active background color"
-	default "#005f5f"
-
-config COL_ACT_BORDER
-	qstring "active border color"
-	default "#005f5f"
-
-config COL_INACT_FG
-	qstring "inactive foreground color"
-	default "#bbbbbb"
-
-config COL_INACT_BG
-	qstring "inactive background color"
-	default "#222222"
-
-config COL_INACT_BORDER
-	qstring "inactive border color"
-	default "#005f5f"
-
 config XINERAMA
 	bool "xinerama"
 

@@ -32,7 +32,6 @@
 #include <xlib/xlib.h>
 #include <utils/log.h>
 #include <utils/utils.h>
-#include <config.h>
 
 
 /* local/static prototypes */
@@ -42,7 +41,7 @@ static int xevent_hdlr(void);
 /* global variables */
 dwm_t dwm = {
 	.stack = 0x0,
-	.layout = layouts + 0,
+	.layout = __start_layouts,
 	.state = DWM_ERROR,
 	.numlock_mask = 0,
 	.tag_mask = 1,

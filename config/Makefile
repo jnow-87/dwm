@@ -1,1 +1,5 @@
-obj-y := mappings.o tags.o layouts.o colors.o
+obj-y := \
+	layouts.o \
+	mappings.o \
+	schemes.o \
+	tags.o

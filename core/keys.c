@@ -5,7 +5,7 @@
 #include <xlib/input.h>
 #include <utils/timer.h>
 #include <utils/log.h>
-#include <config.h>
+#include <utils/utils.h>
 
 
 /* local/static prototypes */
@@ -25,7 +25,7 @@ int keys_init(void){
 	if(modifier_reset_timer == -1)
 		return -1;
 
-	input_keys_register(keys, nkeys);
+	input_keys_register(__start_keys, __stop_keys - __start_keys);
 
 	return dwm_hdlr_add(modifier_reset_timer, modifier_reset_hdlr);
 }
@@ -38,9 +38,12 @@ void keys_cleanup(void){
 }
 
 void keys_handle(keysym_t sym, unsigned int mods){
-	for(size_t i=0; i<nkeys; i++){
-		if(sym == keys[i].keysym && CLEANMODS(keys[i].mod) == CLEANMODS(mods) && keys[i].func)
-			keys[i].func(&(keys[i].arg));
+	key_map_t *key;
+
+
+	config_for_each(keys, key){
+		if(sym == key->keysym && CLEANMODS(key->mod) == CLEANMODS(mods) && key->func)
+			key->func(&(key->arg));
 	}
 }
 

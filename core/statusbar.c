@@ -7,7 +7,6 @@
 #include <xlib/atoms.h>
 #include <xlib/gfx.h>
 #include <xlib/window.h>
-#include <config.h>
 
 
 /* macros */
@@ -43,6 +42,8 @@ void statusbar_update(void){
 	statusbar_t *bar = &dwm.statusbar;
 	monitor_t *m = dwm.mons;
 	int bar_height = bar->geom.height;
+	char **tag;
+	size_t i;
 	int x,
 		w,
 		status_width;
@@ -66,12 +67,14 @@ void statusbar_update(void){
 	status_width += w;
 
 	/* draw tags */
+	i = 0;
 	x = 0;
 
-	for(size_t i=0; i<ntags; i++){
-		w = TEXTW(tags[i]);
-		gfx_text(dwm.gfx, x, 0, w, bar_height, (dwm.tag_mask & (1 << i)) ? SCM_FOCUS : SCM_NORM, PADDING / 2, tags[i], 0);
+	config_for_each(tags, tag){
+		w = TEXTW(*tag);
+		gfx_text(dwm.gfx, x, 0, w, bar_height, (dwm.tag_mask & (1 << i)) ? SCM_FOCUS : SCM_NORM, PADDING / 2, *tag, 0);
 
+		i++;
 		x += w;
 	}
 
@@ -109,13 +112,14 @@ void statusbar_toggle(void){
 click_t statusbar_element(int x, int y){
 	unsigned int pos = 0;
 	statusbar_t *bar = &dwm.statusbar;
+	char **tag;
 
 
 	if(y < bar->geom.y || y >= bar->geom.y + bar->geom.height)
 		return CLK_UNKNOWN;
 
-	for(size_t i=0; i<ntags; i++){
-		pos += TEXTW(tags[i]);
+	config_for_each(tags, tag){
+		pos += TEXTW(*tag);
 
 		if(pos > x)
 			return CLK_TAGBAR;

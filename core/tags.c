@@ -1,11 +1,11 @@
 #include <core/clientstack.h>
 #include <core/layout.h>
 #include <core/statusbar.h>
-#include <config.h>
+#include <core/tags.h>
 
 
 /* macros */
-#define TAGMASK ((1 << ntags) - 1)
+#define TAGMASK		((1 << (__stop_tags - __start_tags)) - 1)
 
 
 /* global functions */

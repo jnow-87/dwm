@@ -4,10 +4,20 @@
 
 #include <core/client.h>
 #include <xlib/window.h>
+#include <utils/utils.h>
+
+
+/* macros */
+#define LAYOUT(_symbol, _arrange) \
+	static layout_t const layout_##_arrange \
+		linker_array("layouts") noreorder = { \
+			.symbol = _symbol, \
+			.arrange = _arrange, \
+		}
 
 
 /* types */
-typedef struct layout_t{
+typedef struct{
 	char const *symbol;
 	void (*arrange)(void);
 } layout_t;
@@ -19,6 +29,11 @@ void layout_arrange(void);
 
 void layout_tile(void);
 void layout_monocle(void);
+
+
+/* external variables */
+extern layout_t __start_layouts[],
+				__stop_layouts[];
 
 
 #endif // LAYOUT_H

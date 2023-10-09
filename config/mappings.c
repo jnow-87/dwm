@@ -1,111 +1,87 @@
 #include <config/config.h>
-#include <stddef.h>
-#include <limits.h>
 #include <X11/X.h>
 #include <X11/keysymdef.h>
 #include <core/buttons.h>
 #include <core/keys.h>
-#include <utils/utils.h>
 #include <actions.h>
 
 
 /* macros */
-/* key definitions */
 #define ALT		Mod1Mask
 #define WIN		Mod4Mask
 #define MODKEY	WIN
 
-	// move to tag
-	// move window to tag
-	// toggle to view windows for tag
-	// toggle add window to tag
-#define TAGKEYS(KEY, TAG) \
-	{ ControlMask,				KEY,	action_tags_view,			{.ui = 1 << TAG} }, \
-	{ ControlMask | ShiftMask,	KEY,	action_tags_toggle,			{.ui = 1 << TAG} }, \
-	{ MODKEY,					KEY,	action_tags_client_set,		{.ui = 1 << TAG} }, \
-	{ MODKEY | ShiftMask,		KEY,	action_tags_client_toggle,	{.ui = 1 << TAG} },
+#define MOVE_INC	100
+#define SIZE_INC	50
+
+#define TAGKEY(keysym, tag) \
+	KEY(keysym,	ControlMask,				action_tags_view,			.ui = (1 << tag)); \
+	KEY(keysym,	ControlMask | ShiftMask,	action_tags_toggle,			.ui = (1 << tag)); \
+	KEY(keysym,	MODKEY,						action_tags_client_set,		.ui = (1 << tag)); \
+	KEY(keysym,	MODKEY | ShiftMask,			action_tags_client_toggle,	.ui = (1 << tag))
 
 
-/* global variables */
-char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-char const *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", CONFIG_FONT, "-nb", CONFIG_COL_INACT_BG, "-nf", CONFIG_COL_INACT_FG, "-sb", CONFIG_COL_ACT_BG, "-sf", CONFIG_COL_ACT_FG, 0x0 };
+/* static variables */
+static char const *dmenucmd[] = { "dmenu_run", "-fn", CONFIG_FONT, 0x0 };
 
-key_map_t const keys[] = {
-	// tag control
-	TAGKEYS(					XK_F1,	0)
-	TAGKEYS(					XK_F2,	1)
-	TAGKEYS(					XK_F3,	2)
-	TAGKEYS(					XK_F4,	3)
 
-	// window movement
-	{ MODKEY,					XK_Up,		action_client_move,	{ .v = (int[]){ 0, -30 } } },
-	{ MODKEY,					XK_Down,	action_client_move,	{ .v = (int[]){ 0, 30 } } },
-	{ MODKEY,					XK_Left,	action_client_move,	{ .v = (int[]){ -40, 0 } } },
-	{ MODKEY,					XK_Right,	action_client_move,	{ .v = (int[]){ 40, 0 } } },
-	{ MODKEY | ShiftMask,		XK_Up,		action_client_move,	{ .v = (int[]){ 0, -INT_MAX } } },
-	{ MODKEY | ShiftMask,		XK_Down,	action_client_move,	{ .v = (int[]){ 0, INT_MAX } } },
-	{ MODKEY | ShiftMask,		XK_Left,	action_client_move,	{ .v = (int[]){ -INT_MAX, 0 } } },
-	{ MODKEY | ShiftMask,		XK_Right,	action_client_move,	{ .v = (int[]){ INT_MAX, 0 } } },
+/* keys */
+// tag control
+TAGKEY(XK_F1, 0);
+TAGKEY(XK_F2, 1);
+TAGKEY(XK_F3, 2);
+TAGKEY(XK_F4, 3);
 
-	// window size
-	{ MODKEY,					XK_Next,	action_client_resize,	{ .v = (int []){ 0, 25 } } },
-	{ MODKEY,					XK_Prior,	action_client_resize,	{ .v = (int []){ 0, -25 } } },
-	{ MODKEY,					XK_End,		action_client_resize,	{ .v = (int []){ 25, 0 } } },
-	{ MODKEY,					XK_Home,	action_client_resize,	{ .v = (int []){ -25, 0 } } },
-	{ MODKEY | ALT | ShiftMask,	XK_Down,	action_client_resize,	{ .v = (int []){ 0, INT_MAX } } },
-	{ MODKEY | ALT | ShiftMask,	XK_Up,		action_client_resize,	{ .v = (int []){ 0, INT_MAX } } },
-	{ MODKEY | ALT | ShiftMask,	XK_Right,	action_client_resize,	{ .v = (int []){ INT_MAX, 0 } } },
-	{ MODKEY | ALT | ShiftMask,	XK_Left,	action_client_resize,	{ .v = (int []){ INT_MAX, 0 } } },
-	{ MODKEY | ALT | ShiftMask,	XK_Left,	action_client_resize,	{ .v = (int []){ INT_MAX, 0 } } },
-	{ MODKEY,					XK_Insert,	action_client_resize,	{ .v = (int []){ INT_MAX, INT_MAX } } },
+// window movement
+KEY(XK_Up,		MODKEY,				action_client_move,	.v = (int[]){ 0, -MOVE_INC });
+KEY(XK_Down,	MODKEY,				action_client_move,	.v = (int[]){ 0, MOVE_INC });
+KEY(XK_Left,	MODKEY,				action_client_move,	.v = (int[]){ -MOVE_INC, 0 });
+KEY(XK_Right,	MODKEY,				action_client_move,	.v = (int[]){ MOVE_INC, 0 });
+KEY(XK_Up,		MODKEY | ShiftMask,	action_client_move,	.v = (int[]){ 0, -INT_MAX });
+KEY(XK_Down,	MODKEY | ShiftMask,	action_client_move,	.v = (int[]){ 0, INT_MAX });
+KEY(XK_Left,	MODKEY | ShiftMask,	action_client_move,	.v = (int[]){ -INT_MAX, 0 });
+KEY(XK_Right,	MODKEY | ShiftMask,	action_client_move,	.v = (int[]){ INT_MAX, 0 });
 
-	// window open/close/client_focus
-	{ ALT,						XK_F4,		action_client_kill,	{ 0 } },
-	{ ALT,						XK_Tab,		action_client_cycle,	{ .i = +1 } },
-	{ ALT | ShiftMask,			XK_Tab,		action_client_cycle,	{ .i = -1 } },
+// window size
+KEY(XK_Next,	MODKEY,						action_client_resize,	.v = (int []){ 0, SIZE_INC });
+KEY(XK_Prior,	MODKEY,						action_client_resize,	.v = (int []){ 0, -SIZE_INC });
+KEY(XK_End,		MODKEY,						action_client_resize,	.v = (int []){ SIZE_INC, 0 });
+KEY(XK_Home,	MODKEY,						action_client_resize,	.v = (int []){ -SIZE_INC, 0 });
+KEY(XK_Down,	MODKEY | ALT | ShiftMask,	action_client_resize,	.v = (int []){ 0, INT_MAX });
+KEY(XK_Up,		MODKEY | ALT | ShiftMask,	action_client_resize,	.v = (int []){ 0, INT_MAX });
+KEY(XK_Right,	MODKEY | ALT | ShiftMask,	action_client_resize,	.v = (int []){ INT_MAX, 0 });
+KEY(XK_Left,	MODKEY | ALT | ShiftMask,	action_client_resize,	.v = (int []){ INT_MAX, 0 });
+KEY(XK_Left,	MODKEY | ALT | ShiftMask,	action_client_resize,	.v = (int []){ INT_MAX, 0 });
+KEY(XK_Insert,	MODKEY,						action_client_resize,	.v = (int []){ INT_MAX, INT_MAX });
 
-	// dwm start/stop
-	// TODO call dmenu as menu asking for exit | restart
-	{ MODKEY|ShiftMask,			XK_q,		action_quit,		{ 0 } },
-	{ ALT | ControlMask,		XK_Delete,	action_restart,		{ 0 } },
+// window open/close/client_focus
+KEY(XK_F4,		ALT,				action_client_kill,		0);
+KEY(XK_Tab,		ALT,				action_client_cycle,	.i = +1);
+KEY(XK_Tab,		ALT | ShiftMask,	action_client_cycle,	.i = -1);
 
-	// launch programs
-	{ MODKEY,					XK_s,		action_statusbar_toggle,	{ 0 } },
-	{ ALT,						XK_F2,		action_spawn,		{ .v = dmenucmd } },
+// dwm start/stop
+// TODO call dmenu as menu asking for exit | restart
+KEY(XK_q,		MODKEY|ShiftMask,	action_quit,		0);
+KEY(XK_Delete,	ALT | ControlMask,	action_restart,		0);
 
-	// TODO pstree comparing starting xterm via spawn and via dmenu
-//	{ MODKEY,				XK_x,		spawn,			{ .v = termcmd } },
+// launch programs
+KEY(XK_s,		MODKEY,	action_statusbar_toggle,	0);
+KEY(XK_F2,		ALT,	action_spawn,				.v = dmenucmd);
 
-	// winfade
-	// TODO dwm doesn't set _NET_CURRENT_DESKTOP
-	{ MODKEY,					XK_1,		action_spawn,		{ .v = (char const *[]){ "winfade", "--group", "1", "fade" } } },
-	{ MODKEY,					XK_2,		action_spawn,		{ .v = (char const *[]){ "winfade", "--group", "2", "fade" } } },
-	{ MODKEY,					XK_3,		action_spawn,		{ .v = (char const *[]){ "winfade", "--group", "3", "fade" } } },
-	{ MODKEY | ShiftMask,		XK_1,		action_spawn,		{ .v = (char const *[]){ "winfade", "--group", "1", "select" } } },
-	{ MODKEY | ShiftMask,		XK_2,		action_spawn,		{ .v = (char const *[]){ "winfade", "--group", "2", "select" } } },
-	{ MODKEY | ShiftMask,		XK_3,		action_spawn,		{ .v = (char const *[]){ "winfade", "--group", "3", "select" } } },
-//	{ MODKEY,                       XK_Return, zoom,           {0} },
-//	{ MODKEY,                       XK_Tab,    view,           {0} },
-//	{ MODKEY|ShiftMask,             XK_c,      win_kill,     {0} },
-//	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
-//	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
-//	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
-//	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
-//	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
-//	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
-//	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
-};
+// TODO pstree comparing starting xterm via spawn and via dmenu
+//	{ MODKEY,				XK_x,		spawn,			{ .v = termcmd);
 
-size_t nkeys = LENGTH(keys);
+// winfade
+// TODO dwm doesn't set _NET_CURRENT_DESKTOP
+KEY(XK_1,		MODKEY,				action_spawn,	.v = (char const *[]){ "winfade", "--group", "1", "fade" });
+KEY(XK_2,		MODKEY,				action_spawn,	.v = (char const *[]){ "winfade", "--group", "2", "fade" });
+KEY(XK_3,		MODKEY,				action_spawn,	.v = (char const *[]){ "winfade", "--group", "3", "fade" });
+KEY(XK_1,		MODKEY | ShiftMask,	action_spawn,	.v = (char const *[]){ "winfade", "--group", "1", "select" });
+KEY(XK_2,		MODKEY | ShiftMask,	action_spawn,	.v = (char const *[]){ "winfade", "--group", "2", "select" });
+KEY(XK_3,		MODKEY | ShiftMask,	action_spawn,	.v = (char const *[]){ "winfade", "--group", "3", "select" });
 
-/* click can be CLK_TAGBAR, CLK_LAYOUT, CLK_STATUS, ClkWinTitle, CLK_CLIENT, or CLK_ROOT */
-button_map_t const buttons[] = {
-	// window movement/size
-	{ CLK_CLIENT,	MODKEY,				Button1,	action_client_move_mouse,	{0} },
-	{ CLK_CLIENT,	MODKEY | ShiftMask,	Button1,	action_client_resize_mouse,	{0} },
 
-	// status bar actions
-	{ CLK_LAYOUT,	0,					Button1,	action_layout_select,	{0} },
-};
-
-size_t nbuttons = LENGTH(buttons);
+/* buttons */
+BUTTON(Button1,	MODKEY,				CLK_CLIENT,	action_client_move_mouse,	0);
+BUTTON(Button1,	MODKEY | ShiftMask,	CLK_CLIENT,	action_client_resize_mouse,	0);
+BUTTON(Button1,	0,					CLK_LAYOUT,	action_layout_select,		0);

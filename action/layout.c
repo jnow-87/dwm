@@ -1,16 +1,18 @@
 #include <core/dwm.h>
+#include <core/layout.h>
 #include <core/statusbar.h>
 #include <actions.h>
-#include <config.h>
 
 
 /* global functions */
 void action_layout_select(action_arg_t const *arg){
+	layout_t *l;
+
+
 	if(arg == 0x0 || arg->v == 0x0){
-		for(size_t i=0; i<nlayouts; i++){
-			if(dwm.layout == layouts + i){
-				i = (i + 1 < nlayouts) ? i + 1 : 0;
-				dwm.layout = layouts + i;
+		config_for_each(layouts, l){
+			if(l == dwm.layout){
+				dwm.layout = (l + 1 == __stop_layouts) ? __start_layouts : l + 1;
 				break;
 			}
 		}

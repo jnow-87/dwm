@@ -11,7 +11,6 @@
 #include <xlib/input.h>
 #include <xlib/window.h>
 #include <xlib/xlib.h>
-#include <config.h>
 
 
 /* local/static prototypes */
@@ -189,7 +188,7 @@ static void mapping_notify(xevent_t *e){
 	XRefreshKeyboardMapping(ev);
 
 	if(ev->request == MappingKeyboard)
-		input_keys_register(keys, nkeys);
+		input_keys_register(__start_keys, __stop_keys - __start_keys);
 }
 
 static void unmap_notify(xevent_t *e){

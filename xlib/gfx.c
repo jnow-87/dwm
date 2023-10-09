@@ -5,11 +5,12 @@
 #include <X11/Xft/Xft.h>
 #include <X11/Xlib.h>
 #include <core/dwm.h>
+#include <core/scheme.h>
 #include <xlib/gfx.h>
 #include <xlib/xlib.h>
 #include <utils/list.h>
 #include <utils/log.h>
-#include <config.h>
+#include <utils/utils.h>
 
 
 /* macros */
@@ -31,8 +32,8 @@ static unsigned int font_height(font_t *font);
 static cursor_t cursor_create(gfx_t *gfx, int shape);
 static void cursor_free(gfx_t *gfx, cursor_t cursor);
 
-static color_t *scheme_create(gfx_t *gfx, char const *names[], size_t n);
-static void scheme_destroy(gfx_t *gfx, color_t *scm, size_t n);
+static int scheme_create(gfx_t *gfx, color_scheme_t *scheme, scheme_t *scm);
+static void scheme_destroy(gfx_t *gfx, scheme_t *scheme);
 
 static size_t utf8_decode(char const *c, long *u, size_t clen);
 static long utf8_decode_byte(char const c, size_t *i);
@@ -50,6 +51,7 @@ static long const utfmax[UTF_SIZ + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF, 0x10FFFF
 gfx_t *gfx_create(unsigned int w, unsigned int h){
 	gfx_t *gfx;
 	font_t *font;
+	color_scheme_t *scheme;
 
 
 	/* init gfx */
@@ -71,18 +73,12 @@ gfx_t *gfx_create(unsigned int w, unsigned int h){
 	list_add_tail(gfx->fonts, font);
 
 	/* init color schemes */
-	gfx->scheme = malloc(NSCMS * sizeof(color_t*));
+	if(__stop_schemes - __start_schemes > NSCMS)
+		INFO("more than %d schemes defined, the rest will be ignored\n", NSCMS);
 
-	if(gfx->scheme == 0x0)
-		goto err_1;
-
-	for(size_t i=0; i<NSCMS; i++){
-		gfx->scheme[i] = scheme_create(gfx, colors[i], NSCOLORS);
-
-		if(gfx->scheme[i] == 0x0)
+	config_for_each(schemes, scheme){
+		if(scheme_create(gfx, scheme, gfx->schemes + scheme->id) != 0)
 			goto err_1;
-
-		gfx->nscheme = i;
 	}
 
 	/* init cursors */
@@ -107,10 +103,8 @@ void gfx_free(gfx_t *gfx){
 	for(size_t i=0; i<NCURSORS; i++)
 		cursor_free(dwm.gfx, gfx->cursors[i]);
 
-	for(size_t i=0; i<gfx->nscheme; i++)
-		scheme_destroy(gfx, gfx->scheme[i], NSCOLORS);
-
-	free(gfx->scheme);
+	for(size_t i=0; i<NSCMS; i++)
+		scheme_destroy(gfx, gfx->schemes + i);
 
 	list_for_each(gfx->fonts, font){
 		list_rm(gfx->fonts, font);
@@ -134,23 +128,23 @@ size_t gfx_text_width(gfx_t *gfx, char const *text){
 	return gfx_text(gfx, 0, 0, 0, 0, SCM_NORM, 0, text, 0);
 }
 
-void gfx_rect(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t scheme, int filled, int invert){
-	color_t *scm = gfx->scheme[scheme];
+void gfx_rect(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_id_t scheme, int filled, int invert){
+	scheme_t *scm = gfx->schemes + scheme;
 
 
-	XSetForeground(dwm.dpy, gfx->gc, invert ? scm[SCOL_BB].pixel : scm[SCOL_FB].pixel);
+	XSetForeground(dwm.dpy, gfx->gc, invert ? scm->bg.pixel : scm->fg.pixel);
 
 	if(filled)	XFillRectangle(dwm.dpy, gfx->drawable, gfx->gc, x, y, w, h);
 	else		XDrawRectangle(dwm.dpy, gfx->drawable, gfx->gc, x, y, w - 1, h - 1);
 }
 
-int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t scheme, unsigned int lpad, char const *text, int invert){
+int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_id_t scheme, unsigned int lpad, char const *text, int invert){
 	int i, ty, ellipsis_x = 0;
 	unsigned int tmpw, ew, ellipsis_w = 0, ellipsis_len;
 	int utf8strlen, utf8charlen, render = x || y || w || h;
 	long utf8codepoint = 0;
 	XftDraw *d = 0x0;
-	color_t *scm = gfx->scheme[scheme];
+	scheme_t *scm = gfx->schemes + scheme;
 	font_t *usedfont, *curfont, *nextfont;
 	char const *utf8str;
 	FcCharSet *fccharset;
@@ -174,7 +168,7 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t 
 		w = invert ? invert : ~invert;
 	}
 	else{
-		XSetForeground(dwm.dpy, gfx->gc, scm[invert ? SCOL_FB : SCOL_BB].pixel);
+		XSetForeground(dwm.dpy, gfx->gc, invert ? scm->fg.pixel : scm->bg.pixel);
 		XFillRectangle(dwm.dpy, gfx->drawable, gfx->gc, x, y, w, h);
 		d = XftDrawCreate(dwm.dpy, gfx->drawable, DefaultVisual(dwm.dpy, dwm.screen), DefaultColormap(dwm.dpy, dwm.screen));
 		x += lpad;
@@ -234,7 +228,7 @@ int gfx_text(gfx_t *gfx, int x, int y, unsigned int w, unsigned int h, scheme_t 
 		if(utf8strlen){
 			if(render){
 				ty = y + (h - font_height(usedfont)) / 2 + usedfont->xfont->ascent;
-				XftDrawStringUtf8(d, &scm[invert ? SCOL_BB : SCOL_FB], usedfont->xfont, x, ty, (XftChar8*)utf8str, utf8strlen);
+				XftDrawStringUtf8(d, invert ? &scm->bg : &scm->fg, usedfont->xfont, x, ty, (XftChar8*)utf8str, utf8strlen);
 			}
 
 			x += ew;
@@ -409,39 +403,31 @@ void cursor_free(gfx_t *gfx, cursor_t cursor){
 	XFreeCursor(dwm.dpy, cursor);
 }
 
-static color_t *scheme_create(gfx_t *gfx, char const *names[], size_t n){
+static int scheme_create(gfx_t *gfx, color_scheme_t *scheme, scheme_t *scm){
+	char const *names[] = { scheme->fg, scheme->bg, scheme->border };
+	color_t *colors[] = { &scm->fg, &scm->bg, &scm->border };
 	Visual *visual = DefaultVisual(dwm.dpy, dwm.screen);
 	Colormap colmap = DefaultColormap(dwm.dpy, dwm.screen);
-	color_t *c;
-	size_t i;
 
 
-	c = calloc(n, sizeof(XftColor));
+	for(size_t i=0; i<LENGTH(colors); i++){
+		if(!XftColorAllocName(dwm.dpy, visual, colmap, names[i], colors[i])){
+			for(; i>0; i--)
+				XftColorFree(dwm.dpy, visual, colmap, colors[i - 1]);
 
-	if(c == 0x0)
-		goto err_0;
-
-	for(i=0; i<n; i++){
-		if(!XftColorAllocName(dwm.dpy, visual, colmap, names[i], c + i))
-			goto err_1;
+			return -1;
+		}
 	}
 
-	return c;
-
-
-err_1:
-	for(; i>0; i--)
-		XftColorFree(dwm.dpy, visual, colmap, c + i - 1);
-
-err_0:
-	return 0x0;
+	return 0;
 }
 
-static void scheme_destroy(gfx_t *gfx, color_t *scm, size_t n){
-	for(size_t i=0; i<n; i++)
-		XftColorFree(dwm.dpy, DefaultVisual(dwm.dpy, dwm.screen), DefaultColormap(dwm.dpy, dwm.screen), scm + i);
+static void scheme_destroy(gfx_t *gfx, scheme_t *scheme){
+	color_t *colors[] = { &scheme->fg, &scheme->bg, &scheme->border };
 
-	free(scm);
+
+	for(size_t i=0; i<LENGTH(colors); i++)
+		XftColorFree(dwm.dpy, DefaultVisual(dwm.dpy, dwm.screen), DefaultColormap(dwm.dpy, dwm.screen), colors[i]);
 }
 
 static size_t utf8_decode(char const *c, long *u, size_t clen){

@@ -1,12 +1,15 @@
 #include <core/dwm.h>
 #include <core/buttons.h>
-#include <config.h>
+#include <utils/utils.h>
 
 
 /* global functions */
 void buttons_handle(click_t click, unsigned int button, unsigned int mods){
-	for(size_t i=0; i<nbuttons; i++){
-		if(click == buttons[i].click && buttons[i].func && buttons[i].button == button && CLEANMODS(buttons[i].mask) == CLEANMODS(mods))
-			buttons[i].func(&buttons[i].arg);
+	button_map_t *map;
+
+
+	config_for_each(buttons, map){
+		if(click == map->click && map->func && map->button == button && CLEANMODS(map->mask) == CLEANMODS(mods))
+			map->func(&map->arg);
 	}
 }

@@ -4,7 +4,6 @@
 
 #include <stddef.h>
 #include <X11/X.h>
-#include <core/buttons.h>
 #include <xlib/gfx.h>
 #include <xlib/window.h>
 #include <actions.h>
@@ -18,6 +17,15 @@
 /* types */
 typedef KeySym keysym_t;
 
+typedef enum{
+	CLK_UNKNOWN = -1,
+	CLK_ROOT = 0,
+	CLK_CLIENT,
+	CLK_TAGBAR,
+	CLK_LAYOUT,
+	CLK_STATUS,
+} click_t;
+
 typedef struct{
 	click_t click;
 	unsigned int mask;
@@ -28,8 +36,8 @@ typedef struct{
 } button_map_t;
 
 typedef struct{
-	unsigned int mod;
 	keysym_t keysym;
+	unsigned int mod;
 
 	action_t func;
 	action_arg_t const arg;
