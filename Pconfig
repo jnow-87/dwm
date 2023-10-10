@@ -4,26 +4,6 @@ config FONT
 	qstring "font"
 	default "monospace:size=10"
 
-config STATUSBAR_TOP
-	bool "show statusbar at the top"
-	default y
-
-config STATUSBAR_HEIGHT
-	int "statusbar height"
-	default 20
-
-config STATUSBAR_PADDING
-	int "padding between statusbar elements"
-	default 2
-
-config STATUSBAR_SPACER_LEFT
-	qstring "statusbar spacer (left)"
-	default ""
-
-config STATUSBAR_SPACER_RIGHT
-	qstring "statusbar spacer (right)"
-	default ""
-
 config BORDER_PIXEL
 	int "number of border pixels"
 	default 1
@@ -32,16 +12,34 @@ config SNAP_PIXEL
 	int "number of pixels to trigger window snapping"
 	default 32
 
-config LAYOUT_MASTER_RATIO
-	int "relative size of the master window (55..95)"
-	default 55
-
-config LAYOUT_MASTER_WINDOWS
-	int "number of windows in master area"
-	default 1
-
 config XINERAMA
 	bool "xinerama"
+
+menu "statusbar"
+	config STATUSBAR_TOP
+		bool "show statusbar at the top"
+		default y
+
+	config STATUSBAR_HEIGHT
+		int "statusbar height"
+		default 20
+
+	config STATUSBAR_PADDING
+		int "padding between statusbar elements"
+		default 2
+
+	config STATUSBAR_SPACER_LEFT
+		qstring "statusbar spacer (left)"
+		default ""
+
+	config STATUSBAR_SPACER_RIGHT
+		qstring "statusbar spacer (right)"
+		default ""
+endmenu
+
+menu "layouts"
+	source "layouts/Pconfig"
+endmenu
 
 config LOG_FILE
 	qstring "log file"

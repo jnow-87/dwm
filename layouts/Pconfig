@@ -1,0 +1,15 @@
+menuconfig LAYOUT_TILED
+	bool "tiled"
+
+if LAYOUT_TILED
+	config TILED_MASTER_RATIO
+		int "relative size of the master window (55..95)"
+		default 55
+
+	config TILED_MASTER_WINDOWS
+		int "number of windows in master area"
+		default 1
+endif # LAYOUT_TILED
+
+config LAYOUT_MONOCLE
+	bool "monocle"

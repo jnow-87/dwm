@@ -27,9 +27,6 @@ typedef struct{
 client_t *layout_next_tiled(client_t *c);
 void layout_arrange(void);
 
-void layout_tile(void);
-void layout_monocle(void);
-
 
 /* external variables */
 extern layout_t __start_layouts[],

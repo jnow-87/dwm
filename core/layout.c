@@ -1,7 +1,12 @@
 #include <core/client.h>
 #include <core/dwm.h>
+#include <core/layout.h>
 #include <xlib/window.h>
 #include <utils/list.h>
+
+
+/* default nop layout */
+LAYOUT("☯", 0x0);
 
 
 /* global functions */

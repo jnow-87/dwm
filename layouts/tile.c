@@ -8,11 +8,11 @@
 
 
 /* macros */
-#define NMASTER	CONFIG_LAYOUT_MASTER_WINDOWS
+#define NMASTER	CONFIG_TILED_MASTER_WINDOWS
 
 
-/* global functions */
-void layout_tile(void){
+/* local functions */
+static void layout_tile(void){
 	// TODO
 	// 	has to be re-implemented to layout_tile the clients on each monitor separately
 	// 	since clients no longer have the monitor as struct member, the list of
@@ -28,7 +28,7 @@ void layout_tile(void){
 	if(n == 0)
 		return;
 
-	if(n > NMASTER)	w = NMASTER ? m->width * (CONFIG_LAYOUT_MASTER_RATIO / 100.0) : 0;
+	if(n > NMASTER)	w = NMASTER ? m->width * (CONFIG_TILED_MASTER_RATIO / 100.0) : 0;
 	else			w = m->width;
 
 	for(i=y=ty=0, c=layout_next_tiled(dwm.stack); c; c=layout_next_tiled(c->next), i++){
@@ -50,3 +50,5 @@ void layout_tile(void){
 		}
 	}
 }
+
+LAYOUT("⚏", layout_tile);

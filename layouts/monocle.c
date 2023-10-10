@@ -5,8 +5,8 @@
 #include <utils/list.h>
 
 
-/* global functions */
-void layout_monocle(void){
+/* local functions */
+static void layout_monocle(void){
 	unsigned int n = 0;
 	monitor_t *m;
 	client_t *c;
@@ -23,3 +23,5 @@ void layout_monocle(void){
 		client_resize(c, m->x, m->y, m->width - 2 * c->geom.border_width, m->height - 2 * c->geom.border_width);
 	}
 }
+
+LAYOUT("❍", layout_monocle);
