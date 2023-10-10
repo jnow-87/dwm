@@ -45,14 +45,11 @@ void input_keys_release(void){
 	XUngrabKey(dwm.dpy, AnyKey, AnyModifier, dwm.root);
 }
 
-void input_buttons_register(Window win, button_map_t const *mappings, size_t n, int focused){
+void input_buttons_register(Window win, button_map_t const *mappings, size_t n){
 	unsigned int modifiers[] = {0, LockMask, dwm.numlock_mask, dwm.numlock_mask | LockMask};
 
 
 	input_buttons_release(win);
-
-	if(!focused)
-		XGrabButton(dwm.dpy, AnyButton, AnyModifier, win, False, BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
 
 	for(size_t i=0; i<n; i++){
 		if(mappings[i].click == CLK_CLIENT){

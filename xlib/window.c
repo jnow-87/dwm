@@ -67,6 +67,8 @@ void win_init(window_t win, win_geom_t *geom, win_hints_t *hints){
 	win_update_sizehints(win, hints);
 	win_update_wmhints(win, hints, false);
 	win_set_state(win, NormalState);
+	
+	input_buttons_register(win, __start_buttons, __stop_buttons - __start_buttons);
 
 	XMapWindow(dwm.dpy, win);
 }
@@ -189,7 +191,6 @@ void win_focus(window_t win){
 	XSetInputFocus(dwm.dpy, win, RevertToPointerRoot, CurrentTime);
 
 	if(win != dwm.root){
-		input_buttons_register(win, __start_buttons, __stop_buttons - __start_buttons, 1);
 		set_border(win, SCM_FOCUS);
 
 		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NET_ACTIVEWINDOW], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(win), 1);
@@ -201,8 +202,6 @@ void win_focus(window_t win){
 }
 
 void win_unfocus(window_t win){
-	// TODO why do the mappings need to be removed when unfocusing
-	input_buttons_register(win, __start_buttons, __stop_buttons - __start_buttons, 0);
 	set_border(win, SCM_NORM);
 }
 
