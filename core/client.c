@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <X11/Xlib.h>
+#include <core/buttons.h>
 #include <core/client.h>
 #include <core/clientstack.h>
 #include <core/dwm.h>
@@ -80,6 +81,7 @@ void client_init(window_t win, win_attr_t *attr){
 	c->geom_store = attr->geom;
 
 	win_init(win, &c->geom, &c->hints);
+	buttons_register(c);
 
 	/* update client list */
 	atoms_netatom_append(NET_CLIENTLIST, (unsigned char*)&win);

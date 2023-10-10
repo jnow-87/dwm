@@ -188,7 +188,7 @@ static void mapping_notify(xevent_t *e){
 	XRefreshKeyboardMapping(ev);
 
 	if(ev->request == MappingKeyboard)
-		input_keys_register(__start_keys, __stop_keys - __start_keys);
+		keys_register();
 }
 
 static void unmap_notify(xevent_t *e){
@@ -231,7 +231,7 @@ static void key_press(xevent_t *e){
 }
 
 static void button_press(xevent_t *e){
-	click_t click = CLK_ROOT;
+	button_loc_t loc = BLOC_ROOT;
 	XButtonPressedEvent *ev = &e->xbutton;
 	client_t *c;
 
@@ -240,7 +240,7 @@ static void button_press(xevent_t *e){
 		c = client_from_win(ev->window);
 
 		if(c != 0x0){
-			click = CLK_CLIENT;
+			loc = BLOC_CLIENT;
 			xlib_release_events();
 
 			clientstack_focus(c, true);
@@ -248,7 +248,7 @@ static void button_press(xevent_t *e){
 		}
 	}
 	else
-		click = statusbar_element(ev->x, ev->y);
+		loc = statusbar_element(ev->x, ev->y);
 
-	buttons_handle(click, ev->button, ev->state);
+	button_handle(loc, ev->button, ev->state);
 }

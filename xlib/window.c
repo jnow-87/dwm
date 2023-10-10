@@ -1,7 +1,6 @@
 #include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
-#include <core/buttons.h>
 #include <core/dwm.h>
 #include <xlib/input.h>
 #include <xlib/gfx.h>
@@ -68,8 +67,6 @@ void win_init(window_t win, win_geom_t *geom, win_hints_t *hints){
 	win_update_wmhints(win, hints, false);
 	win_set_state(win, NormalState);
 	
-	input_buttons_register(win, __start_buttons, __stop_buttons - __start_buttons);
-
 	XMapWindow(dwm.dpy, win);
 }
 
@@ -96,7 +93,7 @@ void win_release(window_t win, win_geom_t *original){
 
 	XSelectInput(dwm.dpy, win, NoEventMask);
 	XConfigureWindow(dwm.dpy, win, CWBorderWidth, &wc); /* restore border */
-	XUngrabButton(dwm.dpy, AnyButton, AnyModifier, win);
+	input_buttons_release(win);
 	win_set_state(win, WithdrawnState);
 	xlib_sync();
 

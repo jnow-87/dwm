@@ -1,6 +1,5 @@
 #include <X11/X.h>
 #include <X11/XKBlib.h>
-#include <core/buttons.h>
 #include <core/dwm.h>
 #include <xlib/input.h>
 #include <xlib/gfx.h>
@@ -13,50 +12,43 @@
 
 
 /* global functions */
-void input_keys_register(key_map_t const *mappings, size_t n){
+int input_kbd_map_init(kbd_map_t *map){
+	XDisplayKeycodes(dwm.dpy, &map->start, &map->end);
+	map->symbols = XGetKeyboardMapping(dwm.dpy, map->start, map->end - map->start + 1, &map->syms_per_keycode);
+
+	if(map->symbols == 0x0)
+		return -1;
+
+	return 0;
+}
+
+void input_kbd_map_release(kbd_map_t *map){
+	XFree(map->symbols);
+}
+
+void input_key_register(window_t win, keysym_t keysym, unsigned int mods, kbd_map_t *kbd_map){
 	unsigned int modifiers[] = { 0, LockMask, dwm.numlock_mask, dwm.numlock_mask | LockMask };
-	int start,
-		end,
-		syms_per_keycode;
-	KeySym *syms;
 
 
-	input_keys_release();
-	XDisplayKeycodes(dwm.dpy, &start, &end);
-	syms = XGetKeyboardMapping(dwm.dpy, start, end - start + 1, &syms_per_keycode);
-
-	if(!syms)
-		return;
-
-	for(int k=start; k<=end; k++){
-		for(size_t i=0; i<n; i++){
-			/* skip modifier codes, we do that ourselves */
-			if(mappings[i].keysym == syms[(k - start) * syms_per_keycode]){
-				for(int j=0; j<LENGTH(modifiers); j++)
-					XGrabKey(dwm.dpy, k, mappings[i].mod | modifiers[j], dwm.root, True, GrabModeAsync, GrabModeAsync);
-			}
+	for(int i=kbd_map->start; i<=kbd_map->end; i++){
+		/* skip modifier codes, we do that ourselves */
+		if(keysym == kbd_map->symbols[(i - kbd_map->start) * kbd_map->syms_per_keycode]){
+			for(int j=0; j<LENGTH(modifiers); j++)
+				XGrabKey(dwm.dpy, i, mods | modifiers[j], win, True, GrabModeAsync, GrabModeAsync);
 		}
 	}
-
-	XFree(syms);
 }
 
-void input_keys_release(void){
-	XUngrabKey(dwm.dpy, AnyKey, AnyModifier, dwm.root);
+void input_keys_release(window_t win){
+	XUngrabKey(dwm.dpy, AnyKey, AnyModifier, win);
 }
 
-void input_buttons_register(Window win, button_map_t const *mappings, size_t n){
+void input_button_register(window_t win, unsigned int button, unsigned int mods){
 	unsigned int modifiers[] = {0, LockMask, dwm.numlock_mask, dwm.numlock_mask | LockMask};
 
 
-	input_buttons_release(win);
-
-	for(size_t i=0; i<n; i++){
-		if(mappings[i].click == CLK_CLIENT){
-			for(size_t j=0; j<LENGTH(modifiers); j++)
-				XGrabButton(dwm.dpy, mappings[i].button, mappings[i].mask | modifiers[j], win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-		}
-	}
+	for(size_t i=0; i<LENGTH(modifiers); i++)
+		XGrabButton(dwm.dpy, button, mods | modifiers[i], win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
 }
 
 void input_buttons_release(window_t win){

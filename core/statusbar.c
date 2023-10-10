@@ -109,27 +109,27 @@ void statusbar_toggle(void){
 	bar->hidden = !bar->hidden;
 }
 
-click_t statusbar_element(int x, int y){
+button_loc_t statusbar_element(int x, int y){
 	unsigned int pos = 0;
 	statusbar_t *bar = &dwm.statusbar;
 	char **tag;
 
 
 	if(y < bar->geom.y || y >= bar->geom.y + bar->geom.height)
-		return CLK_UNKNOWN;
+		return BLOC_UNKNOWN;
 
 	config_for_each(tags, tag){
 		pos += TEXTW(*tag);
 
 		if(pos > x)
-			return CLK_TAGBAR;
+			return BLOC_TAGBAR;
 	}
 
 	if(x < pos + TEXTW(dwm.layout->symbol))
-		return CLK_LAYOUT;
+		return BLOC_LAYOUT;
 
 	if(x > dwm.mons->width - (int)TEXTW(bar->status))
-		return CLK_STATUS;
+		return BLOC_STATUS;
 
-	return CLK_UNKNOWN;
+	return BLOC_UNKNOWN;
 }

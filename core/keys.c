@@ -20,30 +20,57 @@ static cycle_callback_t cycle_complete = 0x0;
 
 /* global functions */
 int keys_init(void){
+	int r = 0;
+
+
 	modifier_reset_timer = timer_init();
 
 	if(modifier_reset_timer == -1)
 		return -1;
 
-	input_keys_register(__start_keys, __stop_keys - __start_keys);
+	r |= keys_register();
+	r |= dwm_hdlr_add(modifier_reset_timer, modifier_reset_hdlr);
 
-	return dwm_hdlr_add(modifier_reset_timer, modifier_reset_hdlr);
+	if(r == 0)
+		return 0;
+
+	keys_cleanup();
+
+	return -1;
 }
 
 void keys_cleanup(void){
-	input_keys_release();
+	input_keys_release(dwm.root);
 
 	if(modifier_reset_timer != -1)
 		close(modifier_reset_timer);
 }
 
+int keys_register(void){
+	kbd_map_t map;
+	keymap_t *key;
+
+
+	input_keys_release(dwm.root);
+
+	if(input_kbd_map_init(&map) != 0)
+		return -1;
+
+	config_for_each(keys, key)
+		input_key_register(dwm.root, key->keysym, key->mods, &map);
+
+	input_kbd_map_release(&map);
+
+	return 0;
+}
+
 void keys_handle(keysym_t sym, unsigned int mods){
-	key_map_t *key;
+	keymap_t *key;
 
 
 	config_for_each(keys, key){
-		if(sym == key->keysym && CLEANMODS(key->mod) == CLEANMODS(mods) && key->func)
-			key->func(&(key->arg));
+		if(sym == key->keysym && CLEANMODS(key->mods) == CLEANMODS(mods) && key->action)
+			key->action(&(key->arg));
 	}
 }
 

@@ -2,31 +2,54 @@
 #define BUTTONS_H
 
 
-#include <xlib/input.h>
+#include <core/client.h>
 #include <utils/utils.h>
+#include <actions.h>
 
 
 /* macros */
-#define BUTTON_N(_id, _button, _mods, _click, _action, ...) \
-	static button_map_t const button_##_id \
+#define BUTTON_N(_id, _button, _mods, _loc, _action, ...) \
+	static buttonmap_t const button_##_id \
 		linker_array("buttons") = { \
-			.click = _click, \
-			.mask = _mods, \
+			.loc = _loc, \
+			.mods = _mods, \
 			.button = _button, \
-			.func = _action, \
+			.action = _action, \
 			.arg = { __VA_ARGS__ }, \
 		}
 
-#define BUTTON(button, mods, click, action, ...)	UNIQUE(BUTTON_N, __COUNTER__, button, mods, click, action, __VA_ARGS__)
+#define BUTTON(button, mods, loc, action, ...)	UNIQUE(BUTTON_N, __COUNTER__, button, mods, loc, action, __VA_ARGS__)
+
+
+/* types */
+typedef enum{
+	BLOC_UNKNOWN = -1,
+	BLOC_ROOT = 0,
+	BLOC_CLIENT,
+	BLOC_TAGBAR,
+	BLOC_LAYOUT,
+	BLOC_STATUS,
+} button_loc_t;
+
+typedef struct{
+	button_loc_t loc;
+
+	unsigned int mods;
+	unsigned int button;
+
+	action_t action;
+	action_arg_t const arg;
+} buttonmap_t;
 
 
 /* global functions */
-void buttons_handle(click_t click, unsigned int button, unsigned int mods);
+void buttons_register(client_t *c);
+void button_handle(button_loc_t loc, unsigned int button, unsigned int mods);
 
 
 /* external variables */
-extern button_map_t __start_buttons[],
-					__stop_buttons[];
+extern buttonmap_t __start_buttons[],
+				   __stop_buttons[];
 
 
 #endif // BUTTONS_H

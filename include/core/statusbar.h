@@ -26,7 +26,7 @@ void statusbar_raise(void);
 
 void statusbar_toggle(void);
 
-click_t statusbar_element(int x, int y);
+button_loc_t statusbar_element(int x, int y);
 
 
 #endif // STATUSBAR_H

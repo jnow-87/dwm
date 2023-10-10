@@ -6,7 +6,6 @@
 #include <X11/X.h>
 #include <xlib/gfx.h>
 #include <xlib/window.h>
-#include <actions.h>
 
 
 /* macros */
@@ -17,37 +16,22 @@
 /* types */
 typedef KeySym keysym_t;
 
-typedef enum{
-	CLK_UNKNOWN = -1,
-	CLK_ROOT = 0,
-	CLK_CLIENT,
-	CLK_TAGBAR,
-	CLK_LAYOUT,
-	CLK_STATUS,
-} click_t;
-
 typedef struct{
-	click_t click;
-	unsigned int mask;
-	unsigned int button;
+	int start,
+		end;
+	int syms_per_keycode;
 
-	action_t func;
-	action_arg_t const arg;
-} button_map_t;
-
-typedef struct{
-	keysym_t keysym;
-	unsigned int mod;
-
-	action_t func;
-	action_arg_t const arg;
-} key_map_t;
+	KeySym *symbols;
+} kbd_map_t;
 
 
 /* prototypes */
-void input_keys_register(key_map_t const *mappings, size_t n);
-void input_keys_release(void);
-void input_buttons_register(window_t win, button_map_t const *mappings, size_t n);
+int input_kbd_map_init(kbd_map_t *map);
+void input_kbd_map_release(kbd_map_t *map);
+
+void input_key_register(window_t win, keysym_t keysym, unsigned int mods, kbd_map_t *kbd_map);
+void input_keys_release(window_t win);
+void input_button_register(window_t win, unsigned int button, unsigned int mods);
 void input_buttons_release(window_t win);
 
 int input_pointer_grab(cursor_t cursor);
