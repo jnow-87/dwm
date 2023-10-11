@@ -3,12 +3,39 @@
 #include <core/clientstack.h>
 #include <core/dwm.h>
 #include <core/keys.h>
+#include <core/monitor.h>
 #include <core/statusbar.h>
 #include <core/xevents.h>
 #include <xlib/input.h>
 #include <xlib/window.h>
 #include <utils/utils.h>
 #include <actions.h>
+
+
+/* macros */
+#define SIZE_MIN	32
+
+#define PREP_RESIZE(origin, dim, new, geom, store, mon){ \
+	if((new)->dim == INT_MAX){ \
+		(new)->origin = (mon)->origin; \
+		(new)->dim = (mon)->dim- (geom)->border_width * 2; \
+		\
+		if((geom)->origin == (new)->origin && (geom)->dim == (new)->dim){ \
+			(new)->origin = (store)->origin; \
+			(new)->dim = (store)->dim; \
+		} \
+	} \
+	else{ \
+		(new)->origin = (geom)->origin - ((new)->dim) / 2; \
+		(new)->dim += (geom)->dim; \
+	} \
+	\
+	(new)->dim = MAX((new)->dim, 32); /* prevent too small windows */ \
+	\
+	/* prevent windows from moving if they would be smaller than SIZE_MIN */ \
+	if((new)->dim == (geom)->dim) \
+		(new)->origin = (geom)->origin; \
+}
 
 
 /* local/static prototypes */
@@ -125,57 +152,22 @@ void action_client_move_mouse(action_arg_t const *arg){
 }
 
 void action_client_resize(action_arg_t const *arg){
-	int nx, ny, nw, nh;
-	client_t *c;
-	win_geom_t *geom;
+	client_t *c = dwm.focused;
+	win_geom_t new;
+	monitor_t *m;
 
 
-	if(!(c = dwm.focused))
+	if(c == 0x0)
 		return;
 
-	geom = &c->geom;
+	m = monitor_from_client(c);
+	new.width = ((int*)(arg->v))[0];
+	new.height = ((int*)(arg->v))[1];
 
-	nw = ((int*)(arg->v))[0];
-	nh = ((int*)(arg->v))[1];
+	PREP_RESIZE(x, width, &new, &c->geom, &c->geom_store, m);
+	PREP_RESIZE(y, height, &new, &c->geom, &c->geom_store, m);
 
-	if(nw == INT_MAX){
-		nx = dwm.mons->x;
-		nw = dwm.mons->width - geom->border_width * 2;
-
-		if(geom->x == nx && geom->width == nw){
-			nx = c->geom_store.x;
-			nw = c->geom_store.width;
-		}
-	}
-	else{
-		nx = geom->x - nw / 2;
-		nw += geom->width;
-	}
-
-	if(nh == INT_MAX){
-		ny = dwm.mons->y;
-		nh = dwm.mons->height - geom->border_width * 2;
-
-		if(geom->y == ny && geom->height == nh){
-			ny = c->geom_store.y;
-			nh = c->geom_store.height;
-		}
-	}
-	else{
-		ny = geom->y - nh / 2;
-		nh += geom->height;
-	}
-
-	nw = MAX(nw, 32);
-	nh = MAX(nh, 32);
-
-	if(nw == geom->width)
-		nx = geom->x;
-
-	if(nh == geom->height)
-		ny = geom->y;
-
-	client_resize(c, nx, ny, nw, nh);
+	client_resize(c, new.x, new.y, new.width, new.height);
 	statusbar_raise();
 }
 
@@ -191,8 +183,8 @@ void action_client_resize_mouse(action_arg_t const *arg){
 		return;
 
 	geom = &c->geom;
-	ocx = c->geom.x;
-	ocy = c->geom.y;
+	ocx = geom->x;
+	ocy = geom->y;
 
 	if(input_pointer_grab(dwm.gfx->cursors[CUR_RESIZE]) != 0)
 		return;

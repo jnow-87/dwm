@@ -15,6 +15,14 @@
 #include <utils/utils.h>
 
 
+/* macros */
+#define PREP_N_STORE(dim, geom, store) \
+	if(dim != (geom)->dim) \
+		(store)->dim = (geom)->dim; \
+	\
+	(geom)->dim = dim
+	
+
 /* global functions */
 int clients_init(void){
 	unsigned int n;
@@ -131,12 +139,10 @@ void client_resize(client_t *c, int x, int y, int width, int height){
 	if(x == geom->x && y == geom->y && width == geom->width && height == geom->height)
 		return;
 
-	c->geom_store = *geom;
-
-	geom->x = x;
-	geom->y = y;
-	geom->width = width;
-	geom->height = height;
+	PREP_N_STORE(x, geom, &c->geom_store);
+	PREP_N_STORE(y, geom, &c->geom_store);
+	PREP_N_STORE(width, geom, &c->geom_store);
+	PREP_N_STORE(height, geom, &c->geom_store);
 
 	win_resize(c->win, geom, &c->hints);
 }
