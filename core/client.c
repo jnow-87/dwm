@@ -144,5 +144,5 @@ void client_resize(client_t *c, int x, int y, int width, int height){
 	PREP_N_STORE(width, geom, &c->geom_store);
 	PREP_N_STORE(height, geom, &c->geom_store);
 
-	win_resize(c->win, geom, &c->hints);
+	win_resize(c->win, geom, 0x0);
 }

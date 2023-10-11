@@ -124,7 +124,8 @@ void win_resize(window_t win, win_geom_t *geom, win_hints_t *hints){
 	XWindowChanges wc;
 
 
-	apply_sizehints(win, geom, hints);
+	if(hints != 0x0)
+		apply_sizehints(win, geom, hints);
 
 	wc.x = geom->x;
 	wc.y = geom->y;
