@@ -68,54 +68,54 @@ void action_client_kill(action_arg_t const *arg){
 }
 
 void action_client_move(action_arg_t const *arg){
-	int nx, ny;
-	client_t *c;
+	client_t *c = dwm.focused;
+	int nx,
+		ny;
 	win_geom_t *geom;
+	monitor_t *m;
 
 
-	if(!(c = dwm.focused))
+	if(c == 0x0)
 		return;
 
 	geom = &c->geom;
+	m = monitor_from_client(c);
 
 	nx = ((int*)(arg->v))[0];
 	ny = ((int*)(arg->v))[1];
 
 	switch(nx){
-	case -INT_MAX:	nx = dwm.mons->x; break;
-	case INT_MAX:	nx = dwm.mons->x + dwm.mons->width - geom->width - geom->border_width*2; break;
+	case -INT_MAX:	nx = m->x; break;
+	case INT_MAX:	nx = m->x + m->width - geom->width - geom->border_width*2; break;
 	default:		nx += geom->x; break;
 	}
 
 	switch(ny){
-	case -INT_MAX:	ny = dwm.mons->y; break;
-	case INT_MAX:	ny = dwm.mons->y + dwm.mons->height - geom->height - geom->border_width*2; break;
+	case -INT_MAX:	ny = m->y; break;
+	case INT_MAX:	ny = m->y + m->height - geom->height - geom->border_width*2; break;
 	default:		ny += geom->y;
 	}
 
-	// TODO why do the following two lines not lead to the following glitch
-	// 	- tiling mode with two windows
-	// 	- client_resize the right windw
-	// 	- move it to top-right
-	// 	- move it to top-left
-	// 	- move it bottom-left
-	// 		=> clientstack_focus moves to the other window
 	client_resize(c, nx, ny, geom->width, geom->height);
 	statusbar_raise();
 }
 
 void action_client_move_mouse(action_arg_t const *arg){
+	client_t *c = dwm.focused;
 	int x, y, ocx, ocy, nx, ny;
-	client_t *c;
 	xevent_t ev;
+	win_geom_t *geom;
+	monitor_t *m;
 	Time lasttime = 0;
 
 
-	if(!(c = dwm.focused))
+	if(c == 0x0)
 		return;
 
-	ocx = c->geom.x;
-	ocy = c->geom.y;
+	geom = &c->geom;
+	m = monitor_from_client(c);
+	ocx = geom->x;
+	ocy = geom->y;
 
 	if(input_pointer_grab(dwm.gfx->cursors[CUR_MOVE]) != 0)
 		return;
@@ -135,17 +135,17 @@ void action_client_move_mouse(action_arg_t const *arg){
 		nx = ocx + (ev.xmotion.x - x);
 		ny = ocy + (ev.xmotion.y - y);
 
-		if(abs(dwm.mons->x - nx) < CONFIG_SNAP_PIXEL)
-			nx = dwm.mons->x;
-		else if(abs((dwm.mons->x + dwm.mons->width) - (nx + WIDTH(c))) < CONFIG_SNAP_PIXEL)
-			nx = dwm.mons->x + dwm.mons->width - WIDTH(c);
+		if(abs(m->x - nx) < CONFIG_SNAP_PIXEL)
+			nx = m->x;
+		else if(abs((m->x + m->width) - (nx + WIDTH(c))) < CONFIG_SNAP_PIXEL)
+			nx = m->x + m->width - WIDTH(c);
 
-		if(abs(dwm.mons->y - ny) < CONFIG_SNAP_PIXEL)
-			ny = dwm.mons->y;
-		else if(abs((dwm.mons->y + dwm.mons->height) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
-			ny = dwm.mons->y + dwm.mons->height - HEIGHT(c);
+		if(abs(m->y - ny) < CONFIG_SNAP_PIXEL)
+			ny = m->y;
+		else if(abs((m->y + m->height) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
+			ny = m->y + m->height - HEIGHT(c);
 
-		client_resize(c, nx, ny, c->geom.width, c->geom.height);
+		client_resize(c, nx, ny, geom->width, geom->height);
 	}
 
 	input_pointer_release();
