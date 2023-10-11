@@ -16,7 +16,7 @@ static int dummy_xerror_hdlr(Display *dpy, XErrorEvent *ee);
 
 
 /* global functions */
-window_t win_create(win_geom_t *geom, cursor_type_t cursor, char *class){
+window_t win_create(win_geom_t *geom, cursor_type_t cursor, char *class, bool override_redirect){
 	window_t win;
 
 
@@ -33,7 +33,7 @@ window_t win_create(win_geom_t *geom, cursor_type_t cursor, char *class){
 		DefaultVisual(dwm.dpy, dwm.screen),
 		CWOverrideRedirect | CWBackPixmap | CWEventMask,
 		&(XSetWindowAttributes){
-			.override_redirect = True,
+			.override_redirect = override_redirect ? True : False,
 			.background_pixmap = ParentRelative,
 			.event_mask = ButtonPressMask | ExposureMask
 		}

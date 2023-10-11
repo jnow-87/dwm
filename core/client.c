@@ -34,21 +34,11 @@ int clients_init(void){
 	if(!XQueryTree(dwm.dpy, dwm.root, &dummy, &dummy, &childs, &n))
 		return ERROR("querying clients\n");
 
-	// TODO what is the transient check for
 	for(unsigned int i=0; i<n; i++){
-		if(win_get_attr(childs[i], &attr) != 0 || attr.override_redirect || win_get_transient(childs[i]) != None)
+		if(win_get_attr(childs[i], &attr) != 0 || attr.override_redirect)
 			continue;
 
 		if(attr.map_state == IsViewable || win_get_state(childs[i]) == IconicState)
-			client_init(childs[i], &attr);
-	}
-
-	/* now the transients */
-	for(unsigned int i=0; i<n; i++){
-		if(win_get_attr(childs[i], &attr) != 0)
-			continue;
-
-		if(win_get_transient(childs[i]) != None && (attr.map_state == IsViewable || win_get_state(childs[i]) == IconicState))
 			client_init(childs[i], &attr);
 	}
 

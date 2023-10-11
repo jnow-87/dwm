@@ -28,7 +28,7 @@ void statusbar_init(unsigned int height){
 	bar->geom.height = height;
 	bar->geom.border_width = 0;
 
-	bar->win = win_create(&bar->geom, CUR_NORM, "dwm");
+	bar->win = win_create(&bar->geom, CUR_NORM, "dwm", true);
 	win_raise(bar->win);
 
 	statusbar_update();

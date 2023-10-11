@@ -46,7 +46,7 @@ typedef struct{
 
 
 /* prototypes */
-window_t win_create(win_geom_t *geom, cursor_type_t cursor, char *class);
+window_t win_create(win_geom_t *geom, cursor_type_t cursor, char *class, bool override_redirect);
 void win_destroy(window_t win);
 
 void win_init(window_t win, win_geom_t *geom, win_hints_t *hints);
