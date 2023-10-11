@@ -15,6 +15,20 @@
 /* macros */
 #define SIZE_MIN	32
 
+#define SNAP(origin, dim, new, geom, mon){ \
+	if(abs((mon)->origin - *(new)) < CONFIG_SNAP_PIXEL) \
+		*new = (mon)->origin; \
+	else if(abs(((mon)->origin + (mon)->dim) - (*(new) + ((geom)->dim + (geom)->border_width * 2))) < CONFIG_SNAP_PIXEL) \
+		*new = (mon)->origin + (mon)->dim - ((geom)->dim + (geom)->border_width * 2); \
+}
+
+#define PREP_MOVE(origin, dim, new, geom, mon) \
+	switch(*new){ \
+	case -INT_MAX:	*(new) = (mon)->origin; break; \
+	case INT_MAX:	*(new) = (mon)->origin + (mon)->dim - (geom)->dim - (geom)->border_width * 2; break; \
+	default:		*(new) += (geom)->origin; break; \
+	}
+
 #define PREP_RESIZE(origin, dim, new, geom, store, mon){ \
 	if((new)->dim == INT_MAX){ \
 		(new)->origin = (mon)->origin; \
@@ -84,17 +98,8 @@ void action_client_move(action_arg_t const *arg){
 	nx = ((int*)(arg->v))[0];
 	ny = ((int*)(arg->v))[1];
 
-	switch(nx){
-	case -INT_MAX:	nx = m->x; break;
-	case INT_MAX:	nx = m->x + m->width - geom->width - geom->border_width*2; break;
-	default:		nx += geom->x; break;
-	}
-
-	switch(ny){
-	case -INT_MAX:	ny = m->y; break;
-	case INT_MAX:	ny = m->y + m->height - geom->height - geom->border_width*2; break;
-	default:		ny += geom->y;
-	}
+	PREP_MOVE(x, width, &nx, geom, m);
+	PREP_MOVE(y, height, &ny, geom, m);
 
 	client_resize(c, nx, ny, geom->width, geom->height);
 	statusbar_raise();
@@ -102,48 +107,46 @@ void action_client_move(action_arg_t const *arg){
 
 void action_client_move_mouse(action_arg_t const *arg){
 	client_t *c = dwm.focused;
-	int x, y, ocx, ocy, nx, ny;
+	Time tlast = 0;
+	int ptr_x,
+		ptr_y;
+	int ox,
+		oy,
+		nx,
+		ny;
 	xevent_t ev;
 	win_geom_t *geom;
 	monitor_t *m;
-	Time lasttime = 0;
 
 
 	if(c == 0x0)
 		return;
 
-	geom = &c->geom;
-	m = monitor_from_client(c);
-	ocx = geom->x;
-	ocy = geom->y;
-
 	if(input_pointer_grab(dwm.gfx->cursors[CUR_MOVE]) != 0)
 		return;
 
-	if(!input_pointer_coord(&x, &y))
+	if(input_pointer_coord(&ptr_x, &ptr_y) != 0)
 		return;
+
+	m = monitor_from_client(c);
+	geom = &c->geom;
+	ox = geom->x;
+	oy = geom->y;
 
 	while(xlib_get_event(&ev, true, PointerMotionMask | ButtonReleaseMask) >= 0){
 		if(ev.type != MotionNotify)
 			break;
 
-		if((ev.xmotion.time - lasttime) <= (1000 / 60))
+		if((ev.xmotion.time - tlast) <= (1000 / 60))
 			continue;
 
-		lasttime = ev.xmotion.time;
+		tlast = ev.xmotion.time;
 
-		nx = ocx + (ev.xmotion.x - x);
-		ny = ocy + (ev.xmotion.y - y);
+		nx = ox + (ev.xmotion.x - ptr_x);
+		ny = oy + (ev.xmotion.y - ptr_y);
 
-		if(abs(m->x - nx) < CONFIG_SNAP_PIXEL)
-			nx = m->x;
-		else if(abs((m->x + m->width) - (nx + WIDTH(c))) < CONFIG_SNAP_PIXEL)
-			nx = m->x + m->width - WIDTH(c);
-
-		if(abs(m->y - ny) < CONFIG_SNAP_PIXEL)
-			ny = m->y;
-		else if(abs((m->y + m->height) - (ny + HEIGHT(c))) < CONFIG_SNAP_PIXEL)
-			ny = m->y + m->height - HEIGHT(c);
+		SNAP(x, width, &nx, geom, m);
+		SNAP(y, height, &ny, geom, m);
 
 		client_resize(c, nx, ny, geom->width, geom->height);
 	}
@@ -172,19 +175,18 @@ void action_client_resize(action_arg_t const *arg){
 }
 
 void action_client_resize_mouse(action_arg_t const *arg){
-	int ocx, ocy, nw, nh;
-	client_t *c;
+	client_t *c = dwm.focused;
+	Time tlast = 0;
+	int nw,
+		nh;
 	win_geom_t *geom;
 	xevent_t ev;
-	Time lasttime = 0;
 
 
-	if(!(c = dwm.focused))
+	if(c == 0x0)
 		return;
 
 	geom = &c->geom;
-	ocx = geom->x;
-	ocy = geom->y;
 
 	if(input_pointer_grab(dwm.gfx->cursors[CUR_RESIZE]) != 0)
 		return;
@@ -195,13 +197,13 @@ void action_client_resize_mouse(action_arg_t const *arg){
 		if(ev.type != MotionNotify)
 			break;
 
-		if((ev.xmotion.time - lasttime) <= (1000 / 60))
+		if((ev.xmotion.time - tlast) <= (1000 / 60))
 			continue;
 
-		lasttime = ev.xmotion.time;
+		tlast = ev.xmotion.time;
 
-		nw = MAX(ev.xmotion.x - ocx - 2 * geom->border_width + 1, 1);
-		nh = MAX(ev.xmotion.y - ocy - 2 * geom->border_width + 1, 1);
+		nw = MAX(ev.xmotion.x - geom->x - 2 * geom->border_width + 1, SIZE_MIN);
+		nh = MAX(ev.xmotion.y - geom->y - 2 * geom->border_width + 1, SIZE_MIN);
 
 		client_resize(c, geom->x, geom->y, nw, nh);
 	}

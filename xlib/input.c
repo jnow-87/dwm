@@ -77,7 +77,7 @@ int input_pointer_coord(int *x, int *y){
 	Window dummy;
 
 
-	return XQueryPointer(dwm.dpy, dwm.root, &dummy, &dummy, x, y, &di, &di, &dui);
+	return !XQueryPointer(dwm.dpy, dwm.root, &dummy, &dummy, x, y, &di, &di, &dui);
 }
 
 unsigned int input_get_numlock_mask(void){
