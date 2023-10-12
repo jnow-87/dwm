@@ -12,7 +12,7 @@ dwm-y := \
 	statusbar.o \
 	tags.o \
 	xevents.o \
-	action/ \
+	actions/ \
 	config/ \
 	layouts/ \
 	utils/ \
