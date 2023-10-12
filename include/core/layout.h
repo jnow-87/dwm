@@ -3,6 +3,7 @@
 
 
 #include <core/client.h>
+#include <core/monitor.h>
 #include <xlib/window.h>
 #include <utils/utils.h>
 
@@ -24,7 +25,7 @@ typedef struct{
 
 
 /* prototypes */
-client_t *layout_next_tiled(client_t *c);
+client_t *layout_next_tiled(client_t *c, monitor_t *m);
 void layout_arrange(void);
 
 

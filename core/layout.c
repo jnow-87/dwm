@@ -1,6 +1,7 @@
 #include <core/client.h>
 #include <core/dwm.h>
 #include <core/layout.h>
+#include <core/monitor.h>
 #include <xlib/window.h>
 #include <utils/list.h>
 
@@ -10,10 +11,13 @@ LAYOUT("☯", 0x0);
 
 
 /* global functions */
-client_t *layout_next_tiled(client_t *c){
-	for(; c && !ISVISIBLE(c); c=c->next);
+client_t *layout_next_tiled(client_t *c, monitor_t *m){
+	for(; c != 0x0; c=c->next){
+		if(ISVISIBLE(c) && monitor_from_client(c) == m)
+			return c;
+	}
 
-	return c;
+	return 0x0;
 }
 
 void layout_arrange(void){
