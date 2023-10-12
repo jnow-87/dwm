@@ -75,15 +75,14 @@ int xlib_init(void){
 	/* select events */
 	wa.cursor = dwm.gfx->cursors[CUR_NORM];
 
-	// TODO
-	// 	the list doesn't seem correct, cf. notes
 	wa.event_mask = SubstructureRedirectMask
 				  | SubstructureNotifyMask
-				  | ButtonPressMask
-				  | PointerMotionMask
-				  | LeaveWindowMask
 				  | StructureNotifyMask
 				  | PropertyChangeMask
+				  | KeyPressMask
+				  | ButtonPressMask
+				  | FocusChangeMask
+				  | ExposureMask
 				  ;
 
 	XChangeWindowAttributes(dwm.dpy, dwm.root, CWEventMask | CWCursor, &wa);
