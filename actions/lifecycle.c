@@ -1,12 +1,20 @@
 #include <core/dwm.h>
+#include <utils/menu.h>
 #include <actions.h>
 
 
 /* global functions */
-void action_quit(action_arg_t const *arg){
-	dwm.state = DWM_SHUTDOWN;
-}
+void action_lifecycle(action_arg_t const *arg){
+	switch(arg->i){
+	case DWM_SHUTDOWN:
+	case DWM_RESTART:
+		dwm.state = arg->i;
+		break;
 
-void action_restart(action_arg_t const *arg){
-	dwm.state = DWM_RESTART;
+	default:
+		switch(menu((char const *[]){"restart", "quit"}, 2)){
+		case 0:	dwm.state = DWM_RESTART; break;
+		case 1:	dwm.state = DWM_SHUTDOWN; break;
+		}
+	}
 }

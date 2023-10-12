@@ -2,6 +2,7 @@
 #include <X11/X.h>
 #include <X11/keysymdef.h>
 #include <core/buttons.h>
+#include <core/dwm.h>
 #include <core/keys.h>
 #include <actions.h>
 
@@ -59,10 +60,8 @@ KEY(XK_F4,		ALT,				action_client_kill,		0);
 KEY(XK_Tab,		ALT,				action_client_cycle,	.i = +1);
 KEY(XK_Tab,		ALT | ShiftMask,	action_client_cycle,	.i = -1);
 
-// dwm start/stop
-// TODO call dmenu as menu asking for exit | restart
-KEY(XK_q,		MODKEY|ShiftMask,	action_quit,		0);
-KEY(XK_Delete,	ALT | ControlMask,	action_restart,		0);
+// dwm lifecycle
+KEY(XK_Delete,	ALT | ControlMask,	action_lifecycle,		.i = -1);
 
 // launch programs
 KEY(XK_s,		MODKEY,	action_statusbar_toggle,	0);

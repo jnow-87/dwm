@@ -14,8 +14,7 @@ typedef void (*action_t)(action_arg_t const *);
 
 
 /* prototypes */
-void action_quit(action_arg_t const *arg);
-void action_restart(action_arg_t const *arg);
+void action_lifecycle(action_arg_t const *arg);
 
 void action_statusbar_toggle(action_arg_t const *arg);
 void action_layout_select(action_arg_t const *arg);
