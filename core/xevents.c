@@ -85,7 +85,6 @@ static void destroy_notify(xevent_t *e){
 
 	client_cleanup(c, true);
 	layout_arrange();
-	statusbar_raise();
 }
 
 static void configure_request(xevent_t *e){
@@ -143,7 +142,6 @@ static void configure_notify(xevent_t *e){
 	monitor_discover();
 
 	gfx_resize(dwm.gfx, dwm.screen_width, dwm.screen_height);
-	statusbar_raise();
 	layout_arrange();
 }
 
@@ -200,7 +198,6 @@ static void unmap_notify(xevent_t *e){
 		if(!ev->send_event){
 			client_cleanup(c, false);
 			layout_arrange();
-			statusbar_raise();
 		}
 		else
 			win_set_state(c->win, WithdrawnState);
@@ -244,7 +241,6 @@ static void button_press(xevent_t *e){
 			xlib_release_events();
 
 			clientstack_focus(c, true);
-			statusbar_raise();
 		}
 	}
 	else

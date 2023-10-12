@@ -1,6 +1,7 @@
 #include <core/client.h>
 #include <core/dwm.h>
 #include <core/clientstack.h>
+#include <core/statusbar.h>
 #include <xlib/window.h>
 #include <utils/list.h>
 #include <utils/stack.h>
@@ -82,4 +83,6 @@ void clientstack_focus(client_t *c, bool restack){
 	}
 	else
 		win_focus(dwm.root);
+
+	statusbar_raise();
 }

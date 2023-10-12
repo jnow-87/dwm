@@ -4,7 +4,6 @@
 #include <core/dwm.h>
 #include <core/keys.h>
 #include <core/monitor.h>
-#include <core/statusbar.h>
 #include <core/xevents.h>
 #include <xlib/input.h>
 #include <xlib/window.h>
@@ -70,7 +69,6 @@ void action_client_cycle(action_arg_t const *arg){
 		keys_cycle_start(client_cycle_complete);
 
 	clientstack_focus(c, false);
-	statusbar_raise();
 }
 
 void action_client_kill(action_arg_t const *arg){
@@ -102,7 +100,8 @@ void action_client_move(action_arg_t const *arg){
 	PREP_MOVE(y, height, &ny, geom, m);
 
 	client_resize(c, nx, ny, geom->width, geom->height);
-	statusbar_raise();
+
+	layout_arrange();
 }
 
 void action_client_move_mouse(action_arg_t const *arg){
@@ -152,6 +151,8 @@ void action_client_move_mouse(action_arg_t const *arg){
 	}
 
 	input_pointer_release();
+
+	layout_arrange();
 }
 
 void action_client_resize(action_arg_t const *arg){
@@ -171,7 +172,8 @@ void action_client_resize(action_arg_t const *arg){
 	PREP_RESIZE(y, height, &new, &c->geom, &c->geom_store, m);
 
 	client_resize(c, new.x, new.y, new.width, new.height);
-	statusbar_raise();
+
+	layout_arrange();
 }
 
 void action_client_resize_mouse(action_arg_t const *arg){
@@ -210,6 +212,8 @@ void action_client_resize_mouse(action_arg_t const *arg){
 
 	input_pointer_move(c->win, geom->width + geom->border_width - 1, geom->height + geom->border_width - 1);
 	input_pointer_release();
+
+	layout_arrange();
 }
 
 

@@ -20,8 +20,6 @@ void action_layout_select(action_arg_t const *arg){
 	else
 		dwm.layout = (layout_t*)arg->v;
 
-	if(dwm.focused)
-		layout_arrange();
-
+	layout_arrange();
 	statusbar_update();
 }

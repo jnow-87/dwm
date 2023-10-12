@@ -2,6 +2,7 @@
 #include <core/dwm.h>
 #include <core/layout.h>
 #include <core/monitor.h>
+#include <core/statusbar.h>
 #include <xlib/window.h>
 #include <utils/list.h>
 
@@ -31,4 +32,6 @@ void layout_arrange(void){
 
 	if(dwm.layout->arrange)
 		dwm.layout->arrange();
+
+	statusbar_raise();
 }
