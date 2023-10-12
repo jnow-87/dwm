@@ -121,7 +121,7 @@ void action_client_move_mouse(action_arg_t const *arg){
 	if(c == 0x0)
 		return;
 
-	if(input_pointer_grab(dwm.gfx->cursors[CUR_MOVE]) != 0)
+	if(input_pointer_grab(dwm.root, dwm.gfx->cursors[CUR_MOVE]) != 0)
 		return;
 
 	if(input_pointer_coord(&ptr_x, &ptr_y) != 0)
@@ -190,7 +190,7 @@ void action_client_resize_mouse(action_arg_t const *arg){
 
 	geom = &c->geom;
 
-	if(input_pointer_grab(dwm.gfx->cursors[CUR_RESIZE]) != 0)
+	if(input_pointer_grab(dwm.root, dwm.gfx->cursors[CUR_RESIZE]) != 0)
 		return;
 
 	input_pointer_move(c->win, geom->width + geom->border_width - 1, geom->height + geom->border_width - 1);

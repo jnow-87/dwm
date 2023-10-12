@@ -34,7 +34,7 @@ void input_keys_release(window_t win);
 void input_button_register(window_t win, unsigned int button, unsigned int mods);
 void input_buttons_release(window_t win);
 
-int input_pointer_grab(cursor_t cursor);
+int input_pointer_grab(window_t win, cursor_t cursor);
 void input_pointer_release(void);
 void input_pointer_move(window_t win, int x, int y);
 int input_pointer_coord(int *x, int *y);

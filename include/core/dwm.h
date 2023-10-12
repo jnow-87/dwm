@@ -48,7 +48,7 @@ typedef struct{
 	// dwm components
 	monitor_t *mons;
 	statusbar_t statusbar;
-	layout_t const *layout;
+	layout_t *layout;
 
 	// client handling
 	client_t *stack,

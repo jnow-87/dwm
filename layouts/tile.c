@@ -13,7 +13,7 @@
 
 
 /* local functions */
-static void layout_tile(void){
+static void arrange(void){
 	unsigned int i, n, h, w, y, ty;
 	monitor_t *m;
 	client_t *c;
@@ -50,4 +50,4 @@ static void layout_tile(void){
 	}
 }
 
-LAYOUT("⚏", layout_tile);
+LAYOUT("tiled", "⚏", arrange);

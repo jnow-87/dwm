@@ -8,7 +8,7 @@
 
 
 /* default nop layout */
-LAYOUT("☯", 0x0);
+LAYOUT("nop", "☯", 0x0);
 
 
 /* global functions */

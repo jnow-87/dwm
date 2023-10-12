@@ -55,8 +55,8 @@ void input_buttons_release(window_t win){
 	XUngrabButton(dwm.dpy, AnyButton, AnyModifier, win);
 }
 
-int input_pointer_grab(cursor_t cursor){
-	return -(XGrabPointer(dwm.dpy, dwm.root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, cursor, CurrentTime) != GrabSuccess);
+int input_pointer_grab(window_t win, cursor_t cursor){
+	return -(XGrabPointer(dwm.dpy, win, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, cursor, CurrentTime) != GrabSuccess);
 }
 
 void input_pointer_release(void){

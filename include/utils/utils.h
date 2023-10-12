@@ -4,8 +4,17 @@
 
 /* macros */
 #define LENGTH(X)	(sizeof X / sizeof X[0])
-#define MAX(A, B)	((A) > (B) ? (A) : (B))
-#define MIN(A, B)	((A) < (B) ? (A) : (B))
+
+#define CMP(x, y, op)({ \
+	typeof(x) _x = x; \
+	typeof(y) _y = y; \
+	\
+	\
+	(_x op _y) ? _x : _y; \
+})
+
+#define MIN(x, y)	CMP(x, y, <)
+#define MAX(x, y)	CMP(x, y, >)
 
 #define section(sec)			__attribute__((section(sec)))
 #define align(base)				__attribute__((aligned(base)))

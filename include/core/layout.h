@@ -9,17 +9,21 @@
 
 
 /* macros */
-#define LAYOUT(_symbol, _arrange) \
-	static layout_t const layout_##_arrange \
+#define LAYOUT_N(_n, _name, _symbol, _arrange) \
+	static layout_t const layout_##_n \
 		linker_array("layouts") noreorder = { \
+			.name = _symbol " " _name, \
 			.symbol = _symbol, \
 			.arrange = _arrange, \
 		}
 
+#define LAYOUT(name, symbol, arrange)	UNIQUE(LAYOUT_N, __COUNTER__, name, symbol, arrange)
+
 
 /* types */
 typedef struct{
-	char const *symbol;
+	char const *name,
+			   *symbol;
 	void (*arrange)(void);
 } layout_t;
 

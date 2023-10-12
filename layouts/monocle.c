@@ -6,7 +6,7 @@
 
 
 /* local functions */
-static void layout_monocle(void){
+static void arrange(void){
 	monitor_t *m;
 	client_t *c;
 
@@ -19,4 +19,4 @@ static void layout_monocle(void){
 	}
 }
 
-LAYOUT("❍", layout_monocle);
+LAYOUT("monocle", "❍", arrange);
