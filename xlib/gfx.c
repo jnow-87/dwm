@@ -419,6 +419,8 @@ static int scheme_create(gfx_t *gfx, color_scheme_t *scheme, scheme_t *scm){
 		}
 	}
 
+	scm->names = scheme;
+
 	return 0;
 }
 

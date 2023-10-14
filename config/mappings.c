@@ -1,8 +1,6 @@
-#include <config/config.h>
 #include <X11/X.h>
 #include <X11/keysymdef.h>
 #include <core/buttons.h>
-#include <core/dwm.h>
 #include <core/keys.h>
 #include <actions.h>
 
@@ -22,16 +20,20 @@
 	KEY(keysym,	MODKEY | ShiftMask,			action_tags_client_toggle,	.ui = (1 << tag))
 
 
-/* static variables */
-static char const *dmenucmd[] = { "dmenu_run", "-fn", CONFIG_FONT, 0x0 };
-
-
 /* keys */
 // tag control
 TAGKEY(XK_F1, 0);
 TAGKEY(XK_F2, 1);
 TAGKEY(XK_F3, 2);
 TAGKEY(XK_F4, 3);
+
+// dwm control
+KEY(XK_F4,		ALT,				action_client_kill,			0);
+KEY(XK_Tab,		ALT,				action_client_cycle,		.i = +1);
+KEY(XK_Tab,		ALT | ShiftMask,	action_client_cycle,		.i = -1);
+KEY(XK_Delete,	ALT | ControlMask,	action_lifecycle,			.i = -1);
+KEY(XK_s,		MODKEY,				action_statusbar_toggle,	0);
+KEY(XK_F2,		ALT,				action_dmenu_run,			0);
 
 // window movement
 KEY(XK_Up,		MODKEY,				action_client_move,	.v = (int[]){ 0, -MOVE_INC });
@@ -54,21 +56,6 @@ KEY(XK_Right,	MODKEY | ALT | ShiftMask,	action_client_resize,	.v = (int []){ INT
 KEY(XK_Left,	MODKEY | ALT | ShiftMask,	action_client_resize,	.v = (int []){ INT_MAX, 0 });
 KEY(XK_Left,	MODKEY | ALT | ShiftMask,	action_client_resize,	.v = (int []){ INT_MAX, 0 });
 KEY(XK_Insert,	MODKEY,						action_client_resize,	.v = (int []){ INT_MAX, INT_MAX });
-
-// window open/close/client_focus
-KEY(XK_F4,		ALT,				action_client_kill,		0);
-KEY(XK_Tab,		ALT,				action_client_cycle,	.i = +1);
-KEY(XK_Tab,		ALT | ShiftMask,	action_client_cycle,	.i = -1);
-
-// dwm lifecycle
-KEY(XK_Delete,	ALT | ControlMask,	action_lifecycle,		.i = -1);
-
-// launch programs
-KEY(XK_s,		MODKEY,	action_statusbar_toggle,	0);
-KEY(XK_F2,		ALT,	action_spawn,				.v = dmenucmd);
-
-// TODO pstree comparing starting xterm via spawn and via dmenu
-//	{ MODKEY,				XK_x,		spawn,			{ .v = termcmd);
 
 // winfade
 // TODO dwm doesn't set _NET_CURRENT_DESKTOP

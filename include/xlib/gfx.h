@@ -27,6 +27,8 @@ typedef struct{
 	color_t fg,
 			bg,
 			border;
+
+	color_scheme_t *names;
 } scheme_t;
 
 typedef struct font_t{
