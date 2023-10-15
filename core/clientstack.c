@@ -29,7 +29,7 @@ client_t *clientstack_cycle(int dir, cycle_state_t state){
 				return c;
 		}
 
-		if(dwm.focused == 0x0) // the entire stack has been checked and nothing has bee found
+		if(dwm.focused == 0x0) // the entire stack has been checked and nothing has been found
 			return 0x0;
 
 		// retry, this time from the top of the stack

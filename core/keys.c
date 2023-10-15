@@ -78,13 +78,12 @@ void keys_cycle_start(cycle_callback_t complete){
 	unsigned int mods;
 
 
+	keys_cycle_complete();
+
 	mods = input_get_mod_state();
 
-	// TODO should complete() be called if the cycle is completed immediately
 	if(mods == 0)
 		return;
-
-	keys_cycle_complete();
 
 	// the xlib KeyRelease event does not reliably report the release of modifier keys,
 	// hence use a timer to reset the modifier state manually

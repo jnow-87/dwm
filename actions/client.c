@@ -69,6 +69,13 @@ void action_client_cycle(action_arg_t const *arg){
 		keys_cycle_start(client_cycle_complete);
 
 	clientstack_focus(c, false);
+
+	// if the key-cycle has never been started, e.g. since the modifier keys
+	// had already been released, call the cycle complete to get the same state
+	// compared to a full cycle where the modifier keys are not immediately
+	// released
+	if(!keys_cycle_active())
+		client_cycle_complete();
 }
 
 void action_client_kill(action_arg_t const *arg){
