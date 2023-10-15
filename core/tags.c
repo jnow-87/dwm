@@ -17,7 +17,6 @@ void tags_set(unsigned int *tags, unsigned int v){
 
 	*tags = v;
 
-	// TODO this should be moved to dwm level
 	clientstack_refocus();
 	layout_arrange();
 	statusbar_update();

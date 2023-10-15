@@ -82,7 +82,6 @@ int dwm_setup(void){
 		return ERROR("adding xlib event handler\n");
 
 	/* init core components */
-	// TODO add consistent return values and handling
 	monitor_discover();
 	statusbar_init(CONFIG_STATUSBAR_HEIGHT);
 	r |= keys_init();
