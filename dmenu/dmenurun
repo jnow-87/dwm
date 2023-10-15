@@ -1,0 +1,8 @@
+#!/bin/bash
+
+script_root="$(dirname ${BASH_SOURCE[0]})"
+
+dmenupath="${script_root}/dmenupath"
+dmenu="${script_root}/dmenu"
+
+exec $(${dmenupath} | ${dmenu} "$@")

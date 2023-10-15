@@ -31,7 +31,7 @@ void action_spawn(action_arg_t const *arg){
 
 void action_dmenu_run(action_arg_t const *arg){
 	char const *dmenu[] = {
-		"dmenu_run",
+		"dmenurun",
 		"-fn", CONFIG_FONT,
 		"-nf", dwm.gfx->schemes[SCM_NORM].names->fg,
 		"-nb", dwm.gfx->schemes[SCM_NORM].names->bg,

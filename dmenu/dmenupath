@@ -1,0 +1,17 @@
+#!/bin/bash
+
+script_root="$(dirname ${BASH_SOURCE[0]})"
+
+cachedir="${XDG_CACHE_HOME:-"$HOME/.cache"}/dwm"
+cache="$cachedir/dmenurun"
+
+stest="${script_root}/stest"
+
+mkdir -p "$cachedir"
+
+IFS=:
+if ${stest} -dqr -n "$cache" $PATH; then
+	${stest} -flx $PATH | sort -u > "$cache"
+fi
+
+cat "$cache"

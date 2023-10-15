@@ -26,7 +26,7 @@ tool_deps :=
 
 # init source and build tree
 default_build_tree := build/
-src_dirs := core/
+src_dirs := core/ dmenu/
 
 # include build system Makefile
 include $(scripts_dir)/main.make
@@ -94,9 +94,21 @@ include $(scripts_dir)/install.make
 .PHONY: install
 install: all
 	$(call install,$(build_tree)/core/dwm,/usr/bin/)
+	$(call install,$(build_tree)/dmenu/dmenu,/usr/bin/)
+	$(call install,$(build_tree)/dmenu/stest,/usr/bin/)
+	$(call install,dmenu/dmenurun,/usr/bin/)
+	$(call install,dmenu/dmenupath,/usr/bin/)
 	$(call install,man/dwm.1,/usr/local/man/man1)
+	$(call install,man/dmenu.1,/usr/local/man/man1)
+	$(call install,man/stest.1,/usr/local/man/man1)
 
 .PHONY: uninstall
 uninstall:
 	$(call uninstall,/usr/bin/dwm)
+	$(call uninstall,/usr/bin/dmenu)
+	$(call uninstall,/usr/bin/dmenurun)
+	$(call uninstall,/usr/bin/dmenupath)
+	$(call uninstall,/usr/bin/stest)
 	$(call uninstall,/usr/local/man/man1/dwm.1)
+	$(call uninstall,/usr/local/man/man1/dmenu.1)
+	$(call uninstall,/usr/local/man/man1/stest.1)
