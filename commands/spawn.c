@@ -4,11 +4,11 @@
 #include <core/dwm.h>
 #include <core/scheme.h>
 #include <utils/log.h>
-#include <actions.h>
+#include <commands.h>
 
 
 /* global functions */
-void action_spawn(action_arg_t const *arg){
+void cmd_spawn(cmd_arg_t *arg){
 	struct sigaction sa;
 
 
@@ -29,7 +29,7 @@ void action_spawn(action_arg_t const *arg){
 	ERROR("spawning %s\n", ((char **)arg->v)[0]);
 }
 
-void action_dmenu_run(action_arg_t const *arg){
+void cmd_dmenu_run(cmd_arg_t *arg){
 	char const *dmenu[] = {
 		"dmenurun",
 		"-fn", CONFIG_FONT,
@@ -41,5 +41,5 @@ void action_dmenu_run(action_arg_t const *arg){
 	};
 
 
-	action_spawn(&(action_arg_t const){ .v = dmenu });
+	cmd_spawn(&(cmd_arg_t){ .v = dmenu });
 }

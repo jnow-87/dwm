@@ -2,11 +2,11 @@
 #include <core/layout.h>
 #include <core/statusbar.h>
 #include <utils/menu.h>
-#include <actions.h>
+#include <commands.h>
 
 
 /* global functions */
-void action_layout_select(action_arg_t const *arg){
+void cmd_layout_select(cmd_arg_t *arg){
 	int n = 0;
 	char const *names[__stop_layouts - __start_layouts];
 	layout_t *l;

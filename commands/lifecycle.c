@@ -1,10 +1,10 @@
 #include <core/dwm.h>
 #include <utils/menu.h>
-#include <actions.h>
+#include <commands.h>
 
 
 /* global functions */
-void action_lifecycle(action_arg_t const *arg){
+void cmd_lifecycle(cmd_arg_t *arg){
 	switch(arg->i){
 	case DWM_SHUTDOWN:
 	case DWM_RESTART:

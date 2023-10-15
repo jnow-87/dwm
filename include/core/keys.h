@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <xlib/input.h>
 #include <utils/utils.h>
-#include <actions.h>
+#include <commands.h>
 
 
 /* macros */
@@ -28,8 +28,8 @@ typedef struct{
 	keysym_t keysym;
 	unsigned int mods;
 
-	action_t action;
-	action_arg_t const arg;
+	cmd_t action;
+	cmd_arg_t arg;
 } keymap_t;
 
 

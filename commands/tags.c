@@ -1,18 +1,18 @@
 #include <core/dwm.h>
 #include <core/tags.h>
-#include <actions.h>
+#include <commands.h>
 
 
 /* global functions */
-void action_tags_view(action_arg_t const *arg){
+void cmd_tags_view(cmd_arg_t *arg){
 	tags_set(&dwm.tag_mask, arg->ui);
 }
 
-void action_tags_toggle(action_arg_t const *arg){
+void cmd_tags_toggle(cmd_arg_t *arg){
 	tags_toggle(&dwm.tag_mask, arg->ui);
 }
 
-void action_tags_client_set(action_arg_t const *arg){
+void cmd_tags_client_set(cmd_arg_t *arg){
 	client_t *c = dwm.focused;
 
 
@@ -22,7 +22,7 @@ void action_tags_client_set(action_arg_t const *arg){
 	tags_set(&c->tags, arg->ui);
 }
 
-void action_tags_client_toggle(action_arg_t const *arg){
+void cmd_tags_client_toggle(cmd_arg_t *arg){
 	client_t *c = dwm.focused;
 
 

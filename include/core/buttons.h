@@ -4,7 +4,7 @@
 
 #include <core/client.h>
 #include <utils/utils.h>
-#include <actions.h>
+#include <commands.h>
 
 
 /* macros */
@@ -37,8 +37,8 @@ typedef struct{
 	unsigned int mods;
 	unsigned int button;
 
-	action_t action;
-	action_arg_t const arg;
+	cmd_t action;
+	cmd_arg_t arg;
 } buttonmap_t;
 
 

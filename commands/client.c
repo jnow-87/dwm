@@ -8,7 +8,7 @@
 #include <xlib/input.h>
 #include <xlib/window.h>
 #include <utils/utils.h>
-#include <actions.h>
+#include <commands.h>
 
 
 /* macros */
@@ -56,7 +56,7 @@ static void client_cycle_complete(void);
 
 
 /* global functions */
-void action_client_cycle(action_arg_t const *arg){
+void cmd_client_cycle(cmd_arg_t *arg){
 	client_t *c;
 
 
@@ -78,7 +78,7 @@ void action_client_cycle(action_arg_t const *arg){
 		client_cycle_complete();
 }
 
-void action_client_kill(action_arg_t const *arg){
+void cmd_client_kill(cmd_arg_t *arg){
 	if(!dwm.focused)
 		return;
 
@@ -86,7 +86,7 @@ void action_client_kill(action_arg_t const *arg){
 		win_kill(dwm.focused->win);
 }
 
-void action_client_move(action_arg_t const *arg){
+void cmd_client_move(cmd_arg_t *arg){
 	client_t *c = dwm.focused;
 	int nx,
 		ny;
@@ -111,7 +111,7 @@ void action_client_move(action_arg_t const *arg){
 	layout_arrange();
 }
 
-void action_client_move_mouse(action_arg_t const *arg){
+void cmd_client_move_mouse(cmd_arg_t *arg){
 	client_t *c = dwm.focused;
 	Time tlast = 0;
 	int ptr_x,
@@ -162,7 +162,7 @@ void action_client_move_mouse(action_arg_t const *arg){
 	layout_arrange();
 }
 
-void action_client_resize(action_arg_t const *arg){
+void cmd_client_resize(cmd_arg_t *arg){
 	client_t *c = dwm.focused;
 	win_geom_t new;
 	monitor_t *m;
@@ -183,7 +183,7 @@ void action_client_resize(action_arg_t const *arg){
 	layout_arrange();
 }
 
-void action_client_resize_mouse(action_arg_t const *arg){
+void cmd_client_resize_mouse(cmd_arg_t *arg){
 	client_t *c = dwm.focused;
 	Time tlast = 0;
 	int nw,
