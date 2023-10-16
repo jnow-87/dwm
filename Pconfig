@@ -37,6 +37,9 @@ menu "statusbar"
 		default ""
 endmenu
 
+config MOUSEMOVE
+	bool "move mouse with client focus"
+
 menu "layouts"
 	source "layouts/Pconfig"
 endmenu

@@ -16,8 +16,8 @@
 
 #define TAGKEY(keysym, tag) \
 	KEY(keysym,	ControlMask,				cmd_tags_view,			.ui = (1 << tag)); \
-	KEY(keysym,	ControlMask | ShiftMask,	cmd_tags_toggle,			.ui = (1 << tag)); \
-	KEY(keysym,	MODKEY,						cmd_tags_client_set,		.ui = (1 << tag)); \
+	KEY(keysym,	ControlMask | ShiftMask,	cmd_tags_toggle,		.ui = (1 << tag)); \
+	KEY(keysym,	MODKEY,						cmd_tags_client_set,	.ui = (1 << tag)); \
 	KEY(keysym,	MODKEY | ShiftMask,			cmd_tags_client_toggle,	.ui = (1 << tag))
 
 #define SPOTIFY(op)	\

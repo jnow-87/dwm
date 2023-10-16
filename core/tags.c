@@ -17,8 +17,8 @@ void tags_set(unsigned int *tags, unsigned int v){
 
 	*tags = v;
 
-	clientstack_refocus();
 	layout_arrange();
+	clientstack_refocus();
 	statusbar_update();
 }
 
