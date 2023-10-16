@@ -1,0 +1,66 @@
+mainmenu "dwm configuration"
+
+config FONT
+	qstring "font"
+	default "monospace:size=10"
+
+config BORDER_PIXEL
+	int "number of border pixels"
+	default 1
+
+config SNAP_PIXEL
+	int "number of pixels to trigger window snapping"
+	default 32
+
+config XINERAMA
+	bool "xinerama"
+
+menu "statusbar"
+	config STATUSBAR_TOP
+		bool "show statusbar at the top"
+		default y
+
+	config STATUSBAR_HEIGHT
+		int "statusbar height"
+		default 20
+
+	config STATUSBAR_PADDING
+		int "padding between statusbar elements"
+		default 2
+
+	config STATUSBAR_SPACER_LEFT
+		qstring "statusbar spacer (left)"
+		default ""
+
+	config STATUSBAR_SPACER_RIGHT
+		qstring "statusbar spacer (right)"
+		default ""
+endmenu
+
+menu "layouts"
+	source "layouts/Pconfig"
+endmenu
+
+config LOG_FILE
+	qstring "log file"
+	default "~/dwm.log"
+
+# build config
+choice
+	prompt "Build type"
+
+	config BUILD_RELEASE
+		bool "release"
+
+	config BUILD_DEBUG
+		bool "debug"
+endchoice
+
+menu "Hidden"
+	visible if 0
+
+	config BUILD_TYPE
+		string "Build type"
+		default "debug" if BUILD_DEBUG
+		default "release" if BUILD_RELEASE
+endmenu

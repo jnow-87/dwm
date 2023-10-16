@@ -1,51 +1,114 @@
-# dwm - dynamic window manager
-# See LICENSE file for copyright and license details.
+#
+# Copyright (C) 2014 Jan Nowotsch
+# Author Jan Nowotsch	<jan.nowotsch@gmail.com>
+#
+# Released under the terms of the GNU GPL v2.0
+#
 
-include config.mk
 
-SRC = drw.c dwm.c util.c
-OBJ = ${SRC:.c=.o}
 
-all: options dwm
+####
+## init
+####
 
-options:
-	@echo dwm build options:
-	@echo "CFLAGS   = ${CFLAGS}"
-	@echo "LDFLAGS  = ${LDFLAGS}"
-	@echo "CC       = ${CC}"
+# build system variables
+scripts_dir := scripts/build
+project_type := c
+config := .config
+config_tree := scripts/config
+use_config_sys := y
+config_ftype := Pconfig
+use_coverage_sys = n
+tool_deps :=
 
-.c.o:
-	${CC} -c ${CFLAGS} $<
+# include config
+-include $(config)
 
-${OBJ}: config.h config.mk
+# init source and build tree
+default_build_tree := build/
+src_dirs := core/ dmenu/
 
-config.h:
-	cp config.def.h $@
+# include build system Makefile
+include $(scripts_dir)/main.make
 
-dwm: ${OBJ}
-	${CC} -o $@ ${OBJ} ${LDFLAGS}
 
+####
+## flags
+####
+
+warnflags := \
+	-Wall \
+	-Wno-deprecated-declarations \
+	-Wno-unused-function
+
+cflags := \
+	$(CFLAGS) \
+	$(CONFIG_CFLAGS) \
+	$(warnflags) \
+	-std=c2x \
+	-Os
+
+cppflags := \
+	$(CPPFLAGS) \
+	$(CONFIG_CPPFLAGS) \
+	-Iinclude \
+	-I$(build_tree)
+
+ldflags := \
+	$(LDFLAGS) \
+	$(CONFIG_LDFLAGS)
+
+ldlibs := \
+	$(LDLIOBSFLAGS) \
+	$(CONFIG_LDLIBS)
+
+
+####
+## targets
+####
+
+## build
+.PHONY: all
+ifeq ($(CONFIG_BUILD_DEBUG),y)
+all: cflags += -g
+all: asflags += -g
+all: hostcflags += -g
+all: hostcxxflags += -g
+all: hostasflags += -g
+endif
+
+all: $(lib) $(bin) $(hostlib) $(hostbin)
+
+## cleanup
+.PHONY: clean
 clean:
-	rm -f dwm ${OBJ} dwm-${VERSION}.tar.gz
+	$(rm) $(filter-out $(build_tree)/$(scripts_dir),$(wildcard $(build_tree)/*))
 
-dist: clean
-	mkdir -p dwm-${VERSION}
-	cp -R LICENSE Makefile README config.def.h config.mk\
-		dwm.1 drw.h util.h ${SRC} dwm.png transient.c dwm-${VERSION}
-	tar -cf dwm-${VERSION}.tar dwm-${VERSION}
-	gzip dwm-${VERSION}.tar
-	rm -rf dwm-${VERSION}
+.PHONY: distclean
+distclean:
+	$(rm) $(config) $(build_tree)
 
+## install
+include $(scripts_dir)/install.make
+
+.PHONY: install
 install: all
-	mkdir -p ${DESTDIR}${PREFIX}/bin
-	cp -f dwm ${DESTDIR}${PREFIX}/bin
-	chmod 755 ${DESTDIR}${PREFIX}/bin/dwm
-	mkdir -p ${DESTDIR}${MANPREFIX}/man1
-	sed "s/VERSION/${VERSION}/g" < dwm.1 > ${DESTDIR}${MANPREFIX}/man1/dwm.1
-	chmod 644 ${DESTDIR}${MANPREFIX}/man1/dwm.1
+	$(call install,$(build_tree)/core/dwm,/usr/bin/)
+	$(call install,$(build_tree)/dmenu/dmenu,/usr/bin/)
+	$(call install,$(build_tree)/dmenu/stest,/usr/bin/)
+	$(call install,dmenu/dmenurun,/usr/bin/)
+	$(call install,dmenu/dmenupath,/usr/bin/)
+	$(call install,man/dwm.1,/usr/local/man/man1)
+	$(call install,man/dmenu.1,/usr/local/man/man1)
+	$(call install,man/stest.1,/usr/local/man/man1)
 
+.PHONY: uninstall
 uninstall:
-	rm -f ${DESTDIR}${PREFIX}/bin/dwm\
-		${DESTDIR}${MANPREFIX}/man1/dwm.1
-
-.PHONY: all options clean dist install uninstall
+	$(call uninstall,/usr/bin/dwm)
+	$(call uninstall,/usr/bin/dmenu)
+	$(call uninstall,/usr/bin/dmenurun)
+	$(call uninstall,/usr/bin/dmenupath)
+	$(call uninstall,/usr/bin/stest)
+	$(call uninstall,/usr/local/man/man1/dwm.1)
+	$(call uninstall,/usr/local/man/man1/dmenu.1)
+	$(call uninstall,/usr/local/man/man1/stest.1)
