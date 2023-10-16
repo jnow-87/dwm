@@ -2,6 +2,13 @@
 #define COMMANDS_H
 
 
+#include <stdarg.h>
+
+
+/* macros */
+#define SPAWN(...) (char const *[]){ __VA_ARGS__, 0x0 }
+
+
 /* types */
 typedef union{
 	int i;

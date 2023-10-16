@@ -1,5 +1,6 @@
 #include <X11/X.h>
 #include <X11/keysymdef.h>
+#include <X11/XF86keysym.h>
 #include <core/buttons.h>
 #include <core/keys.h>
 #include <commands.h>
@@ -18,6 +19,15 @@
 	KEY(keysym,	ControlMask | ShiftMask,	cmd_tags_toggle,			.ui = (1 << tag)); \
 	KEY(keysym,	MODKEY,						cmd_tags_client_set,		.ui = (1 << tag)); \
 	KEY(keysym,	MODKEY | ShiftMask,			cmd_tags_client_toggle,	.ui = (1 << tag))
+
+#define SPOTIFY(op)	\
+	SPAWN(\
+		"dbus-send", \
+		"--print-reply", \
+		"--dest=org.mpris.MediaPlayer2.spotify", \
+		"/org/mpris/MediaPlayer2", \
+		"org.mpris.MediaPlayer2.Player." op \
+	)
 
 
 /* keys */
@@ -54,17 +64,37 @@ KEY(XK_Down,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ 0, INT_
 KEY(XK_Up,		MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ 0, INT_MAX });
 KEY(XK_Right,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ INT_MAX, 0 });
 KEY(XK_Left,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ INT_MAX, 0 });
-KEY(XK_Left,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ INT_MAX, 0 });
 KEY(XK_Insert,	MODKEY,						cmd_client_resize,	.v = (int []){ INT_MAX, INT_MAX });
 
 // winfade
 // TODO dwm doesn't set _NET_CURRENT_DESKTOP
-KEY(XK_1,		MODKEY,				cmd_spawn,	.v = (char const *[]){ "winfade", "--group", "1", "fade" });
-KEY(XK_2,		MODKEY,				cmd_spawn,	.v = (char const *[]){ "winfade", "--group", "2", "fade" });
-KEY(XK_3,		MODKEY,				cmd_spawn,	.v = (char const *[]){ "winfade", "--group", "3", "fade" });
-KEY(XK_1,		MODKEY | ShiftMask,	cmd_spawn,	.v = (char const *[]){ "winfade", "--group", "1", "select" });
-KEY(XK_2,		MODKEY | ShiftMask,	cmd_spawn,	.v = (char const *[]){ "winfade", "--group", "2", "select" });
-KEY(XK_3,		MODKEY | ShiftMask,	cmd_spawn,	.v = (char const *[]){ "winfade", "--group", "3", "select" });
+KEY(XK_1,		MODKEY,				cmd_spawn,	.v = SPAWN("winfade", "--group", "1", "fade"));
+KEY(XK_2,		MODKEY,				cmd_spawn,	.v = SPAWN("winfade", "--group", "2", "fade"));
+KEY(XK_3,		MODKEY,				cmd_spawn,	.v = SPAWN("winfade", "--group", "3", "fade"));
+KEY(XK_1,		MODKEY | ShiftMask,	cmd_spawn,	.v = SPAWN("winfade", "--group", "1", "select"));
+KEY(XK_2,		MODKEY | ShiftMask,	cmd_spawn,	.v = SPAWN("winfade", "--group", "2", "select"));
+KEY(XK_3,		MODKEY | ShiftMask,	cmd_spawn,	.v = SPAWN("winfade", "--group", "3", "select"));
+
+// audio control
+KEY(XF86XK_AudioMute,			0,	cmd_spawn,	.v = SPAWN("st-audio", "mute", "toggle"));
+KEY(XF86XK_AudioRaiseVolume,	0,	cmd_spawn,	.v = SPAWN("st-audio", "volume", "raise"));
+KEY(XF86XK_AudioLowerVolume,	0,	cmd_spawn,	.v = SPAWN("st-audio", "volume", "lower"));
+
+// display and keyboard backlight control
+KEY(XF86XK_MonBrightnessDown,	0,			cmd_spawn,	.v = SPAWN("statdctrl", "ctrl", "display-backlight", "-50"));
+KEY(XF86XK_MonBrightnessUp,		0,			cmd_spawn,	.v = SPAWN("statdctrl", "ctrl", "display-backlight", "+50"));
+KEY(XF86XK_MonBrightnessDown,	ShiftMask,	cmd_spawn,	.v = SPAWN("statdctrl", "ctrl", "keyboard-backlight", "-1"));
+KEY(XF86XK_MonBrightnessUp,		ShiftMask,	cmd_spawn,	.v = SPAWN("statdctrl", "ctrl", "keyboard-backlight", "+1"));
+
+// fan control
+KEY(XF86XK_AudioMute,			ShiftMask,	cmd_spawn,	.v = SPAWN("statdctrl", "ctrl", "fan", "t"));
+KEY(XF86XK_AudioRaiseVolume,	ShiftMask,	cmd_spawn,	.v = SPAWN("statdctrl", "ctrl", "fan", "+"));
+KEY(XF86XK_AudioLowerVolume,	ShiftMask,	cmd_spawn,	.v = SPAWN("statdctrl", "ctrl", "fan", "-"));
+
+// media control
+KEY(XF86XK_AudioPlay,			0,			cmd_spawn,	.v = SPOTIFY("PlayPause"));
+KEY(XF86XK_AudioPrev,			0,			cmd_spawn,	.v = SPOTIFY("Previous"));
+KEY(XF86XK_AudioNext,			0,			cmd_spawn,	.v = SPOTIFY("Next"));
 
 
 /* buttons */
