@@ -25,7 +25,7 @@ client_t *clientstack_cycle(int dir, cycle_state_t state){
 		c = (c != 0x0) ? ((dir > 0) ? c->next : c->prev) : dwm.stack;
 
 		for(; c!=0x0; c=(dir > 0) ? c->next : c->prev){
-			if(ISVISIBLE(c))
+			if(ONTAG(c))
 				return c;
 		}
 
@@ -59,7 +59,7 @@ void clientstack_refocus(void){
 	dwm.focused = 0x0;
 
 	list_for_each(dwm.stack, c){
-		if(ISVISIBLE(c) && !c->hints.never_focus)
+		if(ONTAG(c) && !c->hints.never_focus)
 			break;
 	}
 

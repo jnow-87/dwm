@@ -12,7 +12,7 @@ static void arrange(void){
 
 
 	list_for_each(dwm.stack, c){
-		if(ISVISIBLE(c)){
+		if(ONTAG(c)){
 			m = monitor_from_client(c);
 			client_resize(c, m->x, m->y, m->width - 2 * c->geom.border_width, m->height - 2 * c->geom.border_width);
 		}

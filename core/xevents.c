@@ -111,7 +111,7 @@ static void configure_request(xevent_t *e){
 
 		win_configure(c->win, &c->geom);
 
-		if(ISVISIBLE(c))
+		if(ONTAG(c))
 			win_resize(c->win, &c->geom, &c->hints);
 	}
 	else{

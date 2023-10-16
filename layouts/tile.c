@@ -35,16 +35,18 @@ static void arrange(void){
 			if(i < NMASTER){
 				h = (m->height - y) / (MIN(n, NMASTER) - i);
 				client_resize(c, m->x, m->y + y, w - (2 * geom->border_width), h - (2 * geom->border_width));
+				h = geom->height + 2 * geom->border_width;
 
-				if(y + HEIGHT(c) < m->height)
-					y += HEIGHT(c);
+				if(y + h < m->height)
+					y += h;
 			}
 			else{
 				h = (m->height - ty) / (n - i);
 				client_resize(c, m->x + w, m->y + ty, m->width - w - (2 * geom->border_width), h - (2 * geom->border_width));
+				h = geom->height + 2 * geom->border_width;
 
-				if(ty + HEIGHT(c) < m->height)
-					ty += HEIGHT(c);
+				if(ty + h < m->height)
+					ty += h;
 			}
 		}
 	}
