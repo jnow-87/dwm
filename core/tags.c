@@ -1,6 +1,3 @@
-#include <core/clientstack.h>
-#include <core/layout.h>
-#include <core/statusbar.h>
 #include <core/tags.h>
 
 
@@ -16,10 +13,6 @@ void tags_set(unsigned int *tags, unsigned int v){
 		return;
 
 	*tags = v;
-
-	layout_arrange();
-	clientstack_refocus();
-	statusbar_update();
 }
 
 void tags_toggle(unsigned int *tags, unsigned int v){
