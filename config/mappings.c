@@ -67,13 +67,12 @@ KEY(XK_Left,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ INT_MAX
 KEY(XK_Insert,	MODKEY,						cmd_client_resize,	.v = (int []){ INT_MAX, INT_MAX });
 
 // winfade
-// TODO dwm doesn't set _NET_CURRENT_DESKTOP
-KEY(XK_1,		MODKEY,				cmd_spawn,	.v = SPAWN("winfade", "--group", "1", "fade"));
-KEY(XK_2,		MODKEY,				cmd_spawn,	.v = SPAWN("winfade", "--group", "2", "fade"));
-KEY(XK_3,		MODKEY,				cmd_spawn,	.v = SPAWN("winfade", "--group", "3", "fade"));
-KEY(XK_1,		MODKEY | ShiftMask,	cmd_spawn,	.v = SPAWN("winfade", "--group", "1", "select"));
-KEY(XK_2,		MODKEY | ShiftMask,	cmd_spawn,	.v = SPAWN("winfade", "--group", "2", "select"));
-KEY(XK_3,		MODKEY | ShiftMask,	cmd_spawn,	.v = SPAWN("winfade", "--group", "3", "select"));
+KEY(XK_1,		MODKEY,				cmd_winfade_fade,	.ui = (1 << 0));
+KEY(XK_2,		MODKEY,				cmd_winfade_fade,	.ui = (1 << 1));
+KEY(XK_3,		MODKEY,				cmd_winfade_fade,	.ui = (1 << 2));
+KEY(XK_1,		MODKEY | ShiftMask,	cmd_winfade_add,	.ui = (1 << 0));
+KEY(XK_2,		MODKEY | ShiftMask,	cmd_winfade_add,	.ui = (1 << 1));
+KEY(XK_3,		MODKEY | ShiftMask,	cmd_winfade_add,	.ui = (1 << 2));
 
 // audio control
 KEY(XF86XK_AudioMute,			0,	cmd_spawn,	.v = SPAWN("st-audio", "mute", "toggle"));

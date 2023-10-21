@@ -37,6 +37,14 @@ menu "statusbar"
 		default ""
 endmenu
 
+config FADE_STEPS
+	int "number of animation steps for fading windows"
+	default 5
+
+config FADE_DELAY_MS
+	int "delay per fading window animation step [ms]"
+	default 25
+
 config MOUSEMOVE
 	bool "move mouse with client focus"
 
