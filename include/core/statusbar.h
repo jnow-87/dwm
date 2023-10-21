@@ -9,16 +9,17 @@
 
 /* types */
 typedef struct{
-	char status[256];
 	bool hidden;
 
 	window_t win;
 	win_geom_t geom;
+
+	int fd_timer;
 } statusbar_t;
 
 
 /* prototypes */
-void statusbar_init(unsigned int height);
+int statusbar_init(unsigned int height);
 void statusbar_destroy(void);
 
 void statusbar_update(void);

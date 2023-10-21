@@ -83,7 +83,7 @@ int dwm_setup(void){
 
 	/* init core components */
 	monitor_discover();
-	statusbar_init(CONFIG_STATUSBAR_HEIGHT);
+	r |= statusbar_init(CONFIG_STATUSBAR_HEIGHT);
 	r |= keys_init();
 	r |= clients_init();
 
