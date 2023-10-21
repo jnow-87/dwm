@@ -185,6 +185,16 @@ void win_hide(window_t win, win_geom_t *geom){
 	XMoveWindow(dwm.dpy, win, geom->width * -2, geom->y);
 }
 
+bool win_visible(window_t win, win_geom_t *geom){
+	win_attr_t attr;
+
+
+	if(win_get_attr(win, &attr) != 0)
+		return false;
+
+	return (attr.geom.x == geom->x && attr.geom.y == geom->y);
+}
+
 void win_focus(window_t win){
 	XSetInputFocus(dwm.dpy, win, RevertToPointerRoot, CurrentTime);
 

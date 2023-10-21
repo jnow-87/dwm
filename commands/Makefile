@@ -4,4 +4,5 @@ obj-y := \
 	lifecycle.o \
 	tags.o \
 	layout.o \
-	statusbar.o
+	statusbar.o \
+	winfade.o

@@ -109,10 +109,8 @@ static void configure_request(xevent_t *e){
 		if(ev->value_mask & CWWidth)		geom->width = ev->width;
 		if(ev->value_mask & CWHeight)		geom->height = ev->height;
 
-		win_configure(c->win, &c->geom);
-
-		if(ONTAG(c))
-			win_resize(c->win, &c->geom, &c->hints);
+		win_configure(c->win, geom);
+		win_resize(c->win, geom, &c->hints);
 	}
 	else{
 		wc.x = ev->x;

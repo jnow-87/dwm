@@ -16,7 +16,8 @@ typedef struct client_t{
 	struct client_t *prev,
 					*next;
 
-	unsigned int tags;
+	unsigned int tags,
+				 fades;
 
 	window_t win;
 	win_geom_t geom,
