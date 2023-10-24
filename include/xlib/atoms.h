@@ -28,6 +28,7 @@ typedef enum{
 
 /* prototypes */
 int atoms_text_prop(window_t win, Atom atom, char *text, unsigned int size);
+int atoms_text_prop_set(Window win, Atom atom, char *text);
 
 void atoms_netatom_append(net_atom_t atom, unsigned char *value);
 void atoms_netatom_delete(net_atom_t atom);

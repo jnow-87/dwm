@@ -1,5 +1,6 @@
 #include <config/config.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
 #include <core/buttons.h>
@@ -21,6 +22,7 @@
 static void draw_left(char const *s, scheme_id_t scheme, int padding, int *x);
 static void draw_right(char const *s, scheme_id_t scheme, int padding, int *x);
 static void datetime(char *s, size_t n);
+static void statd_refresh(bool indicate_error);
 
 static int timer_hdlr(void);
 
@@ -85,6 +87,10 @@ void statusbar_update(void){
 
 	// status
 	atoms_text_prop(dwm.root, XA_WM_NAME, s, sizeof(s));
+
+	if(*s == 0)
+		strcpy(s, "no status info");
+
 	draw_right(s, SCM_STATUS, PADDING, &x);
 	draw_right(CONFIG_STATUSBAR_SPACER_RIGHT, SCM_SPACER_STATUS, 0, &x);
 
@@ -117,8 +123,12 @@ void statusbar_toggle(void){
 	statusbar_t *bar = &dwm.statusbar;
 
 
-	if(bar->hidden)	win_show(bar->win, &bar->geom);
-	else			win_hide(bar->win, &bar->geom);
+	if(bar->hidden){
+		statd_refresh(false);
+		win_show(bar->win, &bar->geom);
+	}
+	else
+		win_hide(bar->win, &bar->geom);
 
 	bar->hidden = !bar->hidden;
 }
@@ -174,8 +184,26 @@ static void datetime(char *s, size_t n){
 	s[n - 1] = 0;
 }
 
+static void statd_refresh(bool indicate_error){
+	statusbar_t *bar = &dwm.statusbar;
+
+
+	if(system("statdctrl refresh") == 0)
+		return;
+
+	atoms_text_prop_set(dwm.root, XA_WM_NAME, "");
+
+	// show statusbar to indicate dead statd
+	if(indicate_error && bar->hidden){
+		win_show(bar->win, &bar->geom);
+		bar->hidden = false;
+	}
+}
+
 static int timer_hdlr(void){
 	timer_ack(dwm.statusbar.fd_timer);
+
+	statd_refresh(true);
 	statusbar_update();
 
 	return 0;
