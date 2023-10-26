@@ -67,6 +67,10 @@ choice
 		bool "debug"
 endchoice
 
+config BUILD_TREE
+	string "build tree"
+	default "build/$(CONFIG_BUILD_TYPE)"
+
 menu "Hidden"
 	visible if 0
 
