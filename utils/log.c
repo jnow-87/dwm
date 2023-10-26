@@ -57,7 +57,7 @@ static void ptime(FILE *fp){
 
 
 	time(&t);
-	strftime(s, sizeof(s), "%a-%b-%Y %T%z", localtime(&t));
+	strftime(s, sizeof(s), "%d-%b-%Y %T%z", localtime(&t));
 
 	fprintf(fp, "[%s] ", s);
 }
