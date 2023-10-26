@@ -37,6 +37,15 @@ menu "statusbar"
 		default ""
 endmenu
 
+config WIN_RESIZE_DELTA
+	int "delta for resizing a client [pixels]"
+
+config WIN_MOVE_DELTA
+	int "delta for moving a client [pixels]"
+
+config WIN_SIZE_MIN
+	int "minimum client window size [pixels]"
+
 config FADE_STEPS
 	int "number of animation steps for fading windows"
 	default 5

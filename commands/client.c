@@ -12,8 +12,6 @@
 
 
 /* macros */
-#define SIZE_MIN	32
-
 #define SNAP(origin, dim, new, geom, mon){ \
 	if(abs((mon)->origin - *(new)) < CONFIG_SNAP_PIXEL) \
 		*new = (mon)->origin; \
@@ -43,9 +41,9 @@
 		(new)->dim += (geom)->dim; \
 	} \
 	\
-	(new)->dim = MAX((new)->dim, 32); /* prevent too small windows */ \
+	(new)->dim = MAX((new)->dim, CONFIG_WIN_SIZE_MIN); /* prevent too small windows */ \
 	\
-	/* prevent windows from moving if they would be smaller than SIZE_MIN */ \
+	/* prevent windows from moving if they would be too small */ \
 	if((new)->dim == (geom)->dim) \
 		(new)->origin = (geom)->origin; \
 }
@@ -211,8 +209,8 @@ void cmd_client_resize_mouse(cmd_arg_t *arg){
 
 		tlast = ev.xmotion.time;
 
-		nw = MAX(ev.xmotion.x - geom->x - 2 * geom->border_width + 1, SIZE_MIN);
-		nh = MAX(ev.xmotion.y - geom->y - 2 * geom->border_width + 1, SIZE_MIN);
+		nw = MAX(ev.xmotion.x - geom->x - 2 * geom->border_width + 1, CONFIG_WIN_SIZE_MIN);
+		nh = MAX(ev.xmotion.y - geom->y - 2 * geom->border_width + 1, CONFIG_WIN_SIZE_MIN);
 
 		client_resize(c, geom->x, geom->y, nw, nh);
 	}

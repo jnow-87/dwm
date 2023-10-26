@@ -1,3 +1,4 @@
+#include <config/config.h>
 #include <X11/X.h>
 #include <X11/keysymdef.h>
 #include <X11/XF86keysym.h>
@@ -11,8 +12,8 @@
 #define WIN		Mod4Mask
 #define MODKEY	WIN
 
-#define MOVE_INC	100
-#define SIZE_INC	50
+#define MOVE_INC	CONFIG_WIN_MOVE_DELTA
+#define SIZE_INC	CONFIG_WIN_RESIZE_DELTA
 
 #define TAGKEY(keysym, tag) \
 	KEY(keysym,	ControlMask,				cmd_tags_view,			.ui = (1 << tag)); \
