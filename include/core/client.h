@@ -23,6 +23,7 @@ typedef struct client_t{
 	win_geom_t geom,
 			   geom_store;
 	win_hints_t hints;
+	win_flags_t flags;
 } client_t;
 
 
@@ -35,7 +36,8 @@ void client_cleanup(client_t *c, bool destroyed);
 
 client_t *client_from_win(window_t win);
 
-void client_resize(client_t *c, int x, int y, int width, int height);
+void client_resize(client_t *c, int x, int y, int width, int height, int border_width);
+void client_flags_set(client_t *c, unsigned int mask);
 
 
 #endif // CLIENT_H

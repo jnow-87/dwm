@@ -66,6 +66,7 @@ void client_init(window_t win, win_attr_t *attr){
 
 	/* init client */
 	c->win = win;
+	c->flags = 0;
 
 	trans = client_from_win(win_get_transient(win));
 	c->tags = (trans != 0x0) ? trans->tags : dwm.tag_mask;
@@ -122,17 +123,51 @@ client_t *client_from_win(window_t win){
 	return 0x0;
 }
 
-void client_resize(client_t *c, int x, int y, int width, int height){
+void client_resize(client_t *c, int x, int y, int width, int height, int border_width){
 	win_geom_t *geom = &c->geom;
 
 
-	if(x == geom->x && y == geom->y && width == geom->width && height == geom->height)
+	if(x == geom->x && y == geom->y && width == geom->width && height == geom->height && geom->border_width == border_width)
 		return;
 
 	PREP_N_STORE(x, geom, &c->geom_store);
 	PREP_N_STORE(y, geom, &c->geom_store);
 	PREP_N_STORE(width, geom, &c->geom_store);
 	PREP_N_STORE(height, geom, &c->geom_store);
+	PREP_N_STORE(border_width, geom, &c->geom_store);
 
 	win_resize(c->win, geom, 0x0);
+}
+
+void client_flags_set(client_t *c, unsigned int mask){
+	win_geom_t geom;
+	monitor_t *m;
+
+
+	if(c->flags == mask)
+		return;
+
+	if(mask & (WF_FULLSCREEN)){
+		m = monitor_from_client(c);
+
+		geom.x = m->x;
+		geom.y = m->y;
+		geom.width = m->width;
+		geom.height = m->height;
+		geom.border_width = 0;
+
+		// Pre-backup client geometry even though client_resize() does it already.
+		// This is required, since changing the border doesn't impact the location
+		// of a client, which causes client_resize() to not update the stored
+		// location either, which in turn restores the wrong location when disabling
+		// fullscreen.
+		c->geom_store = c->geom;
+	}
+	else
+		geom = c->geom_store;
+
+	win_set_flags(c->win, mask);
+	client_resize(c, geom.x, geom.y, geom.width, geom.height, geom.border_width);
+
+	c->flags = mask;
 }

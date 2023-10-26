@@ -29,7 +29,7 @@
 #define PREP_RESIZE(origin, dim, new, geom, store, mon){ \
 	if((new)->dim == INT_MAX){ \
 		(new)->origin = (mon)->origin; \
-		(new)->dim = (mon)->dim- (geom)->border_width * 2; \
+		(new)->dim = (mon)->dim - (geom)->border_width * 2; \
 		\
 		if((geom)->origin == (new)->origin && (geom)->dim == (new)->dim){ \
 			(new)->origin = (store)->origin; \
@@ -104,7 +104,7 @@ void cmd_client_move(cmd_arg_t *arg){
 	PREP_MOVE(x, width, &nx, geom, m);
 	PREP_MOVE(y, height, &ny, geom, m);
 
-	client_resize(c, nx, ny, geom->width, geom->height);
+	client_resize(c, nx, ny, geom->width, geom->height, geom->border_width);
 
 	layout_arrange();
 }
@@ -152,7 +152,7 @@ void cmd_client_move_mouse(cmd_arg_t *arg){
 		SNAP(x, width, &nx, geom, m);
 		SNAP(y, height, &ny, geom, m);
 
-		client_resize(c, nx, ny, geom->width, geom->height);
+		client_resize(c, nx, ny, geom->width, geom->height, geom->border_width);
 	}
 
 	input_pointer_release();
@@ -176,7 +176,7 @@ void cmd_client_resize(cmd_arg_t *arg){
 	PREP_RESIZE(x, width, &new, &c->geom, &c->geom_store, m);
 	PREP_RESIZE(y, height, &new, &c->geom, &c->geom_store, m);
 
-	client_resize(c, new.x, new.y, new.width, new.height);
+	client_resize(c, new.x, new.y, new.width, new.height, c->geom.border_width);
 
 	layout_arrange();
 }
@@ -212,7 +212,7 @@ void cmd_client_resize_mouse(cmd_arg_t *arg){
 		nw = MAX(ev.xmotion.x - geom->x - 2 * geom->border_width + 1, CONFIG_WIN_SIZE_MIN);
 		nh = MAX(ev.xmotion.y - geom->y - 2 * geom->border_width + 1, CONFIG_WIN_SIZE_MIN);
 
-		client_resize(c, geom->x, geom->y, nw, nh);
+		client_resize(c, geom->x, geom->y, nw, nh, geom->border_width);
 	}
 
 	input_pointer_move(c->win, geom->width + geom->border_width - 1, geom->height + geom->border_width - 1);

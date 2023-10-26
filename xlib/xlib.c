@@ -58,6 +58,10 @@ int xlib_init(void){
 	dwm.netatom[NET_SUPPORTED] = XInternAtom(dwm.dpy, "_NET_SUPPORTED", False);
 	dwm.netatom[NET_WMNAME] = XInternAtom(dwm.dpy, "_NET_WM_NAME", False);
 	dwm.netatom[NET_WMCHECK] = XInternAtom(dwm.dpy, "_NET_SUPPORTING_WM_CHECK", False);
+	dwm.netatom[NET_WMSTATE] = XInternAtom(dwm.dpy, "_NET_WM_STATE", False);
+	dwm.netatom[NET_WMFULLSCREEN] = XInternAtom(dwm.dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	dwm.netatom[NET_WMVMAXIMIZED] = XInternAtom(dwm.dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+	dwm.netatom[NET_WMHMAXIMIZED] = XInternAtom(dwm.dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
 	dwm.netatom[NET_CLIENTLIST] = XInternAtom(dwm.dpy, "_NET_CLIENT_LIST", False);
 
 	/* supporting window for NET_WMCHECK */

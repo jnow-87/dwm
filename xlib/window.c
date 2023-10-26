@@ -66,6 +66,7 @@ void win_init(window_t win, win_geom_t *geom, win_hints_t *hints){
 	win_update_sizehints(win, hints);
 	win_update_wmhints(win, hints, false);
 	win_set_state(win, NormalState);
+	win_set_flags(win, 0);
 	
 	XMapWindow(dwm.dpy, win);
 }
@@ -143,10 +144,17 @@ void win_raise(window_t win){
 }
 
 void win_set_state(window_t win, long state){
-	long data[] = {state, None};
+	long data[] = { state, None };
 
 
 	XChangeProperty(dwm.dpy, win, dwm.wmatom[WM_STATE], dwm.wmatom[WM_STATE], 32, PropModeReplace, (unsigned char *)data, 2);
+}
+
+void win_set_flags(window_t win, unsigned int mask){
+	XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WMSTATE], XA_ATOM, 32, PropModeReplace, 0x0, 0);
+
+	if(mask & WF_FULLSCREEN)
+		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WMSTATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WMFULLSCREEN], 1);
 }
 
 bool win_send_event(window_t win, Atom proto){

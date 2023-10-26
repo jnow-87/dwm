@@ -16,6 +16,7 @@
 /* local/static prototypes */
 static void destroy_notify(xevent_t *e);
 
+static void client_message(xevent_t *e);
 static void configure_request(xevent_t *e);
 static void configure_notify(xevent_t *e);
 static void property_notify(xevent_t *e);
@@ -34,7 +35,7 @@ static void button_press(xevent_t *e);
 /* static variables */
 static void (*handler[LASTEvent])(xevent_t*) = {
 	[DestroyNotify] = destroy_notify,
-	[ClientMessage] = 0x0,
+	[ClientMessage] = client_message,
 	[ConfigureRequest] = configure_request,
 	[ConfigureNotify] = configure_notify,
 	[PropertyNotify] = property_notify,
@@ -85,6 +86,23 @@ static void destroy_notify(xevent_t *e){
 
 	client_cleanup(c, true);
 	layout_arrange();
+}
+
+static void client_message(xevent_t *e){
+	XClientMessageEvent *ev = &e->xclient;
+	win_flags_t fullscreen;
+	client_t *c;
+
+
+	c = client_from_win(ev->window);
+
+	if(c == 0x0 || ev->message_type != dwm.netatom[NET_WMSTATE])
+		return;
+
+	if(ev->data.l[1] == dwm.netatom[NET_WMFULLSCREEN] || ev->data.l[2] == dwm.netatom[NET_WMFULLSCREEN]){
+		fullscreen = (ev->data.l[0] == 1 || ev->data.l[0] == 2) ? WF_FULLSCREEN : 0;
+		client_flags_set(c, (c->flags & ~WF_FULLSCREEN) | fullscreen);
+	}
 }
 
 static void configure_request(xevent_t *e){

@@ -10,6 +10,10 @@
 /* types */
 typedef Window window_t;
 
+typedef enum{
+	WF_FULLSCREEN = 0x1,
+} win_flags_t;
+
 typedef struct{
 	// size hints
 	float aspect_min,
@@ -57,6 +61,7 @@ void win_configure(window_t win, win_geom_t *geom);
 void win_resize(window_t win, win_geom_t *geom, win_hints_t *hints);
 void win_raise(window_t win);
 void win_set_state(window_t win, long state);
+void win_set_flags(window_t win, unsigned int mask);
 bool win_send_event(window_t win, Atom proto);
 
 void win_show(window_t win, win_geom_t *geom);
