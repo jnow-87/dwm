@@ -1,5 +1,3 @@
-#include <stdint.h>
-#include <unistd.h>
 #include <core/dwm.h>
 #include <core/keys.h>
 #include <xlib/input.h>
@@ -41,9 +39,7 @@ int keys_init(void){
 
 void keys_cleanup(void){
 	input_keys_release(dwm.root);
-
-	if(modifier_reset_timer != -1)
-		close(modifier_reset_timer);
+	timer_destroy(modifier_reset_timer);
 }
 
 int keys_register(void){
@@ -112,10 +108,7 @@ bool keys_cycle_active(void){
 
 /* local functions */
 static int modifier_reset_hdlr(void){
-	uint64_t data;
-
-
-	read(modifier_reset_timer, &data, sizeof(data));
+	timer_ack(modifier_reset_timer);
 	modifier_state &= input_get_mod_state();
 
 	if(modifier_state == 0)

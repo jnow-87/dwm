@@ -20,7 +20,9 @@
 typedef enum{
 	SCM_NORM,
 	SCM_FOCUS,
-	SCM_SPACER,
+	SCM_STATUS,
+	SCM_SPACER_NORM,
+	SCM_SPACER_STATUS,
 	NSCMS
 } scheme_id_t;
 

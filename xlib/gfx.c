@@ -337,7 +337,7 @@ err_1:
 err_0:
 	ERROR("loading font %s\n", name);
 
-	return font;
+	return 0x0;
 }
 
 static font_t *font_create_from_pattern(gfx_t *gfx, FcPattern *pattern){

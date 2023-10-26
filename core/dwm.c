@@ -36,6 +36,8 @@
 
 /* local/static prototypes */
 static int xevent_hdlr(void);
+static void reap_zombies(void);
+static void sigchild_hdlr(int sig, siginfo_t *info, void *ucontext);
 
 
 /* global variables */
@@ -59,14 +61,13 @@ int dwm_setup(void){
 
 	DEBUG("dwm hello\n");
 
-	/* do not transform children into zombies when they terminate */
+	/* register SIGCHLD signal handler */
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT | SA_RESTART;
-	sa.sa_handler = SIG_IGN;
+	sa.sa_flags = SA_NOCLDSTOP | SA_RESTART | SA_SIGINFO;
+	sa.sa_sigaction = sigchild_hdlr;
 	sigaction(SIGCHLD, &sa, 0x0);
 
-	/* clean up any zombies (inherited from .xinitrc etc) immediately */
-	while(waitpid(-1, 0x0, WNOHANG) > 0);
+	reap_zombies();
 
 	/* init xlib components */
 	if(xlib_init() != 0)
@@ -83,7 +84,7 @@ int dwm_setup(void){
 
 	/* init core components */
 	monitor_discover();
-	statusbar_init(CONFIG_STATUSBAR_HEIGHT);
+	r |= statusbar_init(CONFIG_STATUSBAR_HEIGHT);
 	r |= keys_init();
 	r |= clients_init();
 
@@ -149,4 +150,13 @@ int dwm_hdlr_add(int fd, event_hdlr_t hdlr){
 /* local functions */
 static int xevent_hdlr(void){
 	return xevents_handle_events();
+}
+
+static void reap_zombies(void){
+	// reap pending child processes to avoid zombies
+	while(waitpid(-1, NULL, WNOHANG) > 0);
+}
+
+static void sigchild_hdlr(int sig, siginfo_t *info, void *ucontext){
+	reap_zombies();
 }

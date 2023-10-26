@@ -1,9 +1,14 @@
 #include <config/config.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
 #include <core/buttons.h>
 #include <core/dwm.h>
 #include <core/monitor.h>
 #include <core/statusbar.h>
 #include <core/tags.h>
+#include <utils/timer.h>
 #include <xlib/atoms.h>
 #include <xlib/gfx.h>
 #include <xlib/window.h>
@@ -11,17 +16,24 @@
 
 /* macros */
 #define PADDING		CONFIG_STATUSBAR_PADDING
-#define TEXTW(s)	(gfx_text_width(dwm.gfx, s) + PADDING)
+
+
+/* local/static prototypes */
+static void draw_left(char const *s, scheme_id_t scheme, int padding, int *x);
+static void draw_right(char const *s, scheme_id_t scheme, int padding, int *x);
+static void datetime(char *s, size_t n);
+static void statd_refresh(bool indicate_error);
+
+static int timer_hdlr(void);
 
 
 /* global functions */
-void statusbar_init(unsigned int height){
+int statusbar_init(unsigned int height){
 	statusbar_t *bar = &dwm.statusbar;
 	monitor_t *m = dwm.mons;
 
 
 	bar->hidden = false;
-	bar->status[0] = 0;
 	bar->geom.x = m->x;
 	bar->geom.y = CONFIG_STATUSBAR_TOP ? m->y : m->y + m->height - height;
 	bar->geom.width = m->width;
@@ -29,24 +41,33 @@ void statusbar_init(unsigned int height){
 	bar->geom.border_width = 0;
 
 	bar->win = win_create(&bar->geom, CUR_NORM, "dwm", true);
+	bar->fd_timer = timer_init();
+
+	if(bar->fd_timer == -1)
+		return -1;
+
+	if(dwm_hdlr_add(bar->fd_timer, timer_hdlr) != 0)
+		return -1;
+
+	timer_set(bar->fd_timer, 60000);
 	win_raise(bar->win);
 
 	statusbar_update();
+
+	return 0;
 }
 
 void statusbar_destroy(void){
+	timer_destroy(dwm.statusbar.fd_timer);
 	win_destroy(dwm.statusbar.win);
 }
 
 void statusbar_update(void){
 	statusbar_t *bar = &dwm.statusbar;
-	monitor_t *m = dwm.mons;
-	int bar_height = bar->geom.height;
 	char **tag;
 	size_t i;
-	int x,
-		w,
-		status_width;
+	int x;
+	char s[256];
 
 
 	if(bar->hidden)
@@ -54,44 +75,43 @@ void statusbar_update(void){
 
 	statusbar_raise();
 
-	atoms_text_prop(dwm.root, XA_WM_NAME, bar->status, sizeof(bar->status));
-	status_width = TEXTW(bar->status) - PADDING + 2;
+	/* background */
+	x = dwm.mons->width;
+	gfx_rect(dwm.gfx, 0, 0, x, bar->geom.height, SCM_FOCUS, 1, 1);
 
-	/* draw status spacer */
-	w = TEXTW(CONFIG_STATUSBAR_SPACER_RIGHT) - PADDING;
-	x = gfx_text(dwm.gfx, m->width - status_width - w, 0, w, bar_height, SCM_SPACER, 0, CONFIG_STATUSBAR_SPACER_RIGHT, 0);
+	/* right side */
+	// date and time
+	datetime(s, sizeof(s));
+	draw_right(s, SCM_NORM, PADDING, &x);
+	draw_right(CONFIG_STATUSBAR_SPACER_RIGHT, SCM_SPACER_NORM, 0, &x);
 
-	/* draw status text */
-	// draw status first so it can be overdrawn by tags later
-	gfx_text(dwm.gfx, x, 0, status_width, bar_height, SCM_NORM, 0, bar->status, 0);
-	status_width += w;
+	// status
+	atoms_text_prop(dwm.root, XA_WM_NAME, s, sizeof(s));
 
-	/* draw tags */
+	if(*s == 0)
+		strcpy(s, "no status info");
+
+	draw_right(s, SCM_STATUS, PADDING, &x);
+	draw_right(CONFIG_STATUSBAR_SPACER_RIGHT, SCM_SPACER_STATUS, 0, &x);
+
+	/* left side */
+	// tags
 	i = 0;
 	x = 0;
 
 	config_for_each(tags, tag){
-		w = TEXTW(*tag);
-		gfx_text(dwm.gfx, x, 0, w, bar_height, (dwm.tag_mask & (1 << i)) ? SCM_FOCUS : SCM_NORM, PADDING / 2, *tag, 0);
-
+		draw_left(*tag, (dwm.tag_mask & (1 << i)) ? SCM_FOCUS : SCM_NORM, PADDING, &x);
 		i++;
-		x += w;
 	}
 
-	/* draw layout symbol */
-	w = TEXTW(dwm.layout->symbol);
-	x = gfx_text(dwm.gfx, x, 0, w, bar_height, SCM_NORM, PADDING / 2, dwm.layout->symbol, 0);
+	draw_left(CONFIG_STATUSBAR_SPACER_LEFT, SCM_SPACER_NORM, 0, &x);
 
-	/* draw layout spacer */
-	w = TEXTW(CONFIG_STATUSBAR_SPACER_LEFT) - PADDING;
-	x = gfx_text(dwm.gfx, x, 0, w, bar_height, SCM_SPACER, 0, CONFIG_STATUSBAR_SPACER_LEFT, 0);
+	// layout symbol
+	draw_left(dwm.layout->symbol, SCM_STATUS, PADDING, &x);
+	draw_left(CONFIG_STATUSBAR_SPACER_LEFT, SCM_SPACER_STATUS, 0, &x);
 
-	/* draw space */
-	if((w = m->width - status_width - x) > bar_height){
-		gfx_rect(dwm.gfx, x, 0, w, bar_height, SCM_FOCUS, 1, 1);
-	}
-
-	gfx_map(dwm.gfx, bar->win, 0, 0, m->width, bar_height);
+	/* sync */
+	gfx_map(dwm.gfx, bar->win, 0, 0, dwm.mons->width, bar->geom.height);
 }
 
 void statusbar_raise(void){
@@ -103,8 +123,12 @@ void statusbar_toggle(void){
 	statusbar_t *bar = &dwm.statusbar;
 
 
-	if(bar->hidden)	win_show(bar->win, &bar->geom);
-	else			win_hide(bar->win, &bar->geom);
+	if(bar->hidden){
+		statd_refresh(false);
+		win_show(bar->win, &bar->geom);
+	}
+	else
+		win_hide(bar->win, &bar->geom);
 
 	bar->hidden = !bar->hidden;
 }
@@ -119,17 +143,68 @@ button_loc_t statusbar_element(int x, int y){
 		return BLOC_UNKNOWN;
 
 	config_for_each(tags, tag){
-		pos += TEXTW(*tag);
+		pos += gfx_text_width(dwm.gfx, *tag) + PADDING;
 
 		if(pos > x)
 			return BLOC_TAGBAR;
 	}
 
-	if(x < pos + TEXTW(dwm.layout->symbol))
+	if(x < pos + gfx_text_width(dwm.gfx, dwm.layout->symbol) + PADDING)
 		return BLOC_LAYOUT;
 
-	if(x > dwm.mons->width - (int)TEXTW(bar->status))
-		return BLOC_STATUS;
-
 	return BLOC_UNKNOWN;
+}
+
+
+/* local functions */
+static void draw_left(char const *s, scheme_id_t scheme, int padding, int *x){
+	int w;
+
+
+	w = gfx_text_width(dwm.gfx, s) + padding;
+	gfx_text(dwm.gfx, *x, 0, w, dwm.statusbar.geom.height, scheme, padding / 2, s, 0);
+	*x += w;
+}
+
+static void draw_right(char const *s, scheme_id_t scheme, int padding, int *x){
+	int w;
+
+
+	w = gfx_text_width(dwm.gfx, s) + padding;
+	*x -= w;
+	gfx_text(dwm.gfx, *x, 0, w, dwm.statusbar.geom.height, scheme, padding / 2, s, 0);
+}
+
+static void datetime(char *s, size_t n){
+	time_t t;
+
+
+	time(&t);
+	strftime(s, n, "%d %b, %H:%M", localtime(&t));
+	s[n - 1] = 0;
+}
+
+static void statd_refresh(bool indicate_error){
+	statusbar_t *bar = &dwm.statusbar;
+
+
+	if(system("statdctrl refresh") == 0)
+		return;
+
+	atoms_text_prop_set(dwm.root, XA_WM_NAME, "");
+
+	// show statusbar to indicate dead statd
+	if(indicate_error && bar->hidden){
+		win_show(bar->win, &bar->geom);
+		bar->hidden = false;
+	}
+}
+
+static int timer_hdlr(void){
+	timer_ack(dwm.statusbar.fd_timer);
+
+	statd_refresh(true);
+	statusbar_update();
+
+	return 0;
 }

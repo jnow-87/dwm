@@ -13,12 +13,12 @@ int atoms_text_prop(Window win, Atom atom, char *text, unsigned int size){
 
 
 	if(!text || size == 0)
-		return 0;
+		return -1;
 
 	text[0] = '\0';
 
 	if(!XGetTextProperty(dwm.dpy, win, &name, atom) || !name.nitems)
-		return 0;
+		return -1;
 
 	if(name.encoding == XA_STRING){
 		strncpy(text, (char*)name.value, size - 1);
@@ -31,7 +31,19 @@ int atoms_text_prop(Window win, Atom atom, char *text, unsigned int size){
 	text[size - 1] = '\0';
 	XFree(name.value);
 
-	return 1;
+	return 0;
+}
+
+int atoms_text_prop_set(Window win, Atom atom, char *text){
+	XTextProperty prop;
+
+
+	if(Xutf8TextListToTextProperty(dwm.dpy, &text, 1, XStdICCTextStyle, &prop) != Success)
+		return -1;
+
+	XSetTextProperty(dwm.dpy, win, &prop, atom);
+
+	return 0;
 }
 
 void atoms_netatom_append(net_atom_t atom, unsigned char *value){

@@ -51,11 +51,23 @@ static XIC xic;
 
 static Drw *drw;
 static Clr *scheme[SchemeLast];
+static int useexec = 0;
 
 #include "config.h"
 
 static int (*fstrncmp)(const char *, const char *, size_t) = strncmp;
 static char *(*fstrstr)(const char *, const char *) = strstr;
+
+static void commit(char *s){
+	if(useexec){
+		if(fork() == 0){
+			setsid();
+			execvp(s, (char *[]){ s, 0x0});
+		}
+	}
+	else
+		puts(s);
+}
 
 static unsigned int
 textw_clamp(const char *str, unsigned int n)
@@ -489,7 +501,8 @@ insert:
 		break;
 	case XK_Return:
 	case XK_KP_Enter:
-		puts((sel && !(ev->state & ShiftMask)) ? sel->text : text);
+		commit((sel && !(ev->state & ShiftMask)) ? sel->text : text);
+
 		if (!(ev->state & ControlMask)) {
 			cleanup();
 			exit(0);
@@ -730,7 +743,10 @@ main(int argc, char *argv[])
 		if (!strcmp(argv[i], "-v")) {      /* prints version information */
 			puts("dmenu-"VERSION);
 			exit(0);
-		} else if (!strcmp(argv[i], "-b")) /* appears at the bottom of the screen */
+		}
+		else if (!strcmp(argv[i], "-e")) /* exec instead of printing the selected item */
+			useexec = 1;
+		else if (!strcmp(argv[i], "-b")) /* appears at the bottom of the screen */
 			topbar = 0;
 		else if (!strcmp(argv[i], "-f"))   /* grabs keyboard before reading stdin */
 			fast = 1;

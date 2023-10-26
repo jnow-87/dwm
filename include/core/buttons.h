@@ -28,7 +28,6 @@ typedef enum{
 	BLOC_CLIENT,
 	BLOC_TAGBAR,
 	BLOC_LAYOUT,
-	BLOC_STATUS,
 } button_loc_t;
 
 typedef struct{
