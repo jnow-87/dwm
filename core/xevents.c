@@ -236,9 +236,9 @@ static void button_press(xevent_t *e){
 
 		if(c != 0x0){
 			loc = BLOC_CLIENT;
-			xlib_release_events();
 
 			clientstack_focus(c, true);
+			xlib_release_events();
 		}
 	}
 	else

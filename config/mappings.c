@@ -98,7 +98,7 @@ KEY(XF86XK_AudioNext,			0,			cmd_spawn,	.v = SPOTIFY("Next"));
 
 
 /* buttons */
-BUTTON(Button1, 0,					BLOC_CLIENT,	0x0 /* focus client */,		0);
+BUTTON(Button1, ALT,				BLOC_CLIENT,	0x0 /* focus client */,		0);
 BUTTON(Button1,	MODKEY,				BLOC_CLIENT,	cmd_client_move_mouse,		0);
 BUTTON(Button1,	MODKEY | ShiftMask,	BLOC_CLIENT,	cmd_client_resize_mouse,	0);
 BUTTON(Button1,	0,					BLOC_LAYOUT,	cmd_layout_select,			0);
