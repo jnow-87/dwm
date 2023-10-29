@@ -6,7 +6,7 @@
 
 
 /* global functions */
-int atoms_text_prop(Window win, Atom atom, char *text, unsigned int size){
+int atoms_text_prop(window_t win, Atom atom, char *text, unsigned int size){
 	char **list = 0x0;
 	int n;
 	XTextProperty name;
@@ -34,7 +34,7 @@ int atoms_text_prop(Window win, Atom atom, char *text, unsigned int size){
 	return 0;
 }
 
-int atoms_text_prop_set(Window win, Atom atom, char *text){
+int atoms_text_prop_set(window_t win, Atom atom, char *text){
 	XTextProperty prop;
 
 

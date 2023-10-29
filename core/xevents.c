@@ -96,10 +96,10 @@ static void client_message(xevent_t *e){
 
 	c = client_from_win(ev->window);
 
-	if(c == 0x0 || ev->message_type != dwm.netatom[NET_WMSTATE])
+	if(c == 0x0 || ev->message_type != dwm.netatom[NET_WM_STATE])
 		return;
 
-	if(ev->data.l[1] == dwm.netatom[NET_WMFULLSCREEN] || ev->data.l[2] == dwm.netatom[NET_WMFULLSCREEN]){
+	if(ev->data.l[1] == dwm.netatom[NET_WM_FULLSCREEN] || ev->data.l[2] == dwm.netatom[NET_WM_FULLSCREEN]){
 		fullscreen = (ev->data.l[0] == 1 || ev->data.l[0] == 2) ? WF_FULLSCREEN : 0;
 		client_flags_set(c, (c->flags & ~WF_FULLSCREEN) | fullscreen);
 	}

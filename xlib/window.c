@@ -151,15 +151,15 @@ void win_set_state(window_t win, long state){
 }
 
 void win_set_flags(window_t win, unsigned int mask){
-	XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WMSTATE], XA_ATOM, 32, PropModeReplace, 0x0, 0);
+	XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WM_STATE], XA_ATOM, 32, PropModeReplace, 0x0, 0);
 
 	if(mask & WF_MAXED){
-		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WMSTATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WMVMAXIMIZED], 1);
-		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WMSTATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WMHMAXIMIZED], 1);
+		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WM_STATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WM_VERTMAX], 1);
+		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WM_STATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WM_HORMAX], 1);
 	}
 
 	if(mask & WF_FULLSCREEN)
-		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WMSTATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WMFULLSCREEN], 1);
+		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WM_STATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WM_FULLSCREEN], 1);
 }
 
 bool win_send_event(window_t win, Atom proto){
@@ -214,12 +214,12 @@ void win_focus(window_t win){
 	if(win != dwm.root){
 		set_border(win, SCM_FOCUS);
 
-		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NET_ACTIVEWINDOW], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(win), 1);
+		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NET_ACTIVE_WINDOW], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(win), 1);
 		XRaiseWindow(dwm.dpy, win);
 		win_send_event(win, dwm.wmatom[WM_TAKEFOCUS]);
 	}
 	else
-		XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NET_ACTIVEWINDOW]);
+		XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NET_ACTIVE_WINDOW]);
 }
 
 void win_unfocus(window_t win){
