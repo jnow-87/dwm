@@ -153,6 +153,11 @@ void win_set_state(window_t win, long state){
 void win_set_flags(window_t win, unsigned int mask){
 	XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WMSTATE], XA_ATOM, 32, PropModeReplace, 0x0, 0);
 
+	if(mask & WF_MAXED){
+		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WMSTATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WMVMAXIMIZED], 1);
+		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WMSTATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WMHMAXIMIZED], 1);
+	}
+
 	if(mask & WF_FULLSCREEN)
 		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WMSTATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WMFULLSCREEN], 1);
 }

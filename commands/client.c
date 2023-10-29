@@ -51,6 +51,7 @@
 
 /* local/static prototypes */
 static void client_cycle_complete(void);
+static int unmax(client_t *c);
 
 
 /* global functions */
@@ -166,7 +167,7 @@ void cmd_client_resize(cmd_arg_t *arg){
 	monitor_t *m;
 
 
-	if(c == 0x0)
+	if(c == 0x0 || unmax(c) == 0)
 		return;
 
 	m = monitor_from_client(c);
@@ -190,7 +191,7 @@ void cmd_client_resize_mouse(cmd_arg_t *arg){
 	xevent_t ev;
 
 
-	if(c == 0x0)
+	if(c == 0x0 || unmax(c) == 0)
 		return;
 
 	geom = &c->geom;
@@ -221,8 +222,31 @@ void cmd_client_resize_mouse(cmd_arg_t *arg){
 	layout_arrange();
 }
 
+void cmd_client_max(cmd_arg_t *arg){
+	client_t *c = dwm.focused;
+
+
+	if(c == 0x0 || (c->flags & WF_FULLSCREEN))
+		return;
+
+	client_flags_set(c, c->flags ^ WF_MAXED);
+}
+
 
 /* local functions */
 static void client_cycle_complete(void){
 	clientstack_focus(clientstack_cycle(0, CYCLE_END), false);
+}
+
+static int unmax(client_t *c){
+	// fullscreen can only be disabled on client request
+	if(c->flags & WF_FULLSCREEN)
+		return 0;
+
+	if((c->flags & WF_MAXED) == 0)
+		return -1;
+
+	client_flags_set(c, c->flags & ~WF_MAXED);
+
+	return 0;
 }

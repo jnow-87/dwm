@@ -147,7 +147,7 @@ void client_flags_set(client_t *c, unsigned int mask){
 	if(c->flags == mask)
 		return;
 
-	if(mask & (WF_FULLSCREEN)){
+	if(mask & (WF_FULLSCREEN | WF_MAXED)){
 		m = monitor_from_client(c);
 
 		geom.x = m->x;

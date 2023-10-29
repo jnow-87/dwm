@@ -12,6 +12,7 @@ typedef Window window_t;
 
 typedef enum{
 	WF_FULLSCREEN = 0x1,
+	WF_MAXED = 0x2,
 } win_flags_t;
 
 typedef struct{

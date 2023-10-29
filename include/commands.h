@@ -34,6 +34,7 @@ void cmd_client_move(cmd_arg_t *arg);
 void cmd_client_move_mouse(cmd_arg_t *arg);
 void cmd_client_resize(cmd_arg_t *arg);
 void cmd_client_resize_mouse(cmd_arg_t *arg);
+void cmd_client_max(cmd_arg_t *arg);
 
 void cmd_tags_view(cmd_arg_t *arg);
 void cmd_tags_toggle(cmd_arg_t *arg);

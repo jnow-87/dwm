@@ -66,6 +66,7 @@ KEY(XK_Up,		MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ 0, INT_M
 KEY(XK_Right,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ INT_MAX, 0 });
 KEY(XK_Left,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ INT_MAX, 0 });
 KEY(XK_Insert,	MODKEY,						cmd_client_resize,	.v = (int []){ INT_MAX, INT_MAX });
+KEY(XK_Insert,	MODKEY | ShiftMask,			cmd_client_max,		0);
 
 // winfade
 KEY(XK_1,		MODKEY,				cmd_winfade_fade,	.ui = (1 << 0));
