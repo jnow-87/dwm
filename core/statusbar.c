@@ -86,9 +86,7 @@ void statusbar_update(void){
 	draw_right(CONFIG_STATUSBAR_SPACER_RIGHT, SCM_SPACER_NORM, 0, &x);
 
 	// status
-	atoms_text_prop(dwm.root, XA_WM_NAME, s, sizeof(s));
-
-	if(*s == 0)
+	if(win_get_name(dwm.root, s, sizeof(s)) != 0 || *s == 0)
 		strcpy(s, "no status info");
 
 	draw_right(s, SCM_STATUS, PADDING, &x);
@@ -191,7 +189,7 @@ static void statd_refresh(bool indicate_error){
 	if(system("statdctrl refresh") == 0)
 		return;
 
-	atoms_text_prop_set(dwm.root, XA_WM_NAME, "");
+	win_set_name(dwm.root, "");
 
 	// show statusbar to indicate dead statd
 	if(indicate_error && bar->hidden){

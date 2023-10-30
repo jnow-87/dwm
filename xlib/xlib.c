@@ -20,7 +20,6 @@ static void check_other_wm_running(void);
 /* global functions */
 int xlib_init(void){
 	XSetWindowAttributes wa;
-	Atom utf8string;
 
 
 	xlib_set_error_handler(xerror_hdlr);
@@ -48,33 +47,35 @@ int xlib_init(void){
 	dwm.numlock_mask = input_get_numlock_mask();
 
 	/* init atoms */
-	utf8string = XInternAtom(dwm.dpy, "UTF8_STRING", False);
-	dwm.wmatom[WM_PROTOCOLS] = XInternAtom(dwm.dpy, "WM_PROTOCOLS", False);
-	dwm.wmatom[WM_DELETE] = XInternAtom(dwm.dpy, "WM_DELETE_WINDOW", False);
-	dwm.wmatom[WM_STATE] = XInternAtom(dwm.dpy, "WM_STATE", False);
-	dwm.wmatom[WM_TAKEFOCUS] = XInternAtom(dwm.dpy, "WM_TAKE_FOCUS", False);
+	wmatom_init(WM_PROTOCOLS, "WM_PROTOCOLS");
+	wmatom_init(WM_DELETE_WINDOW, "WM_DELETE_WINDOW");
+	wmatom_init(WM_TAKEFOCUS, "WM_TAKE_FOCUS");
+	wmatom_init(WM_STATE, "WM_STATE");
 
-	dwm.netatom[NET_ACTIVE_WINDOW] = XInternAtom(dwm.dpy, "_NET_ACTIVE_WINDOW", False);
-	dwm.netatom[NET_SUPPORTED] = XInternAtom(dwm.dpy, "_NET_SUPPORTED", False);
-	dwm.netatom[NET_WM_NAME] = XInternAtom(dwm.dpy, "_NET_WM_NAME", False);
-	dwm.netatom[NET_WM_CHECK] = XInternAtom(dwm.dpy, "_NET_SUPPORTING_WM_CHECK", False);
-	dwm.netatom[NET_WM_STATE] = XInternAtom(dwm.dpy, "_NET_WM_STATE", False);
-	dwm.netatom[NET_WM_FULLSCREEN] = XInternAtom(dwm.dpy, "_NET_WM_STATE_FULLSCREEN", False);
-	dwm.netatom[NET_WM_VERTMAX] = XInternAtom(dwm.dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
-	dwm.netatom[NET_WM_HORMAX] = XInternAtom(dwm.dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
-	dwm.netatom[NET_CLIENT_LIST] = XInternAtom(dwm.dpy, "_NET_CLIENT_LIST", False);
+	netatom_init(NET_ACTIVE_WINDOW, "_NET_ACTIVE_WINDOW", XA_WINDOW, 32);
+	netatom_init(NET_SUPPORTED, "_NET_SUPPORTED", XA_ATOM, 32);
+	netatom_init(NET_WM_NAME, "_NET_WM_NAME", XInternAtom(dwm.dpy, "UTF8_STRING", False), 8);
+	netatom_init(NET_WM_CHECK, "_NET_SUPPORTING_WM_CHECK", XA_WINDOW, 32);
+	netatom_init(NET_WM_STATE, "_NET_WM_STATE", XA_ATOM, 32);
+	netatom_init(NET_WM_FULLSCREEN, "_NET_WM_STATE_FULLSCREEN", None, -1);
+	netatom_init(NET_WM_VERTMAX, "_NET_WM_STATE_MAXIMIZED_VERT", None, -1);
+	netatom_init(NET_WM_HORMAX, "_NET_WM_STATE_MAXIMIZED_HORZ", None, -1);
+	netatom_init(NET_CLIENT_LIST, "_NET_CLIENT_LIST", XA_WINDOW, 32);
 
 	/* supporting window for NET_WM_CHECK */
 	// this is a requirement to indicate a conforming window manager, cf.
 	// https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html#idm45771211439200
 	dwm.wmcheck = XCreateSimpleWindow(dwm.dpy, dwm.root, 0, 0, 1, 1, 0, 0, 0);
-	XChangeProperty(dwm.dpy, dwm.wmcheck, dwm.netatom[NET_WM_CHECK], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&dwm.wmcheck, 1);
-	XChangeProperty(dwm.dpy, dwm.wmcheck, dwm.netatom[NET_WM_NAME], utf8string, 8, PropModeReplace, (unsigned char *)"dwm", 3);
-	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NET_WM_CHECK], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&dwm.wmcheck, 1);
+	netatom_set(NET_WM_CHECK, dwm.wmcheck, (unsigned char *)&dwm.wmcheck, 1);
+	netatom_set(NET_WM_NAME, dwm.wmcheck, (unsigned char *)"dwm", 3);
+	netatom_set(NET_WM_CHECK, dwm.root, (unsigned char *)&dwm.wmcheck, 1);
 
 	/* extended window manager hints (EWMH) support per view */
-	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NET_SUPPORTED], XA_ATOM, 32, PropModeReplace, (unsigned char *)dwm.netatom, NNETATOMS);
-	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NET_CLIENT_LIST]);
+	netatom_delete(NET_SUPPORTED, dwm.root);
+	netatom_set(NET_CLIENT_LIST, dwm.root, 0x0, 0);
+
+	for(size_t i=0; i<NNETATOMS; i++)
+		netatom_append(NET_SUPPORTED, dwm.root, (unsigned char*)&dwm.netatoms[i].property);
 
 	/* select events */
 	wa.cursor = dwm.gfx->cursors[CUR_NORM];
@@ -103,7 +104,7 @@ void xlib_cleanup(void){
 	xlib_sync();
 
 	XSetInputFocus(dwm.dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
-	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NET_ACTIVE_WINDOW]);
+	netatom_delete(NET_ACTIVE_WINDOW, dwm.root);
 
 	XCloseDisplay(dwm.dpy);
 }

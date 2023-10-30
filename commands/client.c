@@ -81,7 +81,7 @@ void cmd_client_kill(cmd_arg_t *arg){
 	if(!dwm.focused)
 		return;
 
-	if(!win_send_event(dwm.focused->win, dwm.wmatom[WM_DELETE]))
+	if(!win_send_event(dwm.focused->win, wmatom_get(WM_DELETE_WINDOW)))
 		win_kill(dwm.focused->win);
 }
 

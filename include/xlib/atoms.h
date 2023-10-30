@@ -22,20 +22,30 @@ typedef enum{
 } net_atom_t;
 
 typedef enum{
+	WM_DELETE_WINDOW,
 	WM_PROTOCOLS,
-	WM_DELETE,
 	WM_STATE,
 	WM_TAKEFOCUS,
 	NWMATOMS
-} wm_atoms_t;
+} wm_atom_t;
+
+typedef struct{
+	Atom property,
+		 type;
+
+	int format;
+} atom_t;
 
 
 /* prototypes */
-int atoms_text_prop(window_t win, Atom atom, char *text, unsigned int size);
-int atoms_text_prop_set(window_t win, Atom atom, char *text);
+void wmatom_init(wm_atom_t id, char const *name);
+Atom wmatom_get(wm_atom_t id);
 
-void atoms_netatom_append(net_atom_t atom, unsigned char *value);
-void atoms_netatom_delete(net_atom_t atom);
+void netatom_init(net_atom_t id, char const *name, Atom type, int format);
+Atom netatom_get(net_atom_t id);
+void netatom_set(net_atom_t id, window_t win, unsigned char *v, int n);
+void netatom_append(net_atom_t id, window_t win, unsigned char *v);
+void netatom_delete(net_atom_t id, window_t win);
 
 
 #endif // ATOMS_H

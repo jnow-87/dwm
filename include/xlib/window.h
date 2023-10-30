@@ -62,6 +62,7 @@ void win_configure(window_t win, win_geom_t *geom);
 void win_resize(window_t win, win_geom_t *geom, win_hints_t *hints);
 void win_raise(window_t win);
 void win_set_state(window_t win, long state);
+int win_set_name(window_t win, char *name);
 void win_set_flags(window_t win, unsigned int mask);
 bool win_send_event(window_t win, Atom proto);
 
@@ -74,6 +75,7 @@ void win_unfocus(window_t win);
 
 int win_get_attr(window_t win, win_attr_t *attr);
 long win_get_state(window_t w);
+int win_get_name(window_t win, char *text, size_t n);
 window_t win_get_transient(window_t win);
 void win_update_wmhints(window_t win, win_hints_t *hints, bool isfocused);
 void win_update_sizehints(window_t win, win_hints_t *hints);

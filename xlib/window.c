@@ -147,19 +147,31 @@ void win_set_state(window_t win, long state){
 	long data[] = { state, None };
 
 
-	XChangeProperty(dwm.dpy, win, dwm.wmatom[WM_STATE], dwm.wmatom[WM_STATE], 32, PropModeReplace, (unsigned char *)data, 2);
+	XChangeProperty(dwm.dpy, win, wmatom_get(WM_STATE), wmatom_get(WM_STATE), 32, PropModeReplace, (unsigned char *)data, 2);
+}
+
+int win_set_name(window_t win, char *name){
+	XTextProperty prop;
+
+
+	if(Xutf8TextListToTextProperty(dwm.dpy, &name, 1, XStdICCTextStyle, &prop) != Success)
+		return -1;
+
+	XSetTextProperty(dwm.dpy, win, &prop, XA_WM_NAME);
+
+	return 0;
 }
 
 void win_set_flags(window_t win, unsigned int mask){
-	XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WM_STATE], XA_ATOM, 32, PropModeReplace, 0x0, 0);
+	netatom_set(NET_WM_STATE, win, 0x0, 0);
 
 	if(mask & WF_MAXED){
-		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WM_STATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WM_VERTMAX], 1);
-		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WM_STATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WM_HORMAX], 1);
+		netatom_append(NET_WM_STATE, win, (unsigned char*)&dwm.netatoms[NET_WM_VERTMAX].property);
+		netatom_append(NET_WM_STATE, win, (unsigned char*)&dwm.netatoms[NET_WM_HORMAX].property);
 	}
 
 	if(mask & WF_FULLSCREEN)
-		XChangeProperty(dwm.dpy, win, dwm.netatom[NET_WM_STATE], XA_ATOM, 32, PropModeAppend, (unsigned char*)&dwm.netatom[NET_WM_FULLSCREEN], 1);
+		netatom_append(NET_WM_STATE, win, (unsigned char*)&dwm.netatoms[NET_WM_FULLSCREEN]);
 }
 
 bool win_send_event(window_t win, Atom proto){
@@ -181,7 +193,7 @@ bool win_send_event(window_t win, Atom proto){
 
 	ev.type = ClientMessage;
 	ev.xclient.window = win;
-	ev.xclient.message_type = dwm.wmatom[WM_PROTOCOLS];
+	ev.xclient.message_type = wmatom_get(WM_PROTOCOLS);
 	ev.xclient.format = 32;
 	ev.xclient.data.l[0] = proto;
 	ev.xclient.data.l[1] = CurrentTime;
@@ -214,12 +226,12 @@ void win_focus(window_t win){
 	if(win != dwm.root){
 		set_border(win, SCM_FOCUS);
 
-		XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[NET_ACTIVE_WINDOW], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(win), 1);
+		netatom_set(NET_ACTIVE_WINDOW, dwm.root, (unsigned char *)&(win), 1);
 		XRaiseWindow(dwm.dpy, win);
-		win_send_event(win, dwm.wmatom[WM_TAKEFOCUS]);
+		win_send_event(win, wmatom_get(WM_TAKEFOCUS));
 	}
 	else
-		XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[NET_ACTIVE_WINDOW]);
+		netatom_delete(NET_ACTIVE_WINDOW, dwm.root);
 }
 
 void win_unfocus(window_t win){
@@ -252,7 +264,7 @@ long win_get_state(window_t win){
 	Atom real;
 
 
-	if(XGetWindowProperty(dwm.dpy, win, dwm.wmatom[WM_STATE], 0L, 2L, False, dwm.wmatom[WM_STATE], &real, &format, &n, &extra, (unsigned char **)&p) != Success)
+	if(XGetWindowProperty(dwm.dpy, win, wmatom_get(WM_STATE), 0L, 2L, False, wmatom_get(WM_STATE), &real, &format, &n, &extra, (unsigned char **)&p) != Success)
 		return -1;
 
 	if(n != 0)
@@ -261,6 +273,29 @@ long win_get_state(window_t win){
 	XFree(p);
 
 	return result;
+}
+
+int win_get_name(window_t win, char *name, size_t size){
+	char **list = 0x0;
+	int n;
+	XTextProperty prop;
+
+
+	if(!XGetTextProperty(dwm.dpy, win, &prop, XA_WM_NAME) || !prop.nitems)
+		return -1;
+
+	if(prop.encoding == XA_STRING){
+		strncpy(name, (char*)prop.value, size - 1);
+	}
+	else if(XmbTextPropertyToTextList(dwm.dpy, &prop, &list, &n) >= Success && n > 0 && *list){
+		strncpy(name, *list, size - 1);
+		XFreeStringList(list);
+	}
+
+	name[size - 1] = 0;
+	XFree(prop.value);
+
+	return 0;
 }
 
 window_t win_get_transient(window_t win){
