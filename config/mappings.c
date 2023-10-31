@@ -57,16 +57,16 @@ KEY(XK_Left,	MODKEY | ShiftMask,	cmd_client_move,	.v = (int[]){ -INT_MAX, 0 });
 KEY(XK_Right,	MODKEY | ShiftMask,	cmd_client_move,	.v = (int[]){ INT_MAX, 0 });
 
 // window size
-KEY(XK_Next,	MODKEY,						cmd_client_resize,	.v = (int []){ 0, SIZE_INC });
-KEY(XK_Prior,	MODKEY,						cmd_client_resize,	.v = (int []){ 0, -SIZE_INC });
-KEY(XK_End,		MODKEY,						cmd_client_resize,	.v = (int []){ SIZE_INC, 0 });
-KEY(XK_Home,	MODKEY,						cmd_client_resize,	.v = (int []){ -SIZE_INC, 0 });
-KEY(XK_Down,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ 0, INT_MAX });
-KEY(XK_Up,		MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ 0, INT_MAX });
-KEY(XK_Right,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ INT_MAX, 0 });
-KEY(XK_Left,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ INT_MAX, 0 });
-KEY(XK_Insert,	MODKEY,						cmd_client_resize,	.v = (int []){ INT_MAX, INT_MAX });
-KEY(XK_Insert,	MODKEY | ShiftMask,			cmd_client_max,		0);
+KEY(XK_Next,	MODKEY,						cmd_client_resize,		.v = (int []){ 0, SIZE_INC });
+KEY(XK_Prior,	MODKEY,						cmd_client_resize,		.v = (int []){ 0, -SIZE_INC });
+KEY(XK_End,		MODKEY,						cmd_client_resize,		.v = (int []){ SIZE_INC, 0 });
+KEY(XK_Home,	MODKEY,						cmd_client_resize,		.v = (int []){ -SIZE_INC, 0 });
+KEY(XK_Down,	MODKEY | ALT | ShiftMask,	cmd_client_max,			.v = (int []){ 0, 1 });
+KEY(XK_Up,		MODKEY | ALT | ShiftMask,	cmd_client_max,			.v = (int []){ 0, 1 });
+KEY(XK_Right,	MODKEY | ALT | ShiftMask,	cmd_client_max,			.v = (int []){ 1, 0 });
+KEY(XK_Left,	MODKEY | ALT | ShiftMask,	cmd_client_max,			.v = (int []){ 1, 0 });
+KEY(XK_Insert,	MODKEY,						cmd_client_max,			.v = (int []){ 1, 1});
+KEY(XK_Insert,	MODKEY | ShiftMask,			cmd_client_fullscreen,	0);
 
 // winfade
 KEY(XK_1,		MODKEY,				cmd_winfade_fade,	.ui = (1 << 0));

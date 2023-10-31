@@ -67,7 +67,7 @@ void win_init(window_t win, win_geom_t *geom, win_hints_t *hints){
 	win_update_wmhints(win, hints, false);
 	win_set_state(win, NormalState);
 	win_set_flags(win, 0);
-	
+
 	XMapWindow(dwm.dpy, win);
 }
 
