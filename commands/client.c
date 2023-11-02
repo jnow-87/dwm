@@ -55,6 +55,7 @@
 
 /* local/static prototypes */
 static void client_cycle_complete(void);
+static int precheck(client_t *c);
 static int unmax(client_t *c);
 static int inc_size(int v, int inc, int base);
 
@@ -98,7 +99,7 @@ void cmd_client_move(cmd_arg_t *arg){
 	monitor_t *m;
 
 
-	if(c == 0x0)
+	if(precheck(c) != 0)
 		return;
 
 	geom = &c->geom;
@@ -111,8 +112,6 @@ void cmd_client_move(cmd_arg_t *arg){
 	MOVE(y, height, &ny, geom, m);
 
 	client_resize(c, nx, ny, geom->width, geom->height, geom->border_width);
-
-	layout_arrange();
 }
 
 void cmd_client_move_mouse(cmd_arg_t *arg){
@@ -129,7 +128,7 @@ void cmd_client_move_mouse(cmd_arg_t *arg){
 	monitor_t *m;
 
 
-	if(c == 0x0)
+	if(precheck(c) != 0)
 		return;
 
 	if(input_pointer_grab(dwm.root, dwm.gfx->cursors[CUR_MOVE]) != 0)
@@ -162,8 +161,6 @@ void cmd_client_move_mouse(cmd_arg_t *arg){
 	}
 
 	input_pointer_release();
-
-	layout_arrange();
 }
 
 void cmd_client_resize(cmd_arg_t *arg){
@@ -171,7 +168,7 @@ void cmd_client_resize(cmd_arg_t *arg){
 	win_geom_t new;
 
 
-	if(c == 0x0 || unmax(c) == 0)
+	if(precheck(c) != 0)
 		return;
 
 	new.width = ((int*)(arg->v))[0] + c->geom.width;
@@ -181,8 +178,6 @@ void cmd_client_resize(cmd_arg_t *arg){
 	RESIZE_MOVE(y, height, &new, &c->geom, &c->hints);
 
 	client_resize(c, new.x, new.y, new.width, new.height, c->geom.border_width);
-
-	layout_arrange();
 }
 
 void cmd_client_resize_mouse(cmd_arg_t *arg){
@@ -193,7 +188,7 @@ void cmd_client_resize_mouse(cmd_arg_t *arg){
 	xevent_t ev;
 
 
-	if(c == 0x0 || unmax(c) == 0)
+	if(precheck(c) != 0)
 		return;
 
 	geom = &c->geom;
@@ -223,8 +218,6 @@ void cmd_client_resize_mouse(cmd_arg_t *arg){
 
 	input_pointer_move(c->win, geom->width + geom->border_width - 1, geom->height + geom->border_width - 1);
 	input_pointer_release();
-
-	layout_arrange();
 }
 
 void cmd_client_max(cmd_arg_t *arg){
@@ -233,7 +226,7 @@ void cmd_client_max(cmd_arg_t *arg){
 	monitor_t *m;
 
 
-	if(c == 0x0 || unmax(c) == 0)
+	if(precheck(c) != 0)
 		return;
 
 	m = monitor_from_client(c);
@@ -243,8 +236,6 @@ void cmd_client_max(cmd_arg_t *arg){
 	if(((int*)(arg->v))[1] == 1)	MAX_TOGGLE(y, height, &new, &c->geom, &c->geom_store, m);
 
 	client_resize(c, new.x, new.y, new.width, new.height, c->geom.border_width);
-
-	layout_arrange();
 }
 
 void cmd_client_fullscreen(cmd_arg_t *arg){
@@ -261,6 +252,13 @@ void cmd_client_fullscreen(cmd_arg_t *arg){
 /* local functions */
 static void client_cycle_complete(void){
 	clientstack_focus(clientstack_cycle(0, CYCLE_END), false);
+}
+
+static int precheck(client_t *c){
+	if(c == 0x0 || dwm.layout->arrange != 0x0 || unmax(c) == 0)
+		return -1;
+
+	return 0;
 }
 
 static int unmax(client_t *c){
