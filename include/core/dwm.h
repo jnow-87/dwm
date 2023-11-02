@@ -36,8 +36,8 @@ typedef struct{
 
 	unsigned int numlock_mask;
 
-	Atom netatom[NNETATOMS];
-	Atom wmatom[NWMATOMS];
+	atom_t netatoms[NNETATOMS],
+		   wmatoms[NWMATOMS];
 
 	gfx_t *gfx;
 

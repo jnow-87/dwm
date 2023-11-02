@@ -1,3 +1,4 @@
+#include <config/config.h>
 #include <X11/X.h>
 #include <X11/keysymdef.h>
 #include <X11/XF86keysym.h>
@@ -11,8 +12,8 @@
 #define WIN		Mod4Mask
 #define MODKEY	WIN
 
-#define MOVE_INC	100
-#define SIZE_INC	50
+#define MOVE_INC	CONFIG_WIN_MOVE_DELTA
+#define SIZE_INC	CONFIG_WIN_RESIZE_DELTA
 
 #define TAGKEY(keysym, tag) \
 	KEY(keysym,	ControlMask,				cmd_tags_view,			.ui = (1 << tag)); \
@@ -56,15 +57,16 @@ KEY(XK_Left,	MODKEY | ShiftMask,	cmd_client_move,	.v = (int[]){ -INT_MAX, 0 });
 KEY(XK_Right,	MODKEY | ShiftMask,	cmd_client_move,	.v = (int[]){ INT_MAX, 0 });
 
 // window size
-KEY(XK_Next,	MODKEY,						cmd_client_resize,	.v = (int []){ 0, SIZE_INC });
-KEY(XK_Prior,	MODKEY,						cmd_client_resize,	.v = (int []){ 0, -SIZE_INC });
-KEY(XK_End,		MODKEY,						cmd_client_resize,	.v = (int []){ SIZE_INC, 0 });
-KEY(XK_Home,	MODKEY,						cmd_client_resize,	.v = (int []){ -SIZE_INC, 0 });
-KEY(XK_Down,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ 0, INT_MAX });
-KEY(XK_Up,		MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ 0, INT_MAX });
-KEY(XK_Right,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ INT_MAX, 0 });
-KEY(XK_Left,	MODKEY | ALT | ShiftMask,	cmd_client_resize,	.v = (int []){ INT_MAX, 0 });
-KEY(XK_Insert,	MODKEY,						cmd_client_resize,	.v = (int []){ INT_MAX, INT_MAX });
+KEY(XK_Next,	MODKEY,						cmd_client_resize,		.v = (int []){ 0, SIZE_INC });
+KEY(XK_Prior,	MODKEY,						cmd_client_resize,		.v = (int []){ 0, -SIZE_INC });
+KEY(XK_End,		MODKEY,						cmd_client_resize,		.v = (int []){ SIZE_INC, 0 });
+KEY(XK_Home,	MODKEY,						cmd_client_resize,		.v = (int []){ -SIZE_INC, 0 });
+KEY(XK_Down,	MODKEY | ALT | ShiftMask,	cmd_client_max,			.v = (int []){ 0, 1 });
+KEY(XK_Up,		MODKEY | ALT | ShiftMask,	cmd_client_max,			.v = (int []){ 0, 1 });
+KEY(XK_Right,	MODKEY | ALT | ShiftMask,	cmd_client_max,			.v = (int []){ 1, 0 });
+KEY(XK_Left,	MODKEY | ALT | ShiftMask,	cmd_client_max,			.v = (int []){ 1, 0 });
+KEY(XK_Insert,	MODKEY,						cmd_client_max,			.v = (int []){ 1, 1});
+KEY(XK_Insert,	MODKEY | ShiftMask,			cmd_client_fullscreen,	0);
 
 // winfade
 KEY(XK_1,		MODKEY,				cmd_winfade_fade,	.ui = (1 << 0));
@@ -97,7 +99,7 @@ KEY(XF86XK_AudioNext,			0,			cmd_spawn,	.v = SPOTIFY("Next"));
 
 
 /* buttons */
-BUTTON(Button1, 0,					BLOC_CLIENT,	0x0 /* focus client */,		0);
+BUTTON(Button1, ALT,				BLOC_CLIENT,	0x0 /* focus client */,		0);
 BUTTON(Button1,	MODKEY,				BLOC_CLIENT,	cmd_client_move_mouse,		0);
 BUTTON(Button1,	MODKEY | ShiftMask,	BLOC_CLIENT,	cmd_client_resize_mouse,	0);
 BUTTON(Button1,	0,					BLOC_LAYOUT,	cmd_layout_select,			0);

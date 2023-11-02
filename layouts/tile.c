@@ -14,7 +14,13 @@
 
 /* local functions */
 static void arrange(void){
-	unsigned int i, n, h, w, y, ty;
+	unsigned int i,
+				 n,
+				 h,
+				 w,
+				 y,
+				 ty,
+				 border;
 	monitor_t *m;
 	client_t *c;
 	win_geom_t *geom;
@@ -31,19 +37,20 @@ static void arrange(void){
 
 		for(i=y=ty=0, c=layout_next_tiled(dwm.stack, m); c; c=layout_next_tiled(c->next, m), i++){
 			geom = &c->geom;
+			border = geom->border_width;
 
 			if(i < NMASTER){
 				h = (m->height - y) / (MIN(n, NMASTER) - i);
-				client_resize(c, m->x, m->y + y, w - (2 * geom->border_width), h - (2 * geom->border_width));
-				h = geom->height + 2 * geom->border_width;
+				client_resize(c, m->x, m->y + y, w - 2 * border, h - 2 * border, border);
+				h = geom->height + 2 * border;
 
 				if(y + h < m->height)
 					y += h;
 			}
 			else{
 				h = (m->height - ty) / (n - i);
-				client_resize(c, m->x + w, m->y + ty, m->width - w - (2 * geom->border_width), h - (2 * geom->border_width));
-				h = geom->height + 2 * geom->border_width;
+				client_resize(c, m->x + w, m->y + ty, m->width - w - 2 * border, h - 2 * border, border);
+				h = geom->height + 2 * border;
 
 				if(ty + h < m->height)
 					ty += h;

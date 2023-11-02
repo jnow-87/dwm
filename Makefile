@@ -101,6 +101,8 @@ install: all
 	$(call install,man/dwm.1,/usr/local/man/man1)
 	$(call install,man/dmenu.1,/usr/local/man/man1)
 	$(call install,man/stest.1,/usr/local/man/man1)
+	update-alternatives --install /usr/bin/x-window-manager x-window-manager /usr/bin/dwm 1
+	update-alternatives --config x-window-manager
 
 .PHONY: uninstall
 uninstall:

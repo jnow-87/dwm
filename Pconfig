@@ -37,6 +37,12 @@ menu "statusbar"
 		default ""
 endmenu
 
+config WIN_RESIZE_DELTA
+	int "delta for resizing a client [pixels]"
+
+config WIN_MOVE_DELTA
+	int "delta for moving a client [pixels]"
+
 config FADE_STEPS
 	int "number of animation steps for fading windows"
 	default 5
@@ -66,6 +72,10 @@ choice
 	config BUILD_DEBUG
 		bool "debug"
 endchoice
+
+config BUILD_TREE
+	string "build tree"
+	default "build/$(CONFIG_BUILD_TYPE)"
 
 menu "Hidden"
 	visible if 0

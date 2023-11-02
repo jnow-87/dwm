@@ -24,6 +24,7 @@ void cmd_dmenu_run(cmd_arg_t *arg){
 	char const *dmenu[] = {
 		"dmenurun",
 		"-fn", CONFIG_FONT,
+		"-m", "0",
 		"-nf", dwm.gfx->schemes[SCM_NORM].names->fg,
 		"-nb", dwm.gfx->schemes[SCM_NORM].names->bg,
 		"-sf", dwm.gfx->schemes[SCM_FOCUS].names->fg,

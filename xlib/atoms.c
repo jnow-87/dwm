@@ -5,51 +5,54 @@
 #include <core/dwm.h>
 
 
+/* local/static prototypes */
+void netatom_change(window_t win, net_atom_t id, int mode, unsigned char *v, int n);
+
+
 /* global functions */
-int atoms_text_prop(Window win, Atom atom, char *text, unsigned int size){
-	char **list = 0x0;
-	int n;
-	XTextProperty name;
+void wmatom_init(wm_atom_t id, char const *name){
+	atom_t *atom = dwm.wmatoms + id;
 
 
-	if(!text || size == 0)
-		return -1;
-
-	text[0] = '\0';
-
-	if(!XGetTextProperty(dwm.dpy, win, &name, atom) || !name.nitems)
-		return -1;
-
-	if(name.encoding == XA_STRING){
-		strncpy(text, (char*)name.value, size - 1);
-	}
-	else if(XmbTextPropertyToTextList(dwm.dpy, &name, &list, &n) >= Success && n > 0 && *list){
-		strncpy(text, *list, size - 1);
-		XFreeStringList(list);
-	}
-
-	text[size - 1] = '\0';
-	XFree(name.value);
-
-	return 0;
+	atom->property = XInternAtom(dwm.dpy, name, False);
+	atom->type = None;
+	atom->format = -1;
 }
 
-int atoms_text_prop_set(Window win, Atom atom, char *text){
-	XTextProperty prop;
-
-
-	if(Xutf8TextListToTextProperty(dwm.dpy, &text, 1, XStdICCTextStyle, &prop) != Success)
-		return -1;
-
-	XSetTextProperty(dwm.dpy, win, &prop, atom);
-
-	return 0;
+Atom wmatom_get(wm_atom_t atom){
+	return dwm.wmatoms[atom].property;
 }
 
-void atoms_netatom_append(net_atom_t atom, unsigned char *value){
-	XChangeProperty(dwm.dpy, dwm.root, dwm.netatom[atom], XA_WINDOW, 32, PropModeAppend, value, 1);
+void netatom_init(net_atom_t id, char const *name, Atom type, int format){
+	atom_t *atom = dwm.netatoms + id;
+
+
+	atom->property = XInternAtom(dwm.dpy, name, False);
+	atom->type = type;
+	atom->format = format;
 }
 
-void atoms_netatom_delete(net_atom_t atom){
-	XDeleteProperty(dwm.dpy, dwm.root, dwm.netatom[atom]);
+Atom netatom_get(net_atom_t id){
+	return dwm.netatoms[id].property;
+}
+
+void netatom_set(net_atom_t id, window_t win, unsigned char *v, int n){
+	netatom_change(win, id, PropModeReplace, v, n);
+}
+
+void netatom_append(net_atom_t id, window_t win, unsigned char *v){
+	netatom_change(win, id, PropModeAppend, v, 1);
+}
+
+void netatom_delete(net_atom_t id, window_t win){
+	XDeleteProperty(dwm.dpy, win, dwm.netatoms[id].property);
+}
+
+
+/* local functions */
+void netatom_change(window_t win, net_atom_t id, int mode, unsigned char *v, int n){
+	atom_t *atom = dwm.netatoms + id;
+
+
+	XChangeProperty(dwm.dpy, win, atom->property, atom->type, atom->format, mode, v, n);
 }
