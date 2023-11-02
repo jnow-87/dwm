@@ -73,8 +73,9 @@ void client_init(window_t win, win_attr_t *attr){
 
 	geom = &c->geom;
 	*geom = attr->geom;
-	geom->x = MAX(geom->x, m->x);
-	geom->y = MAX(geom->y, m->y);
+
+	geom->x = (m->width - (geom->width + 2 * CONFIG_BORDER_PIXEL)) / 2;
+	geom->y = (m->height - (geom->height + 2 * CONFIG_BORDER_PIXEL)) / 2;
 	geom->border_width = CONFIG_BORDER_PIXEL;
 
 	c->geom_store = attr->geom;
