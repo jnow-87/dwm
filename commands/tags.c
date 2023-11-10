@@ -3,6 +3,7 @@
 #include <core/layout.h>
 #include <core/statusbar.h>
 #include <core/tags.h>
+#include <utils/menu.h>
 #include <commands.h>
 
 
@@ -38,6 +39,23 @@ void cmd_tags_client_toggle(cmd_arg_t *arg){
 		return;
 
 	toggle(&c->tags, arg->ui);
+}
+
+void cmd_tags_menu(cmd_arg_t *arg){
+	int n = 0;
+	char const *names[__stop_tags - __start_tags];
+	char **tag;
+
+
+	config_for_each(tags, tag)
+		names[n++] = *tag;
+
+	n = menu(names, n);
+
+	if(n == -1)
+		return;
+
+	set(&dwm.tag_mask, 1 << n);
 }
 
 

@@ -41,6 +41,7 @@ void cmd_tags_view(cmd_arg_t *arg);
 void cmd_tags_toggle(cmd_arg_t *arg);
 void cmd_tags_client_set(cmd_arg_t *arg);
 void cmd_tags_client_toggle(cmd_arg_t *arg);
+void cmd_tags_menu(cmd_arg_t *arg);
 
 void cmd_winfade_add(cmd_arg_t *arg);
 void cmd_winfade_fade(cmd_arg_t *arg);
