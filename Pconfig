@@ -35,6 +35,10 @@ menu "statusbar"
 	config STATUSBAR_SPACER_RIGHT
 		qstring "statusbar spacer (right)"
 		default ""
+
+	config STATUSBAR_TAGS_MULTI
+		qstring "tag string if multiple tags are selected"
+		default "⇆"
 endmenu
 
 config WIN_RESIZE_DELTA

@@ -2,6 +2,7 @@
 #define TAGS_H
 
 
+#include <stddef.h>
 #include <utils/utils.h>
 
 
@@ -13,6 +14,7 @@
 /* prototypes */
 void tags_set(unsigned int *tags, unsigned int v);
 void tags_toggle(unsigned int *tags, unsigned int v);
+size_t tags_selected(unsigned int tags);
 
 
 /* external variables */

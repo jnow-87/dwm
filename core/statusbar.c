@@ -93,15 +93,24 @@ void statusbar_update(void){
 	draw_right(CONFIG_STATUSBAR_SPACER_RIGHT, SCM_SPACER_STATUS, 0, &x);
 
 	/* left side */
-	// tags
-	i = 0;
 	x = 0;
 
+	// tags
+	i = 0;
+
 	config_for_each(tags, tag){
-		draw_left(*tag, (dwm.tag_mask & (1 << i)) ? SCM_FOCUS : SCM_NORM, PADDING, &x);
+		if(dwm.tag_mask & (1 << i))
+			break;
+
 		i++;
 	}
 
+	i = tags_selected(dwm.tag_mask);
+
+	if(i > 1)	snprintf(s, sizeof(s), "%s [%zu]", CONFIG_STATUSBAR_TAGS_MULTI, i);
+	else		snprintf(s, sizeof(s), "%s", *tag);
+	
+	draw_left(s, SCM_NORM, PADDING, &x);
 	draw_left(CONFIG_STATUSBAR_SPACER_LEFT, SCM_SPACER_NORM, 0, &x);
 
 	// layout symbol
