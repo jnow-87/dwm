@@ -2,7 +2,7 @@
 
 
 /* tags */
-TAG("💻");
-TAG("💻");
-TAG("🗇");
-TAG("📟");
+TAG("dev");
+TAG("scratch");
+TAG("work");
+TAG("media");
