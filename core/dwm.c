@@ -37,7 +37,11 @@
 /* local/static prototypes */
 static int xevent_hdlr(void);
 static void reap_zombies(void);
-static void sigchild_hdlr(int sig, siginfo_t *info, void *ucontext);
+
+static int signal_register(int sig, void (*hdlr)(int), int flags);
+
+static void sigchild_hdlr(int sig);
+static void sigrestart_hdlr(int sig);
 
 
 /* global variables */
@@ -53,7 +57,6 @@ dwm_t dwm = {
 /* global functions */
 int dwm_setup(void){
 	int r = 0;
-	struct sigaction sa;
 
 
 	if(log_init(CONFIG_LOG_FILE, true) != 0)
@@ -61,11 +64,12 @@ int dwm_setup(void){
 
 	DEBUG("dwm hello\n");
 
-	/* register SIGCHLD signal handler */
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_NOCLDSTOP | SA_RESTART | SA_SIGINFO;
-	sa.sa_sigaction = sigchild_hdlr;
-	sigaction(SIGCHLD, &sa, 0x0);
+	/* register signal handler */
+	r |= signal_register(SIGCHLD, sigchild_hdlr, SA_NOCLDSTOP | SA_RESTART);
+	r |= signal_register(SIGINT, sigrestart_hdlr, 0x0);
+
+	if(r != 0)
+		return ERROR("registering signal handler\n");
 
 	reap_zombies();
 
@@ -157,6 +161,22 @@ static void reap_zombies(void){
 	while(waitpid(-1, NULL, WNOHANG) > 0);
 }
 
-static void sigchild_hdlr(int sig, siginfo_t *info, void *ucontext){
+static int signal_register(int sig, void (*hdlr)(int), int flags){
+	struct sigaction sa;
+
+
+	sigemptyset(&sa.sa_mask);
+
+	sa.sa_flags = flags;
+	sa.sa_handler = hdlr;
+
+	return sigaction(sig, &sa, 0x0);
+}
+
+static void sigchild_hdlr(int sig){
 	reap_zombies();
+}
+
+static void sigrestart_hdlr(int sig){
+	dwm.state = DWM_RESTART;
 }
