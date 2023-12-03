@@ -53,14 +53,16 @@ int xlib_init(void){
 	wmatom_init(WM_STATE, "WM_STATE");
 
 	netatom_init(NET_ACTIVE_WINDOW, "_NET_ACTIVE_WINDOW", XA_WINDOW, 32);
+	netatom_init(NET_CLIENT_LIST, "_NET_CLIENT_LIST", XA_WINDOW, 32);
 	netatom_init(NET_SUPPORTED, "_NET_SUPPORTED", XA_ATOM, 32);
+	netatom_init(NET_CURRENT_DESKTOP, "_NET_CURRENT_DESKTOP", XA_CARDINAL, 32);
 	netatom_init(NET_WM_NAME, "_NET_WM_NAME", XInternAtom(dwm.dpy, "UTF8_STRING", False), 8);
 	netatom_init(NET_WM_CHECK, "_NET_SUPPORTING_WM_CHECK", XA_WINDOW, 32);
 	netatom_init(NET_WM_STATE, "_NET_WM_STATE", XA_ATOM, 32);
 	netatom_init(NET_WM_FULLSCREEN, "_NET_WM_STATE_FULLSCREEN", None, -1);
 	netatom_init(NET_WM_VERTMAX, "_NET_WM_STATE_MAXIMIZED_VERT", None, -1);
 	netatom_init(NET_WM_HORMAX, "_NET_WM_STATE_MAXIMIZED_HORZ", None, -1);
-	netatom_init(NET_CLIENT_LIST, "_NET_CLIENT_LIST", XA_WINDOW, 32);
+	netatom_init(NET_WM_DESKTOP, "_NET_WM_DESKTOP", XA_CARDINAL, 32);
 
 	/* supporting window for NET_WM_CHECK */
 	// this is a requirement to indicate a conforming window manager, cf.
@@ -71,8 +73,9 @@ int xlib_init(void){
 	netatom_set(NET_WM_CHECK, dwm.root, (unsigned char *)&dwm.wmcheck, 1);
 
 	/* extended window manager hints (EWMH) support per view */
-	netatom_delete(NET_SUPPORTED, dwm.root);
+	netatom_set(NET_CURRENT_DESKTOP, dwm.root, (unsigned char*)&dwm.tag_mask, 1);
 	netatom_set(NET_CLIENT_LIST, dwm.root, 0x0, 0);
+	netatom_delete(NET_SUPPORTED, dwm.root);
 
 	for(size_t i=0; i<NNETATOMS; i++)
 		netatom_append(NET_SUPPORTED, dwm.root, (unsigned char*)&dwm.netatoms[i].property);

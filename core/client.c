@@ -81,6 +81,7 @@ void client_init(window_t win, win_attr_t *attr){
 	c->geom_store = attr->geom;
 
 	win_init(win, &c->geom, &c->hints);
+	client_update_desktop(c);
 	buttons_register(c);
 
 	/* update client list */
@@ -138,6 +139,20 @@ void client_resize(client_t *c, int x, int y, int width, int height, int border_
 	PREP_N_STORE(border_width, geom, &c->geom_store);
 
 	win_resize(c->win, geom, 0x0);
+}
+
+void client_update_desktop(client_t *c){
+	unsigned int desktop;
+
+
+	// dwm's tags work a little different than desktops, since a client can be assigned
+	// to multiple tags and the clients of multiple tags can be shown at once. To keep
+	// the semantics of NET_WM_DESKTOP and NET_CURRENT_DESKTOP in line with the desktop
+	// concept, in particular, that both values being (un)equal equates to the client
+	// (not) being on the current desktop, NET_WM_DESKTOP is set according to the tags
+	// of the client and the dwm tag-mask.
+	desktop = ONTAG(c) ? dwm.tag_mask : c->tags;
+	netatom_set(NET_WM_DESKTOP, c->win, (unsigned char*)&desktop, 1);
 }
 
 void client_flags_set(client_t *c, unsigned int mask){

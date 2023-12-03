@@ -38,6 +38,7 @@ client_t *client_from_win(window_t win);
 
 void client_resize(client_t *c, int x, int y, int width, int height, int border_width);
 void client_flags_set(client_t *c, unsigned int mask);
+void client_update_desktop(client_t *c);
 
 
 #endif // CLIENT_H
