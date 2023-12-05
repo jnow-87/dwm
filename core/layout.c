@@ -26,8 +26,8 @@ void layout_arrange(void){
 
 
 	list_for_each(dwm.stack, c){
-		if(ONTAG(c))	win_show(c->win, &c->geom);
-		else			win_hide(c->win, &c->geom);
+		if(ONTAG(c))	win_show(c->win);
+		else			win_hide(c->win);
 	}
 
 	if(dwm.layout->arrange)

@@ -132,10 +132,10 @@ void statusbar_toggle(void){
 
 	if(bar->hidden){
 		statd_refresh(false);
-		win_show(bar->win, &bar->geom);
+		win_show(bar->win);
 	}
 	else
-		win_hide(bar->win, &bar->geom);
+		win_hide(bar->win);
 
 	bar->hidden = !bar->hidden;
 }
@@ -202,7 +202,7 @@ static void statd_refresh(bool indicate_error){
 
 	// show statusbar to indicate dead statd
 	if(indicate_error && bar->hidden){
-		win_show(bar->win, &bar->geom);
+		win_show(bar->win);
 		bar->hidden = false;
 	}
 }

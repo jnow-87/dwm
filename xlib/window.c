@@ -60,7 +60,7 @@ void win_init(window_t win, win_geom_t *geom, win_hints_t *hints){
 
 	XConfigureWindow(dwm.dpy, win, CWBorderWidth, &((XWindowChanges){ .border_width = geom->border_width }));
 	XSelectInput(dwm.dpy, win, FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
-	XMoveResizeWindow(dwm.dpy, win, geom->x + 2 * dwm.screen_width, geom->y, geom->width, geom->height); //some windows require this
+	XMoveResizeWindow(dwm.dpy, win, geom->x, geom->y, geom->width, geom->height);
 
 	set_border(win, SCM_NORM);
 	win_update_sizehints(win, hints);
@@ -209,12 +209,12 @@ bool win_send_event(window_t win, Atom proto){
 	return true;
 }
 
-void win_show(window_t win, win_geom_t *geom){
-	XMoveWindow(dwm.dpy, win, geom->x, geom->y);
+void win_show(window_t win){
+	XMapWindow(dwm.dpy, win);
 }
 
-void win_hide(window_t win, win_geom_t *geom){
-	XMoveWindow(dwm.dpy, win, geom->width * -2, geom->y);
+void win_hide(window_t win){
+	XUnmapWindow(dwm.dpy, win);
 }
 
 bool win_visible(window_t win, win_geom_t *geom){
@@ -224,7 +224,7 @@ bool win_visible(window_t win, win_geom_t *geom){
 	if(win_get_attr(win, &attr) != 0)
 		return false;
 
-	return (attr.geom.x == geom->x && attr.geom.y == geom->y);
+	return attr.map_state == IsViewable;
 }
 
 void win_focus(window_t win){

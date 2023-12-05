@@ -179,16 +179,20 @@ static void property_notify(xevent_t *e){
 static void map_request(xevent_t *e){
 	XMapRequestEvent *ev = &e->xmaprequest;
 	win_attr_t attr;
+	client_t *c;
 
 
-	if(win_get_attr(ev->window, &attr) != 0 || attr.override_redirect)
-		return;
+	c = client_from_win(ev->window);
 
-	if(client_from_win(ev->window))
-		return;
+	if(c == 0x0){
+		if(win_get_attr(ev->window, &attr) != 0 || attr.override_redirect)
+			return;
 
-	client_init(ev->window, &attr);
-	layout_arrange();
+		client_init(ev->window, &attr);
+		layout_arrange();
+	}
+	else
+		win_show(c->win);
 }
 
 static void mapping_notify(xevent_t *e){
@@ -206,14 +210,10 @@ static void unmap_notify(xevent_t *e){
 	client_t *c;
 
 
-	if((c = client_from_win(ev->window))){
-		if(!ev->send_event){
-			client_cleanup(c, false);
-			layout_arrange();
-		}
-		else
+	c = client_from_win(ev->window);
+
+	if(c != 0x0 && ev->send_event)
 			win_set_state(c->win, WithdrawnState);
-	}
 }
 
 static void expose(xevent_t *e){

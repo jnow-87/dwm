@@ -48,8 +48,15 @@ int clients_init(void){
 }
 
 void clients_cleanup(void){
-	while(dwm.stack)
+	while(dwm.stack){
+		// Ensure the client is visible/mapped in order for it to be
+		// discoverable by dwm in case it is restarting. dwm discovers
+		// clients through the MapRequest. Hence, if a client is not
+		// mapped, it will not be discovered and managed by dwm.
+		win_show(dwm.stack->win);
+
 		client_cleanup(dwm.stack, false);
+	}
 }
 
 void client_init(window_t win, win_attr_t *attr){
