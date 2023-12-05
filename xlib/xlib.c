@@ -56,6 +56,7 @@ int xlib_init(void){
 	netatom_init(NET_CLIENT_LIST, "_NET_CLIENT_LIST", XA_WINDOW, 32);
 	netatom_init(NET_SUPPORTED, "_NET_SUPPORTED", XA_ATOM, 32);
 	netatom_init(NET_CURRENT_DESKTOP, "_NET_CURRENT_DESKTOP", XA_CARDINAL, 32);
+	netatom_init(NET_FRAME_EXTENTS, "_NET_FRAME_EXTENTS", XA_CARDINAL, 32);
 	netatom_init(NET_WM_NAME, "_NET_WM_NAME", XInternAtom(dwm.dpy, "UTF8_STRING", False), 8);
 	netatom_init(NET_WM_CHECK, "_NET_SUPPORTING_WM_CHECK", XA_WINDOW, 32);
 	netatom_init(NET_WM_STATE, "_NET_WM_STATE", XA_ATOM, 32);

@@ -103,6 +103,7 @@ void win_release(window_t win, win_geom_t *original){
 }
 
 void win_configure(window_t win, win_geom_t *geom){
+	unsigned long frame[4];
 	XConfigureEvent ce;
 
 
@@ -119,6 +120,12 @@ void win_configure(window_t win, win_geom_t *geom){
 	ce.override_redirect = False;
 
 	XSendEvent(dwm.dpy, win, False, StructureNotifyMask, (XEvent*)&ce);
+
+	frame[0] = geom->border_width;
+	frame[1] = geom->border_width;
+	frame[2] = geom->border_width;
+	frame[3] = geom->border_width;
+	netatom_set(NET_FRAME_EXTENTS, win, (unsigned char*)frame, 4);
 }
 
 void win_resize(window_t win, win_geom_t *geom, win_hints_t *hints){
