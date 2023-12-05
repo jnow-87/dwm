@@ -104,6 +104,7 @@ static void fade(size_t n, unsigned int fades){
 
 		tags_set(&c->tags, dwm.tag_mask);
 		move(c, -dx[i].delta * CONFIG_FADE_STEPS, -dy[i].delta * CONFIG_FADE_STEPS);
+		win_show(c->win);
 		win_focus(c->win);
 	}
 
@@ -120,7 +121,7 @@ static void fade(size_t n, unsigned int fades){
 	for(i=0; i<n && dir==FADE_OUT; i++){
 		c = clients[i];
 
-		win_hide(c->win, &c->geom);
+		win_hide(c->win);
 		c->tags = 0;
 	}
 

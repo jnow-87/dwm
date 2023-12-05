@@ -66,8 +66,8 @@ int win_set_name(window_t win, char *name);
 void win_set_flags(window_t win, unsigned int mask);
 bool win_send_event(window_t win, Atom proto);
 
-void win_show(window_t win, win_geom_t *geom);
-void win_hide(window_t win, win_geom_t *geom);
+void win_show(window_t win);
+void win_hide(window_t win);
 bool win_visible(window_t win, win_geom_t *geom);
 
 void win_focus(window_t win);
