@@ -212,8 +212,10 @@ static void unmap_notify(xevent_t *e){
 
 	c = client_from_win(ev->window);
 
-	if(c != 0x0 && ev->send_event)
-			win_set_state(c->win, WithdrawnState);
+	if(c != 0x0 && ev->send_event){
+		client_cleanup(c, false);
+		win_kill(c->win);
+	}
 }
 
 static void expose(xevent_t *e){

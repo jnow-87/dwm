@@ -84,10 +84,7 @@ void cmd_client_cycle(cmd_arg_t *arg){
 }
 
 void cmd_client_kill(cmd_arg_t *arg){
-	if(!dwm.focused)
-		return;
-
-	if(!win_send_event(dwm.focused->win, wmatom_get(WM_DELETE_WINDOW)))
+	if(dwm.focused)
 		win_kill(dwm.focused->win);
 }
 
