@@ -72,6 +72,9 @@ void win_init(window_t win, win_geom_t *geom, win_hints_t *hints){
 }
 
 void win_kill(window_t win){
+	if(win_send_event(win, wmatom_get(WM_DELETE_WINDOW)))
+		return;
+
 	XGrabServer(dwm.dpy);
 	xlib_set_error_handler(dummy_xerror_hdlr);
 	XSetCloseDownMode(dwm.dpy, DestroyAll);
