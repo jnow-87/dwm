@@ -4,7 +4,7 @@
 
 
 /* global functions */
-void cmd_lifecycle(cmd_arg_t *arg){
+void cmd_lifecycle(cmd_arg_t const *arg){
 	switch(arg->i){
 	case DWM_SHUTDOWN:
 	case DWM_RESTART:
