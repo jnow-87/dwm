@@ -28,8 +28,7 @@ void cmd_tags_view(cmd_arg_t *arg){
 }
 
 void cmd_tags_toggle(cmd_arg_t *arg){
-	arg->ui ^= dwm.tag_mask;
-	cmd_tags_view(arg);
+	cmd_tags_view(&(cmd_arg_t){ .ui = (arg->ui ^ dwm.tag_mask) });
 }
 
 void cmd_tags_client_set(cmd_arg_t *arg){
@@ -50,8 +49,7 @@ void cmd_tags_client_toggle(cmd_arg_t *arg){
 	if(c == 0x0)
 		return;
 
-	arg->ui ^= c->tags;
-	cmd_tags_client_set(arg);
+	cmd_tags_client_set(&(cmd_arg_t const){ .ui = (arg->ui ^ c->tags) });
 }
 
 void cmd_tags_menu(cmd_arg_t *arg){
