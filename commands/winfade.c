@@ -30,7 +30,7 @@ static delta_t delta(int win_low, int win_high, int mon_low, int mon_high);
 
 
 /* global functions */
-void cmd_winfade_add(cmd_arg_t *arg){
+void cmd_winfade_add(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 
 
@@ -40,7 +40,7 @@ void cmd_winfade_add(cmd_arg_t *arg){
 	c->fades ^= arg->ui;
 }
 
-void cmd_winfade_fade(cmd_arg_t *arg){
+void cmd_winfade_fade(cmd_arg_t const *arg){
 	size_t n = 0;
 	client_t *c;
 

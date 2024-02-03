@@ -6,7 +6,7 @@
 
 
 /* global functions */
-void cmd_layout_select(cmd_arg_t *arg){
+void cmd_layout_select(cmd_arg_t const *arg){
 	int n = 0;
 	char const *names[__stop_layouts - __start_layouts];
 	layout_t *l;

@@ -14,7 +14,7 @@ static void set(unsigned int *tags, unsigned int v);
 
 
 /* global functions */
-void cmd_tags_view(cmd_arg_t *arg){
+void cmd_tags_view(cmd_arg_t const *arg){
 	client_t *c;
 
 
@@ -27,12 +27,11 @@ void cmd_tags_view(cmd_arg_t *arg){
 	}
 }
 
-void cmd_tags_toggle(cmd_arg_t *arg){
-	arg->ui ^= dwm.tag_mask;
-	cmd_tags_view(arg);
+void cmd_tags_toggle(cmd_arg_t const *arg){
+	cmd_tags_view(&(cmd_arg_t const){ .ui = (arg->ui ^ dwm.tag_mask) });
 }
 
-void cmd_tags_client_set(cmd_arg_t *arg){
+void cmd_tags_client_set(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 
 
@@ -43,18 +42,17 @@ void cmd_tags_client_set(cmd_arg_t *arg){
 	client_update_desktop(c);
 }
 
-void cmd_tags_client_toggle(cmd_arg_t *arg){
+void cmd_tags_client_toggle(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 
 
 	if(c == 0x0)
 		return;
 
-	arg->ui ^= c->tags;
-	cmd_tags_client_set(arg);
+	cmd_tags_client_set(&(cmd_arg_t const){ .ui = (arg->ui ^ c->tags) });
 }
 
-void cmd_tags_menu(cmd_arg_t *arg){
+void cmd_tags_menu(cmd_arg_t const *arg){
 	int n = 0;
 	char const *names[__stop_tags - __start_tags];
 	char **tag;
@@ -69,8 +67,7 @@ void cmd_tags_menu(cmd_arg_t *arg){
 	if(n == -1)
 		return;
 
-	arg->ui = 1 << n;
-	cmd_tags_view(arg);
+	cmd_tags_view(&(cmd_arg_t const){ .ui = (1 << n) });
 }
 
 

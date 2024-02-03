@@ -61,7 +61,7 @@ static int inc_size(int v, int inc, int base);
 
 
 /* global functions */
-void cmd_client_cycle(cmd_arg_t *arg){
+void cmd_client_cycle(cmd_arg_t const *arg){
 	client_t *c;
 
 
@@ -83,12 +83,12 @@ void cmd_client_cycle(cmd_arg_t *arg){
 		client_cycle_complete();
 }
 
-void cmd_client_kill(cmd_arg_t *arg){
+void cmd_client_kill(cmd_arg_t const *arg){
 	if(dwm.focused)
 		win_kill(dwm.focused->win);
 }
 
-void cmd_client_move(cmd_arg_t *arg){
+void cmd_client_move(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 	int nx,
 		ny;
@@ -111,7 +111,7 @@ void cmd_client_move(cmd_arg_t *arg){
 	client_resize(c, nx, ny, geom->width, geom->height, geom->border_width);
 }
 
-void cmd_client_move_mouse(cmd_arg_t *arg){
+void cmd_client_move_mouse(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 	Time tlast = 0;
 	int ptr_x,
@@ -160,7 +160,7 @@ void cmd_client_move_mouse(cmd_arg_t *arg){
 	input_pointer_release();
 }
 
-void cmd_client_resize(cmd_arg_t *arg){
+void cmd_client_resize(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 	win_geom_t new;
 
@@ -177,7 +177,7 @@ void cmd_client_resize(cmd_arg_t *arg){
 	client_resize(c, new.x, new.y, new.width, new.height, c->geom.border_width);
 }
 
-void cmd_client_resize_mouse(cmd_arg_t *arg){
+void cmd_client_resize_mouse(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 	Time tlast = 0;
 	win_geom_t new;
@@ -217,7 +217,7 @@ void cmd_client_resize_mouse(cmd_arg_t *arg){
 	input_pointer_release();
 }
 
-void cmd_client_max(cmd_arg_t *arg){
+void cmd_client_max(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 	win_geom_t new;
 	monitor_t *m;
@@ -235,7 +235,7 @@ void cmd_client_max(cmd_arg_t *arg){
 	client_resize(c, new.x, new.y, new.width, new.height, c->geom.border_width);
 }
 
-void cmd_client_fullscreen(cmd_arg_t *arg){
+void cmd_client_fullscreen(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 
 

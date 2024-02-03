@@ -13,14 +13,14 @@ static void exec(char * const argv[]);
 
 
 /* global functions */
-void cmd_spawn(cmd_arg_t *arg){
+void cmd_spawn(cmd_arg_t const *arg){
 	if(fork() != 0)
 		return;
 
 	exec(arg->v);
 }
 
-void cmd_dmenu_run(cmd_arg_t *arg){
+void cmd_dmenu_run(cmd_arg_t const *arg){
 	char const *dmenu[] = {
 		"dmenurun",
 		"-fn", CONFIG_FONT,

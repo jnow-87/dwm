@@ -64,8 +64,6 @@ void statusbar_destroy(void){
 
 void statusbar_update(void){
 	statusbar_t *bar = &dwm.statusbar;
-	char **tag;
-	size_t i;
 	int x;
 	char s[256];
 
@@ -96,26 +94,16 @@ void statusbar_update(void){
 	x = 0;
 
 	// tags
-	i = 0;
-
-	config_for_each(tags, tag){
-		if(dwm.tag_mask & (1 << i))
-			break;
-
-		i++;
-	}
-
-	i = tags_selected(dwm.tag_mask);
-
-	if(i > 1)	snprintf(s, sizeof(s), "%s [%zu]", CONFIG_STATUSBAR_TAGS_MULTI, i);
-	else		snprintf(s, sizeof(s), "%s", *tag);
-	
-	draw_left(s, SCM_NORM, PADDING, &x);
+	bar->pos.tags_begin = x;
+	draw_left(tags_name(dwm.tag_mask, s, sizeof(s)), SCM_NORM, PADDING, &x);
 	draw_left(CONFIG_STATUSBAR_SPACER_LEFT, SCM_SPACER_NORM, 0, &x);
+	bar->pos.tags_end = x;
 
 	// layout symbol
+	bar->pos.layout_begin = x;
 	draw_left(dwm.layout->symbol, SCM_STATUS, PADDING, &x);
 	draw_left(CONFIG_STATUSBAR_SPACER_LEFT, SCM_SPACER_STATUS, 0, &x);
+	bar->pos.layout_end = x;
 
 	/* sync */
 	gfx_map(dwm.gfx, bar->win, 0, 0, dwm.mons->width, bar->geom.height);
@@ -141,22 +129,15 @@ void statusbar_toggle(void){
 }
 
 button_loc_t statusbar_element(int x, int y){
-	unsigned int pos = 0;
 	statusbar_t *bar = &dwm.statusbar;
-	char **tag;
-
 
 	if(y < bar->geom.y || y >= bar->geom.y + bar->geom.height)
 		return BLOC_UNKNOWN;
 
-	config_for_each(tags, tag){
-		pos += gfx_text_width(dwm.gfx, *tag) + PADDING;
+	if(x >= bar->pos.tags_begin && x < bar->pos.tags_end)
+		return BLOC_TAGBAR;
 
-		if(pos > x)
-			return BLOC_TAGBAR;
-	}
-
-	if(x < pos + gfx_text_width(dwm.gfx, dwm.layout->symbol) + PADDING)
+	if(x >= bar->pos.layout_begin && x < bar->pos.layout_end)
 		return BLOC_LAYOUT;
 
 	return BLOC_UNKNOWN;

@@ -3,6 +3,6 @@
 
 
 /* global functions */
-void cmd_statusbar_toggle(cmd_arg_t *arg){
+void cmd_statusbar_toggle(cmd_arg_t const *arg){
 	statusbar_toggle();
 }

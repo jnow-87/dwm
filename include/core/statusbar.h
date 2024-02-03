@@ -15,6 +15,13 @@ typedef struct{
 	win_geom_t geom;
 
 	int fd_timer;
+
+	struct {
+		size_t tags_begin,
+			   tags_end,
+			   layout_begin,
+			   layout_end;
+	} pos;
 } statusbar_t;
 
 
