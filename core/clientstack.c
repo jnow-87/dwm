@@ -69,7 +69,8 @@ void clientstack_refocus(void){
 }
 
 void clientstack_focus(client_t *c, bool restack){
-	if(c == dwm.focused)
+	// ensure the root window is focused if no other client is active
+	if(c == dwm.focused && c != 0x0)
 		return;
 
 	if(dwm.focused)
