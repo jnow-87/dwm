@@ -59,4 +59,4 @@ static void arrange(void){
 	}
 }
 
-LAYOUT("tiled", "⚏", arrange);
+LAYOUT("tiled", "󰕴", arrange);
