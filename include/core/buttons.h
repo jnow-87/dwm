@@ -26,6 +26,7 @@ typedef enum{
 	BLOC_UNKNOWN = -1,
 	BLOC_ROOT = 0,
 	BLOC_CLIENT,
+	BLOC_LAUNCHER,
 	BLOC_TAGBAR,
 	BLOC_LAYOUT,
 } button_loc_t;

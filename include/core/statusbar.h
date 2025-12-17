@@ -17,7 +17,9 @@ typedef struct{
 	int fd_timer;
 
 	struct {
-		size_t tags_begin,
+		size_t launcher_begin,
+			   launcher_end,
+			   tags_begin,
 			   tags_end,
 			   layout_begin,
 			   layout_end;

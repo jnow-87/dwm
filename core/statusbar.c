@@ -93,10 +93,16 @@ void statusbar_update(void){
 	/* left side */
 	x = 0;
 
+	// launcher
+	bar->pos.launcher_begin = x;
+	draw_left(CONFIG_STATUSBAR_LAUNCHER_ICON " ", SCM_NORM, PADDING, &x);
+	draw_left(CONFIG_STATUSBAR_SPACER_LEFT, SCM_SPACER_NORM, 0, &x);
+	bar->pos.launcher_end = x;
+
 	// tags
 	bar->pos.tags_begin = x;
-	draw_left(tags_name(dwm.tag_mask, s, sizeof(s)), SCM_NORM, PADDING, &x);
-	draw_left(CONFIG_STATUSBAR_SPACER_LEFT, SCM_SPACER_NORM, 0, &x);
+	draw_left(tags_name(dwm.tag_mask, s, sizeof(s)), SCM_STATUS, PADDING, &x);
+	draw_left(CONFIG_STATUSBAR_SPACER_INTRA_LEFT, SCM_SPACER_INTRA, 0, &x);
 	bar->pos.tags_end = x;
 
 	// layout symbol
@@ -131,8 +137,12 @@ void statusbar_toggle(void){
 button_loc_t statusbar_element(int x, int y){
 	statusbar_t *bar = &dwm.statusbar;
 
+
 	if(y < bar->geom.y || y >= bar->geom.y + bar->geom.height)
 		return BLOC_UNKNOWN;
+
+	if(x >= bar->pos.launcher_begin && x < bar->pos.launcher_end)
+		return BLOC_LAUNCHER;
 
 	if(x >= bar->pos.tags_begin && x < bar->pos.tags_end)
 		return BLOC_TAGBAR;

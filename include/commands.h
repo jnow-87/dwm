@@ -27,6 +27,7 @@ void cmd_statusbar_toggle(cmd_arg_t const *arg);
 void cmd_layout_select(cmd_arg_t const *arg);
 void cmd_spawn(cmd_arg_t const *arg);
 void cmd_dmenu_run(cmd_arg_t const *arg);
+void cmd_launcher_menu(cmd_arg_t const *arg);
 
 void cmd_client_cycle(cmd_arg_t const *arg);
 void cmd_client_kill(cmd_arg_t const *arg);
