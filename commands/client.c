@@ -168,8 +168,8 @@ void cmd_client_resize(cmd_arg_t const *arg){
 	if(precheck(c) != 0)
 		return;
 
-	new.width = ((int*)(arg->v))[0] + c->geom.width;
-	new.height = ((int*)(arg->v))[1] + c->geom.height;
+	new.width = MAX(1, ((int*)(arg->v))[0] + c->geom.width);
+	new.height = MAX(1, ((int*)(arg->v))[1] + c->geom.height);
 
 	RESIZE_MOVE(x, width, &new, &c->geom, &c->hints);
 	RESIZE_MOVE(y, height, &new, &c->geom, &c->hints);
