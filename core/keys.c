@@ -65,9 +65,13 @@ void keys_handle(keysym_t sym, unsigned int mods){
 
 
 	config_for_each(keys, key){
-		if(sym == key->keysym && CLEANMODS(key->mods) == CLEANMODS(mods) && key->action)
+		if(keys_registered(key, sym, mods))
 			key->action(&(key->arg));
 	}
+}
+
+bool keys_registered(keymap_t *key, keysym_t sym, unsigned int mods){
+	return (sym == key->keysym) && (CLEANMODS(key->mods) == CLEANMODS(mods)) && (key->action != 0x0);
 }
 
 void keys_cycle_start(cycle_callback_t complete){

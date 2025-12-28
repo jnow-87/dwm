@@ -101,6 +101,9 @@ void client_init(window_t win, win_attr_t *attr){
 
 void client_cleanup(client_t *c, bool destroyed){
 	/* update clientstack */
+	if(dwm.keylock == c)
+		dwm.keylock = 0x0;
+
 	list_rm(dwm.stack, c);
 	clientstack_refocus();
 

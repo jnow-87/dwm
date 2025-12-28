@@ -47,5 +47,8 @@ void cmd_tags_menu(cmd_arg_t const *arg);
 void cmd_winfade_add(cmd_arg_t const *arg);
 void cmd_winfade_fade(cmd_arg_t const *arg);
 
+void cmd_keylock_set(cmd_arg_t const *arg);
+void cmd_keylock_toggle(cmd_arg_t const *arg);
+
 
 #endif // COMMANDS_H

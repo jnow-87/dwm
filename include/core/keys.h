@@ -39,6 +39,7 @@ void keys_cleanup(void);
 
 int keys_register(void);
 void keys_handle(keysym_t sym, unsigned int mods);
+bool keys_registered(keymap_t *key, keysym_t sym, unsigned int mods);
 
 void keys_cycle_start(cycle_callback_t complete);
 void keys_cycle_complete(void);

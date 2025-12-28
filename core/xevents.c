@@ -4,6 +4,7 @@
 #include <core/clientstack.h>
 #include <core/dwm.h>
 #include <core/keys.h>
+#include <core/keylock.h>
 #include <core/layout.h>
 #include <core/monitor.h>
 #include <core/statusbar.h>
@@ -29,7 +30,11 @@ static void expose(xevent_t *e);
 static void focus_in(xevent_t *e);
 
 static void key_press(xevent_t *e);
+static void key_release(xevent_t *e);
 static void button_press(xevent_t *e);
+static void button_release(xevent_t *e);
+
+static void replay_event(xevent_t *e, long int mask);
 
 
 /* static variables */
@@ -47,7 +52,9 @@ static void (*handler[LASTEvent])(xevent_t*) = {
 	[Expose] = expose,
 	[FocusIn] = focus_in,
 	[KeyPress] = key_press,
+	[KeyRelease] = key_release,
 	[ButtonPress] = button_press,
+	[ButtonRelease] = button_release,
 };
 
 
@@ -236,9 +243,23 @@ static void focus_in(xevent_t *e){
 
 static void key_press(xevent_t *e){
 	XKeyEvent *ev = &e->xkey;
+	keysym_t sym = input_keysym(ev->keycode);
 
 
-	keys_handle(input_keysym(ev->keycode), ev->state);
+	if(keylock_active()){
+		if(!keylock_key_match(sym, ev->state)){
+			replay_event(e, KeyPressMask);
+
+			return;
+		}
+	}
+
+	keys_handle(sym, ev->state);
+}
+
+static void key_release(xevent_t *e){
+	if(keylock_active())
+		replay_event(e, KeyReleaseMask);
 }
 
 static void button_press(xevent_t *e){
@@ -247,7 +268,10 @@ static void button_press(xevent_t *e){
 	client_t *c;
 
 
-	if(ev->window != dwm.statusbar.win){
+	if(keylock_active()){
+		replay_event(e, ButtonPressMask);
+	}
+	else if(ev->window != dwm.statusbar.win){
 		c = client_from_win(ev->window);
 
 		if(c != 0x0){
@@ -261,4 +285,14 @@ static void button_press(xevent_t *e){
 		loc = statusbar_element(ev->x, ev->y);
 
 	button_handle(loc, ev->button, ev->state);
+}
+
+static void button_release(xevent_t *e){
+	if(keylock_active())
+		replay_event(e, ButtonReleaseMask);
+}
+
+static void replay_event(xevent_t *e, long int mask){
+	if(dwm.focused != 0x0)
+		XSendEvent(dwm.dpy, dwm.focused->win, true, mask, e);
 }

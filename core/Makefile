@@ -6,6 +6,7 @@ dwm-y := \
 	clientstack.o \
 	dwm.o \
 	keys.o \
+	keylock.o \
 	layout.o \
 	main.o \
 	monitor.o \
