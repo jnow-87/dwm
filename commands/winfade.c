@@ -79,7 +79,7 @@ static void fade(size_t n, unsigned int fades){
 		c->geom_store = c->geom;
 	}
 
-	dir = win_visible(clients[0]->win, &clients[0]->geom) ? FADE_OUT : FADE_IN;
+	dir = win_visible(clients[0]->win) ? FADE_OUT : FADE_IN;
 
 	/* calculate x, y movement per client */
 	for(i=0; i<n; i++){

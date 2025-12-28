@@ -220,7 +220,7 @@ void win_hide(window_t win){
 	XUnmapWindow(dwm.dpy, win);
 }
 
-bool win_visible(window_t win, win_geom_t *geom){
+bool win_visible(window_t win){
 	win_attr_t attr;
 
 
