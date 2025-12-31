@@ -76,6 +76,10 @@ KEY(XK_1,		MODKEY | ShiftMask,	cmd_winfade_add,	.ui = (1 << 0));
 KEY(XK_2,		MODKEY | ShiftMask,	cmd_winfade_add,	.ui = (1 << 1));
 KEY(XK_3,		MODKEY | ShiftMask,	cmd_winfade_add,	.ui = (1 << 2));
 
+// keylock window
+KEY(XK_l,		MODKEY,				cmd_keylock_toggle,	0);
+KEY(XK_l,		MODKEY | ShiftMask,	cmd_keylock_set,	0);
+
 // audio control
 KEY(XF86XK_AudioMute,			0,	cmd_spawn,	.v = SPAWN("st-audio", "mute", "toggle"));
 KEY(XF86XK_AudioRaiseVolume,	0,	cmd_spawn,	.v = SPAWN("st-audio", "volume", "raise"));

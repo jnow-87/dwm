@@ -68,7 +68,7 @@ bool win_send_event(window_t win, Atom proto);
 
 void win_show(window_t win);
 void win_hide(window_t win);
-bool win_visible(window_t win, win_geom_t *geom);
+bool win_visible(window_t win);
 
 void win_focus(window_t win);
 void win_unfocus(window_t win);

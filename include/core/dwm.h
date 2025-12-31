@@ -52,7 +52,8 @@ typedef struct{
 
 	// client handling
 	client_t *stack,
-			 *focused;
+			 *focused,
+			 *keylock;
 
 	unsigned int tag_mask;
 } dwm_t;
