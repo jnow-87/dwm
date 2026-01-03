@@ -136,7 +136,7 @@ static void move(client_t *c, int dx, int dy){
 	geom->x += dx;
 	geom->y += dy;
 
-	win_resize(c->win, geom, 0x0);
+	win_resize(c->win, geom);
 }
 
 static delta_t delta(int win_low, int win_high, int mon_low, int mon_high){

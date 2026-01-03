@@ -148,7 +148,7 @@ void client_resize(client_t *c, int x, int y, int width, int height, int border_
 	PREP_N_STORE(height, geom, &c->geom_store);
 	PREP_N_STORE(border_width, geom, &c->geom_store);
 
-	win_resize(c->win, geom, 0x0);
+	win_resize(c->win, geom);
 }
 
 void client_update_desktop(client_t *c){
