@@ -59,7 +59,7 @@ void win_kill(window_t win);
 void win_release(window_t win, win_geom_t *original);
 
 void win_configure(window_t win, win_geom_t *geom);
-void win_resize(window_t win, win_geom_t *geom, win_hints_t *hints);
+void win_resize(window_t win, win_geom_t *geom);
 void win_raise(window_t win);
 void win_set_state(window_t win, long state);
 int win_set_name(window_t win, char *name);
@@ -79,6 +79,7 @@ int win_get_name(window_t win, char *text, size_t n);
 window_t win_get_transient(window_t win);
 void win_update_wmhints(window_t win, win_hints_t *hints, bool isfocused);
 void win_update_sizehints(window_t win, win_hints_t *hints);
+void win_apply_sizehints(win_geom_t *geom, win_hints_t *hints);
 
 
 #endif // WINDOW_H

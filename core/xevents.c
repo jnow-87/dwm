@@ -115,23 +115,23 @@ static void client_message(xevent_t *e){
 static void configure_request(xevent_t *e){
 	XConfigureRequestEvent *ev = &e->xconfigurerequest;
 	client_t *c;
-	win_geom_t *geom;
+	win_geom_t geom;
 	XWindowChanges wc;
 
 
 	c = client_from_win(ev->window);
 
 	if(c != 0x0){
-		geom = &c->geom;
-		c->geom_store = c->geom;
+		geom = c->geom;
 
-		if(ev->value_mask & CWBorderWidth)	geom->border_width = ev->border_width;
-		if(ev->value_mask & CWX)			geom->x = ev->x;
-		if(ev->value_mask & CWY)			geom->y = ev->y;
-		if(ev->value_mask & CWWidth)		geom->width = ev->width;
-		if(ev->value_mask & CWHeight)		geom->height = ev->height;
+		if(ev->value_mask & CWBorderWidth)	geom.border_width = ev->border_width;
+		if(ev->value_mask & CWX)			geom.x = ev->x;
+		if(ev->value_mask & CWY)			geom.y = ev->y;
+		if(ev->value_mask & CWWidth)		geom.width = ev->width;
+		if(ev->value_mask & CWHeight)		geom.height = ev->height;
 
-		win_resize(c->win, geom, &c->hints);
+		win_apply_sizehints(&geom, &c->hints);
+		client_resize(c, geom.x, geom.y, geom.width, geom.height, geom.border_width);
 	}
 	else{
 		wc.x = ev->x;

@@ -14,7 +14,7 @@ LAYOUT("nop", "☯", 0x0);
 /* global functions */
 client_t *layout_next_tiled(client_t *c, monitor_t *m){
 	for(; c != 0x0; c=c->next){
-		if(ONTAG(c) && c->fades == 0 && monitor_from_client(c) == m)
+		if(ONTAG(c) && c->fades == 0 && c->mon == m)
 			return c;
 	}
 

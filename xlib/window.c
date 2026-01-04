@@ -11,7 +11,6 @@
 
 /* local/static prototypes */
 static void set_border(window_t win, scheme_id_t scheme);
-static void apply_sizehints(window_t win, win_geom_t *geom, win_hints_t *hints);
 static int dummy_xerror_hdlr(Display *dpy, XErrorEvent *ee);
 
 
@@ -131,12 +130,9 @@ void win_configure(window_t win, win_geom_t *geom){
 	netatom_set(NET_FRAME_EXTENTS, win, (unsigned char*)frame, 4);
 }
 
-void win_resize(window_t win, win_geom_t *geom, win_hints_t *hints){
+void win_resize(window_t win, win_geom_t *geom){
 	XWindowChanges wc;
 
-
-	if(hints != 0x0)
-		apply_sizehints(win, geom, hints);
 
 	wc.x = geom->x;
 	wc.y = geom->y;
@@ -389,13 +385,7 @@ void win_update_sizehints(window_t win, win_hints_t *hints){
 		hints->aspect_max = hints->aspect_min = 0.0;
 }
 
-
-/* local functions */
-static void set_border(window_t win, scheme_id_t scheme){
-	XSetWindowBorder(dwm.dpy, win, dwm.gfx->schemes[scheme].border.pixel);
-}
-
-static void apply_sizehints(window_t win, win_geom_t *geom, win_hints_t *hints){
+void win_apply_sizehints(win_geom_t *geom, win_hints_t *hints){
 	int baseismin;
 
 
@@ -438,6 +428,12 @@ static void apply_sizehints(window_t win, win_geom_t *geom, win_hints_t *hints){
 
 	if(hints->height_max)
 		geom->height = MIN(geom->height, hints->height_max);
+}
+
+
+/* local functions */
+static void set_border(window_t win, scheme_id_t scheme){
+	XSetWindowBorder(dwm.dpy, win, dwm.gfx->schemes[scheme].border.pixel);
 }
 
 static int dummy_xerror_hdlr(Display *dpy, XErrorEvent *ee){

@@ -21,6 +21,7 @@
 /* local/static prototypes */
 static void draw_left(char const *s, scheme_id_t scheme, int padding, int *x);
 static void draw_right(char const *s, scheme_id_t scheme, int padding, int *x);
+static void draw_center(char const *s, scheme_id_t scheme);
 static void datetime(char *s, size_t n);
 static void statd_refresh(bool indicate_error);
 
@@ -89,6 +90,24 @@ void statusbar_update(void){
 
 	draw_right(s, SCM_STATUS, PADDING, &x);
 	draw_right(CONFIG_STATUSBAR_SPACER_RIGHT, SCM_SPACER_STATUS, 0, &x);
+
+	/* center */
+	x = 0;
+	s[0] = 0;
+
+	// keylock icon
+	if(dwm.keylock != 0x0)
+		x += snprintf(s + x, sizeof(s) - x - 1, CONFIG_STATUSBAR_KEYLOCK_ICON);
+
+	// zaphod icon
+	if(dwm.zaphod_en){
+		if(x > 0 && s[x - 1] != ' ')
+			x += snprintf(s + x, sizeof(s) - x - 1, " ");
+
+		x += snprintf(s + x, sizeof(s) - x - 1, CONFIG_STATUSBAR_ZAPHOD_ICON);
+	}
+
+	draw_center(s, SCM_FOCUS);
 
 	/* left side */
 	x = 0;
@@ -171,6 +190,14 @@ static void draw_right(char const *s, scheme_id_t scheme, int padding, int *x){
 	w = gfx_text_width(dwm.gfx, s) + padding;
 	*x -= w;
 	gfx_text(dwm.gfx, *x, 0, w, dwm.statusbar.geom.height, scheme, padding / 2, s, 0);
+}
+
+static void draw_center(char const *s, scheme_id_t scheme){
+	int w;
+
+
+	w = gfx_text_width(dwm.gfx, s);
+	gfx_text(dwm.gfx, (dwm.statusbar.geom.width - w) / 2, 0, w, dwm.statusbar.geom.height, scheme, 0, s, 0);
 }
 
 static void datetime(char *s, size_t n){

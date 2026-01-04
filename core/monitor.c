@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <core/dwm.h>
 #include <core/monitor.h>
+#include <xlib/input.h>
 #include <xlib/window.h>
 #include <xlib/xinerama.h>
 #include <utils/list.h>
@@ -9,10 +10,16 @@
 
 /* global functions */
 void monitor_discover(void){
+	client_t *c;
+
+
 	monitor_cleanup();
 
 	if(xinerama_discover() < 0)
 		monitor_create(0, 0, dwm.screen_width, dwm.screen_height);
+
+	list_for_each(dwm.stack, c)
+		c->mon = monitor_by_geom(&c->geom);
 }
 
 void monitor_cleanup(void){
@@ -45,10 +52,9 @@ void monitor_destroy(monitor_t *m){
 	free(m);
 }
 
-monitor_t *monitor_from_client(client_t *c){
+monitor_t *monitor_by_geom(win_geom_t *geom){
 	int area = 0;
 	monitor_t *r = dwm.mons;
-	win_geom_t *geom = &c->geom;
 	monitor_t *m;
 	int a;
 
@@ -64,4 +70,20 @@ monitor_t *monitor_from_client(client_t *c){
 	}
 
 	return r;
+}
+
+monitor_t *monitor_by_cursor(void){
+	monitor_t *m;
+	int x,
+		y;
+
+
+	if(input_pointer_coord(&x, &y) == 0){
+		list_for_each(dwm.mons, m){
+			if(x >= m->x && x < m->x + m->width && y >= m->y && y < m->y + m->height)
+				return m;
+		}
+	}
+
+	return dwm.mons;
 }

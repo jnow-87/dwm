@@ -50,5 +50,7 @@ void cmd_winfade_fade(cmd_arg_t const *arg);
 void cmd_keylock_set(cmd_arg_t const *arg);
 void cmd_keylock_toggle(cmd_arg_t const *arg);
 
+void cmd_zaphod_toggle(cmd_arg_t const *arg);
+
 
 #endif // COMMANDS_H

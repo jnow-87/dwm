@@ -2,6 +2,7 @@
 #define DWM_H
 
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <xlib/atoms.h>
 #include <xlib/gfx.h>
@@ -46,6 +47,7 @@ typedef struct{
 	int event_fd;
 
 	// dwm components
+	bool zaphod_en;
 	monitor_t *mons;
 	statusbar_t statusbar;
 	layout_t *layout;
