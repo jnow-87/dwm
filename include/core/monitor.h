@@ -25,6 +25,7 @@ monitor_t *monitor_create(int x, int y, int width, int height);
 void monitor_destroy(monitor_t *mon);
 
 monitor_t *monitor_by_geom(win_geom_t *geom);
+monitor_t *monitor_by_cursor(void);
 
 
 #endif // MONITOR_H

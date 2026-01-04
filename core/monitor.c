@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <core/dwm.h>
 #include <core/monitor.h>
+#include <xlib/input.h>
 #include <xlib/window.h>
 #include <xlib/xinerama.h>
 #include <utils/list.h>
@@ -69,4 +70,20 @@ monitor_t *monitor_by_geom(win_geom_t *geom){
 	}
 
 	return r;
+}
+
+monitor_t *monitor_by_cursor(void){
+	monitor_t *m;
+	int x,
+		y;
+
+
+	if(input_pointer_coord(&x, &y) == 0){
+		list_for_each(dwm.mons, m){
+			if(x >= m->x && x < m->x + m->width && y >= m->y && y < m->y + m->height)
+				return m;
+		}
+	}
+
+	return dwm.mons;
 }

@@ -80,9 +80,9 @@ void client_init(window_t win, win_attr_t *attr){
 	geom = &c->geom;
 	*geom = attr->geom;
 
-	c->mon = dwm.mons;
-	geom->x = (c->mon->width - (geom->width + 2 * CONFIG_BORDER_PIXEL)) / 2;
-	geom->y = (c->mon->height - (geom->height + 2 * CONFIG_BORDER_PIXEL)) / 2;
+	c->mon = monitor_by_cursor();
+	geom->x = c->mon->x + (c->mon->width - (geom->width + 2 * CONFIG_BORDER_PIXEL)) / 2;
+	geom->y = c->mon->y + (c->mon->height - (geom->height + 2 * CONFIG_BORDER_PIXEL)) / 2;
 	geom->border_width = CONFIG_BORDER_PIXEL;
 
 	c->geom_store = attr->geom;
