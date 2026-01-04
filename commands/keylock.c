@@ -2,6 +2,7 @@
 #include <core/client.h>
 #include <core/clientstack.h>
 #include <core/dwm.h>
+#include <core/statusbar.h>
 #include <core/tags.h>
 #include <xlib/window.h>
 #include <commands.h>
@@ -28,6 +29,8 @@ void cmd_keylock_set(cmd_arg_t const *arg){
 	}
 	else
 		dwm.keylock = 0x0;
+
+	statusbar_update();
 }
 
 void cmd_keylock_toggle(cmd_arg_t const *arg){
