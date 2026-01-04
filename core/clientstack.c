@@ -2,6 +2,7 @@
 #include <core/client.h>
 #include <core/dwm.h>
 #include <core/clientstack.h>
+#include <core/monitor.h>
 #include <core/statusbar.h>
 #include <xlib/input.h>
 #include <xlib/window.h>
@@ -13,6 +14,7 @@
 client_t *clientstack_cycle(int dir, cycle_state_t state){
 	static client_t *cycle_origin = 0x0;
 	client_t *c;
+	monitor_t *m = monitor_by_cursor();
 
 
 	switch(state){
@@ -27,7 +29,7 @@ client_t *clientstack_cycle(int dir, cycle_state_t state){
 		c = (c != 0x0) ? ((dir > 0) ? c->next : c->prev) : dwm.stack;
 
 		for(; c!=0x0; c=(dir > 0) ? c->next : c->prev){
-			if(ONTAG(c))
+			if(ONTAG(c) && (!dwm.zaphod_en || c->mon == m))
 				return c;
 		}
 
@@ -55,13 +57,14 @@ client_t *clientstack_cycle(int dir, cycle_state_t state){
 }
 
 void clientstack_refocus(void){
+	monitor_t *m = monitor_by_cursor();
 	client_t *c;
 
 
 	dwm.focused = 0x0;
 
 	list_for_each(dwm.stack, c){
-		if(ONTAG(c) && !c->hints.never_focus)
+		if(ONTAG(c) && (!dwm.zaphod_en || c->mon == m) && !c->hints.never_focus)
 			break;
 	}
 
