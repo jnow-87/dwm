@@ -47,6 +47,14 @@ menu "statusbar"
 	config STATUSBAR_LAUNCHER_ICON
 		qstring "statusbar launcher icon"
 		default ""
+
+	config STATUSBAR_KEYLOCK_ICON
+		qstring "statusbar keylock icon"
+		default "󱌠"
+
+	config STATUSBAR_ZAPHOD_ICON
+		qstring "statusbar zaphod head icon"
+		default "󰀎"
 endmenu
 
 config WIN_RESIZE_DELTA

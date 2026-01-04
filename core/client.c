@@ -6,6 +6,7 @@
 #include <core/client.h>
 #include <core/clientstack.h>
 #include <core/dwm.h>
+#include <core/keylock.h>
 #include <core/monitor.h>
 #include <xlib/atoms.h>
 #include <xlib/window.h>
@@ -102,7 +103,7 @@ void client_init(window_t win, win_attr_t *attr){
 void client_cleanup(client_t *c, bool destroyed){
 	/* update clientstack */
 	if(dwm.keylock == c)
-		dwm.keylock = 0x0;
+		keylock_set(0x0);
 
 	if(dwm.focused == c)
 		dwm.focused = 0x0;
