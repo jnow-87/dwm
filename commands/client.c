@@ -93,20 +93,18 @@ void cmd_client_move(cmd_arg_t const *arg){
 	int nx,
 		ny;
 	win_geom_t *geom;
-	monitor_t *m;
 
 
 	if(precheck(c) != 0)
 		return;
 
 	geom = &c->geom;
-	m = monitor_from_client(c);
 
 	nx = ((int*)(arg->v))[0];
 	ny = ((int*)(arg->v))[1];
 
-	MOVE(x, width, &nx, geom, m);
-	MOVE(y, height, &ny, geom, m);
+	MOVE(x, width, &nx, geom, c->mon);
+	MOVE(y, height, &ny, geom, c->mon);
 
 	client_resize(c, nx, ny, geom->width, geom->height, geom->border_width);
 }
@@ -122,7 +120,6 @@ void cmd_client_move_mouse(cmd_arg_t const *arg){
 		ny;
 	xevent_t ev;
 	win_geom_t *geom;
-	monitor_t *m;
 
 
 	if(precheck(c) != 0)
@@ -134,7 +131,6 @@ void cmd_client_move_mouse(cmd_arg_t const *arg){
 	if(input_pointer_coord(&ptr_x, &ptr_y) != 0)
 		return;
 
-	m = monitor_from_client(c);
 	geom = &c->geom;
 	ox = geom->x;
 	oy = geom->y;
@@ -151,8 +147,8 @@ void cmd_client_move_mouse(cmd_arg_t const *arg){
 		nx = ox + (ev.xmotion.x - ptr_x);
 		ny = oy + (ev.xmotion.y - ptr_y);
 
-		SNAP(x, width, &nx, geom, m);
-		SNAP(y, height, &ny, geom, m);
+		SNAP(x, width, &nx, geom, c->mon);
+		SNAP(y, height, &ny, geom, c->mon);
 
 		client_resize(c, nx, ny, geom->width, geom->height, geom->border_width);
 	}
@@ -220,17 +216,15 @@ void cmd_client_resize_mouse(cmd_arg_t const *arg){
 void cmd_client_max(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 	win_geom_t new;
-	monitor_t *m;
 
 
 	if(precheck(c) != 0)
 		return;
 
-	m = monitor_from_client(c);
 	new = c->geom;
 
-	if(((int*)(arg->v))[0] == 1)	MAX_TOGGLE(x, width, &new, &c->geom, &c->geom_store, m);
-	if(((int*)(arg->v))[1] == 1)	MAX_TOGGLE(y, height, &new, &c->geom, &c->geom_store, m);
+	if(((int*)(arg->v))[0] == 1)	MAX_TOGGLE(x, width, &new, &c->geom, &c->geom_store, c->mon);
+	if(((int*)(arg->v))[1] == 1)	MAX_TOGGLE(y, height, &new, &c->geom, &c->geom_store, c->mon);
 
 	client_resize(c, new.x, new.y, new.width, new.height, c->geom.border_width);
 }

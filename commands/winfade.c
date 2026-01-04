@@ -84,7 +84,7 @@ static void fade(size_t n, unsigned int fades){
 	/* calculate x, y movement per client */
 	for(i=0; i<n; i++){
 		geom = &clients[i]->geom;
-		m = monitor_from_client(clients[i]);
+		m = clients[i]->mon;
 
 		dx[i] = delta(geom->x, geom->x + geom->width + 2 * geom->border_width, m->x, m->x + m->width);
 		dy[i] = delta(geom->y, geom->y + geom->height + 2 * geom->border_width, m->y, m->y + m->height);

@@ -15,7 +15,7 @@ static void arrange(void){
 	list_for_each(dwm.stack, c){
 		if(ONTAG(c) && c->fades == 0){
 			border = c->geom.border_width;
-			m = monitor_from_client(c);
+			m = c->mon;
 
 			client_resize(c, m->x, m->y, m->width - 2 * border, m->height - 2 * border, border);
 		}
