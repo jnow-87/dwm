@@ -10,63 +10,48 @@
 #include <utils/stack.h>
 
 
+/* local/static prototypes */
+static client_t *cycle(int dir, cycle_state_t state);
+static client_t *fallback_client(void);
+
+
 /* global functions */
 client_t *clientstack_cycle(int dir, cycle_state_t state){
-	static client_t *cycle_origin = 0x0;
-	client_t *c;
-	monitor_t *m = monitor_by_cursor();
+	client_t *c,
+			 *fallback;
 
 
-	switch(state){
-	case CYCLE_START:
-		cycle_origin = dwm.stack;
+	fallback = fallback_client();
+	c = cycle(dir, state);
 
-		// fall through
-	case CYCLE_CONT:
-		// find the next visible client, either starting at the currently focused one
-		// or restart at the top of the client stack
-		c = dwm.focused;
-		c = (c != 0x0) ? ((dir > 0) ? c->next : c->prev) : dwm.stack;
+	// keep focus on the previous client if cycle() did not find
+	// a new client, which might happen if zaphod head mode is
+	// enabled but there is no client on the current monitor
+	if(c == 0x0)
+		return fallback;
 
-		for(; c!=0x0; c=(dir > 0) ? c->next : c->prev){
-			if(ONTAG(c) && (!dwm.zaphod_en || c->mon == m))
-				return c;
-		}
-
-		if(dwm.focused == 0x0) // the entire stack has been checked and nothing has been found
-			return 0x0;
-
-		// retry, this time from the top of the stack
-		dwm.focused = 0x0;
-
-		return clientstack_cycle(dir, 0);
-
-	case CYCLE_END:
-		if(cycle_origin != 0x0){
-			stack_raise(dwm.stack, cycle_origin);
-			cycle_origin = 0x0;
-		}
-
-		if(dwm.focused != 0x0)
-			stack_raise(dwm.stack, dwm.focused);
-
-		return dwm.stack;
-	}
-
-	return 0x0;
+	return c;
 }
 
 void clientstack_refocus(void){
 	monitor_t *m = monitor_by_cursor();
-	client_t *c;
+	client_t *c,
+			 *fallback;
 
 
+	fallback = fallback_client();
 	dwm.focused = 0x0;
 
 	list_for_each(dwm.stack, c){
 		if(ONTAG(c) && (!dwm.zaphod_en || c->mon == m) && !c->hints.never_focus)
 			break;
 	}
+
+	// keep focus on the previous client if cycle() did not find
+	// a new client, which might happen if zaphod head mode is
+	// enabled but there is no client on the current monitor
+	if(c == 0x0)
+		c = fallback;
 
 	clientstack_focus(c, true);
 }
@@ -95,4 +80,55 @@ void clientstack_focus(client_t *c, bool restack){
 		win_focus(dwm.root);
 
 	statusbar_raise();
+}
+
+
+/* local functions */
+static client_t *cycle(int dir, cycle_state_t state){
+	static client_t *cycle_origin = 0x0;
+	client_t *c;
+	monitor_t *m = monitor_by_cursor();
+
+
+	switch(state){
+	case CYCLE_START:
+		cycle_origin = dwm.stack;
+
+		// fall through
+	case CYCLE_CONT:
+		// find the next visible client, either starting at the currently focused one
+		// or restart at the top of the client stack
+		c = dwm.focused;
+		c = (c != 0x0) ? ((dir > 0) ? c->next : c->prev) : dwm.stack;
+
+		for(; c!=0x0; c=(dir > 0) ? c->next : c->prev){
+			if(ONTAG(c) && (!dwm.zaphod_en || c->mon == m))
+				return c;
+		}
+
+		if(dwm.focused == 0x0) // the entire stack has been checked and nothing has been found
+			return 0x0;
+
+		// retry, this time from the top of the stack
+		dwm.focused = 0x0;
+
+		return cycle(dir, CYCLE_START);
+
+	case CYCLE_END:
+		if(cycle_origin != 0x0){
+			stack_raise(dwm.stack, cycle_origin);
+			cycle_origin = 0x0;
+		}
+
+		if(dwm.focused != 0x0)
+			stack_raise(dwm.stack, dwm.focused);
+
+		return dwm.stack;
+	}
+
+	return 0x0;
+}
+
+static client_t *fallback_client(void){
+	return (dwm.focused && win_visible(dwm.focused->win)) ? dwm.focused : 0x0;
 }

@@ -104,6 +104,9 @@ void client_cleanup(client_t *c, bool destroyed){
 	if(dwm.keylock == c)
 		dwm.keylock = 0x0;
 
+	if(dwm.focused == c)
+		dwm.focused = 0x0;
+
 	list_rm(dwm.stack, c);
 	clientstack_refocus();
 
