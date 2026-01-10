@@ -15,7 +15,7 @@ typedef enum{
 
 
 /* prototypes */
-client_t *clientstack_cycle(int dir, cycle_state_t state);
+client_t *clientstack_cycle(int dir, cycle_state_t state, bool ignore_zaphod);
 void clientstack_refocus(void);
 void clientstack_focus(client_t *c, bool restack);
 

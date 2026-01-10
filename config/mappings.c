@@ -40,8 +40,8 @@ TAGKEY(XK_F4, 3);
 
 // dwm control
 KEY(XK_F4,		ALT,				cmd_client_kill,		0);
-KEY(XK_Tab,		ALT,				cmd_client_cycle,		.i = +1);
-KEY(XK_Tab,		ALT | ShiftMask,	cmd_client_cycle,		.i = -1);
+KEY(XK_Tab,		ALT,				cmd_client_cycle,		.v = (int[]){ +1, 0 });
+KEY(XK_Tab,		ALT | ShiftMask,	cmd_client_cycle,		.v = (int[]){ +1, 1 });
 KEY(XK_Delete,	ALT | ControlMask,	cmd_lifecycle,			.i = -1);
 KEY(XK_s,		MODKEY,				cmd_statusbar_toggle,	0);
 KEY(XK_F2,		ALT,				cmd_dmenu_run,			0);

@@ -1,4 +1,5 @@
 #include <config/config.h>
+#include <stdbool.h>
 #include <core/client.h>
 #include <core/dwm.h>
 #include <core/clientstack.h>
@@ -11,18 +12,18 @@
 
 
 /* local/static prototypes */
-static client_t *cycle(int dir, cycle_state_t state);
+static client_t *cycle(int dir, cycle_state_t state, bool ignore_zaphod);
 static client_t *fallback_client(void);
 
 
 /* global functions */
-client_t *clientstack_cycle(int dir, cycle_state_t state){
+client_t *clientstack_cycle(int dir, cycle_state_t state, bool ignore_zaphod){
 	client_t *c,
 			 *fallback;
 
 
 	fallback = fallback_client();
-	c = cycle(dir, state);
+	c = cycle(dir, state, ignore_zaphod);
 
 	// keep focus on the previous client if cycle() did not find
 	// a new client, which might happen if zaphod head mode is
@@ -84,7 +85,7 @@ void clientstack_focus(client_t *c, bool restack){
 
 
 /* local functions */
-static client_t *cycle(int dir, cycle_state_t state){
+static client_t *cycle(int dir, cycle_state_t state, bool ignore_zaphod){
 	static client_t *cycle_origin = 0x0;
 	client_t *c;
 	monitor_t *m = monitor_by_cursor();
@@ -102,7 +103,7 @@ static client_t *cycle(int dir, cycle_state_t state){
 		c = (c != 0x0) ? ((dir > 0) ? c->next : c->prev) : dwm.stack;
 
 		for(; c!=0x0; c=(dir > 0) ? c->next : c->prev){
-			if(ONTAG(c) && (!dwm.zaphod_en || c->mon == m))
+			if(ONTAG(c) && (ignore_zaphod || !dwm.zaphod_en || c->mon == m))
 				return c;
 		}
 
@@ -112,7 +113,7 @@ static client_t *cycle(int dir, cycle_state_t state){
 		// retry, this time from the top of the stack
 		dwm.focused = 0x0;
 
-		return cycle(dir, CYCLE_START);
+		return cycle(dir, CYCLE_START, ignore_zaphod);
 
 	case CYCLE_END:
 		if(cycle_origin != 0x0){

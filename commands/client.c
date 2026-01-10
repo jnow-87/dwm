@@ -62,10 +62,12 @@ static int inc_size(int v, int inc, int base);
 
 /* global functions */
 void cmd_client_cycle(cmd_arg_t const *arg){
+	int dir = ((int*)arg->v)[0];
+	bool ignore_zaphod = (bool)((int*)arg->v)[1];
 	client_t *c;
 
 
-	c = clientstack_cycle(arg->i, keys_cycle_active() ? CYCLE_CONT : CYCLE_START);
+	c = clientstack_cycle(dir, keys_cycle_active() ? CYCLE_CONT : CYCLE_START, ignore_zaphod);
 
 	if(c == 0x0)
 		return;
@@ -242,7 +244,7 @@ void cmd_client_fullscreen(cmd_arg_t const *arg){
 
 /* local functions */
 static void client_cycle_complete(void){
-	clientstack_focus(clientstack_cycle(0, CYCLE_END), false);
+	clientstack_focus(clientstack_cycle(0, CYCLE_END, false), false);
 }
 
 static int precheck(client_t *c){
