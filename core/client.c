@@ -6,6 +6,7 @@
 #include <core/client.h>
 #include <core/clientstack.h>
 #include <core/dwm.h>
+#include <core/keylock.h>
 #include <core/monitor.h>
 #include <xlib/atoms.h>
 #include <xlib/window.h>
@@ -60,7 +61,6 @@ void clients_cleanup(void){
 }
 
 void client_init(window_t win, win_attr_t *attr){
-	monitor_t *m = dwm.mons;
 	client_t *c,
 			 *trans;
 	win_geom_t *geom;
@@ -81,8 +81,9 @@ void client_init(window_t win, win_attr_t *attr){
 	geom = &c->geom;
 	*geom = attr->geom;
 
-	geom->x = (m->width - (geom->width + 2 * CONFIG_BORDER_PIXEL)) / 2;
-	geom->y = (m->height - (geom->height + 2 * CONFIG_BORDER_PIXEL)) / 2;
+	c->mon = monitor_by_cursor();
+	geom->x = c->mon->x + (c->mon->width - (geom->width + 2 * CONFIG_BORDER_PIXEL)) / 2;
+	geom->y = c->mon->y + (c->mon->height - (geom->height + 2 * CONFIG_BORDER_PIXEL)) / 2;
 	geom->border_width = CONFIG_BORDER_PIXEL;
 
 	c->geom_store = attr->geom;
@@ -102,7 +103,10 @@ void client_init(window_t win, win_attr_t *attr){
 void client_cleanup(client_t *c, bool destroyed){
 	/* update clientstack */
 	if(dwm.keylock == c)
-		dwm.keylock = 0x0;
+		keylock_set(0x0);
+
+	if(dwm.focused == c)
+		dwm.focused = 0x0;
 
 	list_rm(dwm.stack, c);
 	clientstack_refocus();
@@ -148,7 +152,9 @@ void client_resize(client_t *c, int x, int y, int width, int height, int border_
 	PREP_N_STORE(height, geom, &c->geom_store);
 	PREP_N_STORE(border_width, geom, &c->geom_store);
 
-	win_resize(c->win, geom, 0x0);
+	c->mon = monitor_by_geom(geom);
+
+	win_resize(c->win, geom);
 }
 
 void client_update_desktop(client_t *c){
@@ -166,16 +172,14 @@ void client_update_desktop(client_t *c){
 }
 
 void client_flags_set(client_t *c, unsigned int mask){
+	monitor_t *m = c->mon;
 	win_geom_t geom;
-	monitor_t *m;
 
 
 	if(c->flags == mask)
 		return;
 
 	if(mask & (WF_FULLSCREEN | WF_MAXED)){
-		m = monitor_from_client(c);
-
 		geom.x = m->x;
 		geom.y = m->y;
 		geom.width = m->width;

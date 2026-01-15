@@ -40,8 +40,8 @@ TAGKEY(XK_F4, 3);
 
 // dwm control
 KEY(XK_F4,		ALT,				cmd_client_kill,		0);
-KEY(XK_Tab,		ALT,				cmd_client_cycle,		.i = +1);
-KEY(XK_Tab,		ALT | ShiftMask,	cmd_client_cycle,		.i = -1);
+KEY(XK_Tab,		ALT,				cmd_client_cycle,		.v = (int[]){ +1, 0 });
+KEY(XK_Tab,		ALT | ShiftMask,	cmd_client_cycle,		.v = (int[]){ +1, 1 });
 KEY(XK_Delete,	ALT | ControlMask,	cmd_lifecycle,			.i = -1);
 KEY(XK_s,		MODKEY,				cmd_statusbar_toggle,	0);
 KEY(XK_F2,		ALT,				cmd_dmenu_run,			0);
@@ -79,6 +79,9 @@ KEY(XK_3,		MODKEY | ShiftMask,	cmd_winfade_add,	.ui = (1 << 2));
 // keylock window
 KEY(XK_l,		MODKEY,				cmd_keylock_toggle,	0);
 KEY(XK_l,		MODKEY | ShiftMask,	cmd_keylock_set,	0);
+
+// zaphod
+KEY(XK_z,		MODKEY,	cmd_zaphod_toggle,	0);
 
 // audio control
 KEY(XF86XK_AudioMute,			0,	cmd_spawn,	.v = SPAWN("st-audio", "mute", "toggle"));

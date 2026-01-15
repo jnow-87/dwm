@@ -6,6 +6,12 @@
 
 
 /* global functions */
+void keylock_set(client_t *c){
+	dwm.keylock = c;
+
+	statusbar_update();
+}
+
 bool keylock_active(void){
 	return (dwm.keylock != 0x0 && dwm.keylock == dwm.focused);
 }

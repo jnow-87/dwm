@@ -2,6 +2,8 @@
 #include <core/client.h>
 #include <core/clientstack.h>
 #include <core/dwm.h>
+#include <core/keylock.h>
+#include <core/statusbar.h>
 #include <core/tags.h>
 #include <xlib/window.h>
 #include <commands.h>
@@ -20,14 +22,10 @@ void cmd_keylock_set(cmd_arg_t const *arg){
 	if(c == 0x0)
 		return;
 
-	if(dwm.keylock != c){
-		if(dwm.keylock != 0x0)
-			show(dwm.keylock, false);
+	if(dwm.keylock != 0x0 && dwm.keylock != c)
+		show(dwm.keylock, false);
 
-		dwm.keylock = c;
-	}
-	else
-		dwm.keylock = 0x0;
+	keylock_set((dwm.keylock == c) ? 0x0 : c);
 }
 
 void cmd_keylock_toggle(cmd_arg_t const *arg){

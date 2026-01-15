@@ -17,8 +17,9 @@
 
 
 #include <config/config.h>
-#include <unistd.h>
 #include <signal.h>
+#include <stdbool.h>
+#include <unistd.h>
 #include <sys/wait.h>
 #include <sys/epoll.h>
 #include <core/dwm.h>
@@ -46,6 +47,7 @@ static void sigrestart_hdlr(int sig);
 
 /* global variables */
 dwm_t dwm = {
+	.zaphod_en = true,
 	.stack = 0x0,
 	.layout = __start_layouts,
 	.state = DWM_ERROR,
@@ -104,7 +106,7 @@ int dwm_setup(void){
 }
 
 void dwm_cleanup(void){
-	layout_t nop = { "", 0x0 };
+	layout_t nop = LAYOUT_INITIALISER("", "", 0x0);
 
 
 	tags_set(&dwm.tag_mask, ~0);

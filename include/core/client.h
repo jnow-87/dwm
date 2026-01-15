@@ -4,6 +4,7 @@
 
 #include <stdbool.h>
 #include <core/client.h>
+#include <core/monitor.h>
 #include <xlib/window.h>
 
 
@@ -20,6 +21,7 @@ typedef struct client_t{
 				 fades;
 
 	window_t win;
+	monitor_t *mon;
 	win_geom_t geom,
 			   geom_store;
 	win_hints_t hints;

@@ -7,4 +7,5 @@ obj-y := \
 	tags.o \
 	layout.o \
 	statusbar.o \
-	winfade.o
+	winfade.o \
+	zaphod.o
