@@ -9,13 +9,19 @@
 
 
 /* macros */
+#define LAYOUT_INITIALISER(_name, _symbol, _arrange) (layout_t){ \
+	.name = _name, \
+	.symbol = _symbol, \
+	.arrange = _arrange, \
+}
+
 #define LAYOUT_N(_n, _name, _symbol, _arrange) \
 	static layout_t const layout_##_n \
-		linker_array("layouts") noreorder = { \
-			.name = _symbol " " _name, \
-			.symbol = _symbol, \
-			.arrange = _arrange, \
-		}
+		linker_array("layouts") noreorder = LAYOUT_INITIALISER( \
+			_symbol " " _name, \
+			_symbol, \
+			_arrange \
+		)
 
 #define LAYOUT(name, symbol, arrange)	UNIQUE(LAYOUT_N, __COUNTER__, name, symbol, arrange)
 

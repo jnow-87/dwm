@@ -106,7 +106,7 @@ int dwm_setup(void){
 }
 
 void dwm_cleanup(void){
-	layout_t nop = { "", 0x0 };
+	layout_t nop = LAYOUT_INITIALISER("", "", 0x0);
 
 
 	tags_set(&dwm.tag_mask, ~0);
