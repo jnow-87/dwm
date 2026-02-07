@@ -16,17 +16,17 @@ static void ptime(FILE *fp);
 
 /* global functions */
 int log_init(char const *file, bool debug){
-	if(file == 0x0)
-		return -1;
-
 	log_debug = debug;
-	log_fp = fopen(file, "a");
+	log_fp = (file != 0x0) ? fopen(file, "a") : stdout;
+
+	if(log_fp == 0x0)
+		log_fp = stdout;
 
 	return -(log_fp == 0x0);
 }
 
 void log_cleanup(void){
-	if(log_fp)
+	if(log_fp && log_fp != stdout)
 		fclose(log_fp);
 }
 
@@ -40,10 +40,12 @@ void log_print(log_lvl_t lvl, char const *file, size_t line, char const *fmt, ..
 }
 
 void log_vprint(log_lvl_t lvl, char const *file, size_t line, char const *fmt, va_list lst){
-	if(lvl == LOG_DEBUG && !log_debug)
+	if(log_fp == 0x0 || (lvl == LOG_DEBUG && !log_debug))
 		return;
 
-	ptime(log_fp);
+	if(log_fp != stdout)
+		ptime(log_fp);
+
 	fprintf(log_fp, "%s:%zu:", file, line);
 	vfprintf(log_fp, fmt, lst);
 	fflush(log_fp);
