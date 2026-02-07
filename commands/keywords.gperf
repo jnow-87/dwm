@@ -1,0 +1,55 @@
+/* output declarations */
+%struct-type
+%omit-struct-type
+%readonly-tables
+%includes
+
+/* delimiter */
+%delimiters=","
+
+/* naming */
+%define slot-name keyword
+%define lookup-function-name keyword_lookup
+
+
+/* c-code */
+%{
+	#include <commands.h>
+%}
+
+/* struct-type definition */
+struct arg_keyword_t;
+
+
+%%
+# keyword		arg-id
+forward,		ARG_FORWARD
+backward,		ARG_BACKWARD
+zaphod,			ARG_ZAPHOD
+ignore-zaphod,	ARG_IGNORE_ZAPHOD
+alt,			ARG_ALT
+ctrl,			ARG_CTRL
+shift,			ARG_SHIFT
+win,			ARG_WIN
+left,			ARG_LEFT
+right,			ARG_RIGHT
+up,				ARG_UP
+down,			ARG_DOWN
+top,			ARG_TOP
+bottom,			ARG_BOTTOM
+border,			ARG_BORDER
+shrink,			ARG_SHRINK
+grow,			ARG_GROW
+vertical,		ARG_VERT
+horizontal,		ARG_HOR
+%%
+
+
+arg_id_t cmd_keyword_parse(char const *tk){
+	arg_keyword_t const *kw;
+
+
+	kw = keyword_lookup(tk, strlen(tk));
+
+	return (kw == 0x0) ? ARG_INVAL : kw->id;
+}

@@ -5,6 +5,8 @@
 #include <core/dwm.h>
 #include <core/scheme.h>
 #include <utils/log.h>
+#include <utils/string.h>
+#include <utils/vector.h>
 #include <commands.h>
 
 
@@ -18,6 +20,48 @@ void cmd_spawn(cmd_arg_t const *arg){
 		return;
 
 	exec(arg->v);
+}
+
+int cmd_spawn_parse(char const *tk, arg_id_t tk_id, cmd_arg_t *arg){
+	char **s;
+
+
+	tk = stralloc(tk);
+
+	if(tk == 0x0)
+		goto err;
+
+	if(arg->v == 0x0){
+		arg->v = malloc(sizeof(vector_t));
+
+		if(arg->v == 0x0 || vector_init(arg->v, sizeof(char*), 2) != 0)
+			goto err;
+
+		// add argv terminating null pointer
+		if(vector_add(arg->v, &((char*){ 0x0 })) != 0)
+			goto err;
+	}
+
+	// replace null pointer
+	*((char const**)vector_get(arg->v, ((vector_t*)arg->v)->size - 1)) = tk;
+
+	// add new null pointer
+	if(vector_add(arg->v, &((char*){ 0x0 })) != 0)
+		goto err;
+
+	return 0;
+
+
+err:
+	if(arg->v != 0x0){
+		vector_for_each((vector_t*)arg->v, s)
+			free(*s);
+
+		vector_destroy(arg->v);
+		free(arg->v);
+	}
+
+	return STRERROR("allocating spawn command");
 }
 
 void cmd_dmenu_run(cmd_arg_t const *arg){

@@ -1,5 +1,6 @@
 obj-y := \
 	commands.o \
+	keywords.o \
 	spawn.o \
 	client.o \
 	keylock.o \

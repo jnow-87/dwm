@@ -6,6 +6,7 @@
 #include <utils/vector.h>
 #include <xlib/gfx.h>
 #include <xlib/input.h>
+#include <commands.h>
 
 
 /* macros */
@@ -122,11 +123,13 @@ int input_modkeys(vector_t *keys, unsigned int *mods){
 
 
 	vector_for_each(keys, key){
-		if(strcmp(*key, "alt") == 0)		mask |= Mod1Mask;
-		else if(strcmp(*key, "ctrl") == 0)	mask |= ShiftMask;
-		else if(strcmp(*key, "shift") == 0)	mask |= ControlMask;
-		else if(strcmp(*key, "win") == 0)	mask |= Mod4Mask;
-		else								return ERROR("unknown modified key %s\n", *key);
+		switch(cmd_keyword_parse(*key)){
+		case ARG_ALT:	mask |= Mod1Mask; break;
+		case ARG_SHIFT:	mask |= ShiftMask; break;
+		case ARG_CTRL:	mask |= ControlMask; break;
+		case ARG_WIN:	mask |= Mod4Mask; break;
+		default:		return ERROR("unknown modified key %s\n", *key);
+		}
 	}
 
 	*mods = mask;

@@ -1,0 +1,83 @@
+/* output declarations */
+%struct-type
+%omit-struct-type
+%readonly-tables
+%includes
+
+/* delimiter */
+%delimiters=","
+
+/* naming */
+%define slot-name name
+%define lookup-function-name cmds_lookup
+
+
+/* c-code */
+%{
+	#include <string.h>
+	#include <utils/log.h>
+	#include <commands.h>
+%}
+
+/* struct-type definition */
+struct cmd_t;
+
+
+%%
+# command				action						parse
+lifecycle,				cmd_lifecycle,				0x0
+statusbar-toggle,		cmd_statusbar_toggle,		0x0
+layout-select,			cmd_layout_select,			0x0
+spawn,					cmd_spawn,					cmd_spawn_parse
+dmenu-run,				cmd_dmenu_run,				0x0
+launcher-menu,			cmd_launcher_menu,			0x0
+client-cycle,			cmd_client_cycle,			cmd_client_cycle_parse
+client-kill,			cmd_client_kill,			0x0
+client-move,			cmd_client_move,			cmd_client_move_parse
+client-move-mouse,		cmd_client_move_mouse,		0x0
+client-resize,			cmd_client_resize,			cmd_client_resize_parse
+client-resize-mouse,	cmd_client_resize_mouse,	0x0
+client-max,				cmd_client_max,				cmd_client_max_parse
+client-fullscreen,		cmd_client_fullscreen,		0x0
+tags-view,				cmd_tags_view,				cmd_tag_parse
+tags-toggle,			cmd_tags_toggle,			cmd_tag_parse
+tags-client-set,		cmd_tags_client_set,		cmd_tag_parse
+tags-client-toggle,		cmd_tags_client_toggle,		cmd_tag_parse
+tags-menu,				cmd_tags_menu,				0x0
+winfade-add,			cmd_winfade_add,			cmd_winfade_parse
+winfade-fade,			cmd_winfade_fade,			cmd_winfade_parse
+keylock-set,			cmd_keylock_set,			0x0
+keylock-toggle,			cmd_keylock_toggle,			0x0
+zaphod-toggle,			cmd_zaphod_toggle,			0x0
+%%
+
+
+int cmd_parse(char *cmdline, cmd_action_t *action, cmd_arg_t *args){
+	char *name,
+		 *tk;
+	cmd_t const *cmd;
+
+
+	name = strtok(cmdline, " ");
+	cmd = cmds_lookup(name, strlen(name));
+
+	if(cmd == 0x0)
+		return ERROR("unknown command %s\n", name);
+
+	*action = cmd->action;
+	args->i = 0;
+
+	if(cmd->parse == 0x0){
+		if(strtok(0x0, " ") != 0x0)
+			INFO("command %s doesn't support arguments\n", name);
+
+		return 0;
+	}
+
+	while((tk = strtok(0x0, " ")) != 0x0){
+		if(cmd->parse(tk, cmd_keyword_parse(tk), args) != 0)
+			return ERROR("invalid command arguments\n");
+	}
+
+	return 0;
+}

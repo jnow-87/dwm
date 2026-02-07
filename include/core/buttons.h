@@ -45,7 +45,7 @@ typedef struct{
 	unsigned int mods;
 	unsigned int button;
 
-	cmd_t action;
+	cmd_action_t action;
 	cmd_arg_t arg;
 } buttonmap_t;
 

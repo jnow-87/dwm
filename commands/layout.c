@@ -12,19 +12,15 @@ void cmd_layout_select(cmd_arg_t const *arg){
 	layout_t *l;
 
 
-	if(arg == 0x0 || arg->v == 0x0){
-		config_for_each(layouts, l)
-			names[n++] = l->name;
+	config_for_each(layouts, l)
+		names[n++] = l->name;
 
-		n = menu(names, n);
+	n = menu(names, n);
 
-		if(n == -1)
-			return;
+	if(n == -1)
+		return;
 
-		dwm.layout = __start_layouts + n;
-	}
-	else
-		dwm.layout = (layout_t*)arg->v;
+	dwm.layout = __start_layouts + n;
 
 	layout_arrange();
 	statusbar_update();

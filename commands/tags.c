@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <core/clientstack.h>
 #include <core/dwm.h>
 #include <core/layout.h>
@@ -14,6 +15,12 @@ static void set(unsigned int *tags, unsigned int v);
 
 
 /* global functions */
+int cmd_tag_parse(char const *tk, arg_id_t tk_id, cmd_arg_t *arg){
+	arg->i = (1 << atoi(tk));
+
+	return 0;
+}
+
 void cmd_tags_view(cmd_arg_t const *arg){
 	client_t *c;
 

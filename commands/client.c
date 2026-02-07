@@ -7,6 +7,7 @@
 #include <core/xevents.h>
 #include <xlib/input.h>
 #include <xlib/window.h>
+#include <utils/log.h>
 #include <utils/utils.h>
 #include <commands.h>
 
@@ -53,6 +54,27 @@
 }
 
 
+/* types */
+typedef enum{
+	ARG_CYCLE_FWD = 0x1,
+	ARG_CYCLE_IGNORE_ZAPHOD = 0x2,
+} cycle_arg_t;
+
+typedef enum{
+	ARG_MV_LEFT = 0x1,
+	ARG_MV_RIGHT = 0x2,
+	ARG_MV_UP = 0x4,
+	ARG_MV_DOWN = 0x8,
+	ARG_MV_BORDER = 0x10,
+} move_arg_t;
+
+typedef enum{
+	ARG_RSZ_SHRINK = 0x1,
+	ARG_RSZ_VERT = 0x2,
+	ARG_RSZ_HOR = 0x4,
+} resize_arg_t;
+
+
 /* local/static prototypes */
 static void client_cycle_complete(void);
 static int precheck(client_t *c);
@@ -85,6 +107,18 @@ void cmd_client_cycle(cmd_arg_t const *arg){
 		client_cycle_complete();
 }
 
+int cmd_client_cycle_parse(char const *tk, arg_id_t tk_id, cmd_arg_t *arg){
+	switch(tk_id){
+	case ARG_FORWARD:		arg->ui |= ARG_CYCLE_FWD; break;
+	case ARG_BACKWARD:		arg->ui &= ~ARG_CYCLE_FWD; break;
+	case ARG_IGNORE_ZAPHOD:	arg->ui |= ARG_CYCLE_IGNORE_ZAPHOD; break;
+	case ARG_ZAPHOD:		arg->ui &= ~ARG_CYCLE_IGNORE_ZAPHOD; break;
+	default:				return ERROR("invalid client cycle argument: %s\n", tk);
+	}
+
+	return 0;
+}
+
 void cmd_client_kill(cmd_arg_t const *arg){
 	if(dwm.focused)
 		win_kill(dwm.focused->win);
@@ -109,6 +143,21 @@ void cmd_client_move(cmd_arg_t const *arg){
 	MOVE(y, height, &ny, geom, c->mon);
 
 	client_resize(c, nx, ny, geom->width, geom->height, geom->border_width);
+}
+
+int cmd_client_move_parse(char const *tk, arg_id_t tk_id, cmd_arg_t *arg){
+	switch(tk_id){
+	case ARG_LEFT:		arg->ui |= ARG_MV_LEFT; break;
+	case ARG_RIGHT:		arg->ui |= ARG_MV_RIGHT; break;
+	case ARG_UP:		// fall through
+	case ARG_TOP:		arg->ui |= ARG_MV_UP; break;
+	case ARG_DOWN:		// fall through
+	case ARG_BOTTOM:	arg->ui |= ARG_MV_DOWN; break;
+	case ARG_BORDER:	arg->ui |= ARG_MV_BORDER; break;
+	default:			return ERROR("invalid client move argument: %s\n", tk);
+	}
+
+	return 0;
 }
 
 void cmd_client_move_mouse(cmd_arg_t const *arg){
@@ -175,6 +224,18 @@ void cmd_client_resize(cmd_arg_t const *arg){
 	client_resize(c, new.x, new.y, new.width, new.height, c->geom.border_width);
 }
 
+int cmd_client_resize_parse(char const *tk, arg_id_t tk_id, cmd_arg_t *arg){
+	switch(tk_id){
+	case ARG_SHRINK:	arg->ui |= ARG_RSZ_SHRINK; break;
+	case ARG_GROW:		arg->ui &= ~ARG_RSZ_SHRINK; break;
+	case ARG_VERT:		arg->ui |= ARG_RSZ_VERT; break;
+	case ARG_HOR:		arg->ui |= ARG_RSZ_HOR; break;
+	default:			return ERROR("invalid client resize argument: %s\n", tk);
+	}
+
+	return 0;
+}
+
 void cmd_client_resize_mouse(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 	Time tlast = 0;
@@ -229,6 +290,16 @@ void cmd_client_max(cmd_arg_t const *arg){
 	if(((int*)(arg->v))[1] == 1)	MAX_TOGGLE(y, height, &new, &c->geom, &c->geom_store, c->mon);
 
 	client_resize(c, new.x, new.y, new.width, new.height, c->geom.border_width);
+}
+
+int cmd_client_max_parse(char const *tk, arg_id_t tk_id, cmd_arg_t *arg){
+	switch(tk_id){
+	case ARG_VERT:		arg->ui |= ARG_RSZ_VERT; break;
+	case ARG_HOR:		arg->ui |= ARG_RSZ_HOR; break;
+	default:			return ERROR("invalid client max argument: %s\n", tk);
+	}
+
+	return 0;
 }
 
 void cmd_client_fullscreen(cmd_arg_t const *arg){

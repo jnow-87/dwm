@@ -35,7 +35,7 @@ typedef struct{
 	keysym_t keysym;
 	unsigned int mods;
 
-	cmd_t action;
+	cmd_action_t action;
 	cmd_arg_t arg;
 } keymap_t;
 

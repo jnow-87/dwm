@@ -30,6 +30,12 @@ static delta_t delta(int win_low, int win_high, int mon_low, int mon_high);
 
 
 /* global functions */
+int cmd_winfade_parse(char const *tk, arg_id_t tk_id, cmd_arg_t *arg){
+	arg->i = (1 << atoi(tk));
+
+	return 0;
+}
+
 void cmd_winfade_add(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 
