@@ -5,9 +5,11 @@
 #include <core/statusbar.h>
 #include <core/tags.h>
 #include <xlib/atoms.h>
-#include <utils/menu.h>
 #include <utils/list.h>
+#include <utils/menu.h>
+#include <utils/vector.h>
 #include <commands.h>
+#include <rc.h>
 
 
 /* local/static prototypes */
@@ -61,13 +63,12 @@ void cmd_tags_client_toggle(cmd_arg_t const *arg){
 
 void cmd_tags_menu(cmd_arg_t const *arg){
 	int n = 0;
-	char const *names[__stop_tags - __start_tags];
+	char const *names[rc.tags.size];
 	char **tag;
 
 
-	config_for_each(tags, tag){
+	vector_for_each(&rc.tags, tag)
 		names[n++] = *tag;
-	}
 
 	n = menu(names, n);
 
