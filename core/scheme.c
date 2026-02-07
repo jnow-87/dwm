@@ -1,5 +1,7 @@
 #include <core/scheme.h>
 #include <utils/log.h>
+#include <utils/vector.h>
+#include <rc.h>
 
 
 /* global functions */
