@@ -1,9 +1,11 @@
 #include <X11/X.h>
 #include <X11/XKBlib.h>
 #include <core/dwm.h>
-#include <xlib/input.h>
-#include <xlib/gfx.h>
+#include <utils/log.h>
 #include <utils/utils.h>
+#include <utils/vector.h>
+#include <xlib/gfx.h>
+#include <xlib/input.h>
 
 
 /* macros */
@@ -112,4 +114,22 @@ unsigned int input_get_mod_state(void){
 
 keysym_t input_keysym(unsigned int keycode){
 	return XKeycodeToKeysym(dwm.dpy, (KeyCode)keycode, 0);
+}
+
+int input_modkeys(vector_t *keys, unsigned int *mods){
+	unsigned int mask = 0;
+	char **key;
+
+
+	vector_for_each(keys, key){
+		if(strcmp(*key, "alt") == 0)		mask |= Mod1Mask;
+		else if(strcmp(*key, "ctrl") == 0)	mask |= ShiftMask;
+		else if(strcmp(*key, "shift") == 0)	mask |= ControlMask;
+		else if(strcmp(*key, "win") == 0)	mask |= Mod4Mask;
+		else								return ERROR("unknown modified key %s\n", *key);
+	}
+
+	*mods = mask;
+
+	return 0;
 }

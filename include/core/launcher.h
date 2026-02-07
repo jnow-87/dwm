@@ -3,6 +3,7 @@
 
 
 #include <utils/utils.h>
+#include <utils/vector.h>
 
 
 /* macros */
@@ -18,14 +19,19 @@
 
 /* types */
 typedef struct{
-	char const *name,
-			   *cmd;
+	char const *name;
+	vector_t argv;
 } launcher_item_t;
 
 
 /* external variables */
 extern launcher_item_t __start_launcher_items[],
 					   __stop_launcher_items[];
+
+
+/* prototypes */
+int launcher_init(launcher_item_t *item, char const *name, char *cmdline);
+void launcher_cleanup(launcher_item_t *item);
 
 
 #endif // LAUNCHER_H

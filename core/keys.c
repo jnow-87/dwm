@@ -109,6 +109,16 @@ bool keys_cycle_active(void){
 	return (modifier_state != 0);
 }
 
+int key_verify(keymap_t *key){
+	if(key->action == 0x0)
+		return ERROR("missing action\n");
+
+	if(key->keysym == NoSymbol)
+		return ERROR("invalid key symbol\n");
+
+	return 0;
+}
+
 
 /* local functions */
 static int modifier_reset_hdlr(void){

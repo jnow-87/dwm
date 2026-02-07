@@ -8,6 +8,14 @@
 
 
 /* macros */
+#define BUTTON_INITIALISER() (buttonmap_t){ \
+	.loc = BLOC_UNKNOWN, \
+	.mods = 0, \
+	.button = 0, \
+	.action = 0x0, \
+	.arg = { 0 }, \
+}
+
 #define BUTTON_N(_id, _button, _mods, _loc, _action, ...) \
 	static buttonmap_t const button_##_id \
 		linker_array("buttons") = { \
@@ -45,6 +53,7 @@ typedef struct{
 /* global functions */
 void buttons_register(client_t *c);
 void button_handle(button_loc_t loc, unsigned int button, unsigned int mods);
+int button_verify(buttonmap_t *btn);
 
 
 /* external variables */

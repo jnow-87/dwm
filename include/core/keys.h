@@ -9,6 +9,13 @@
 
 
 /* macros */
+#define KEY_INITIALISER() (keymap_t){ \
+	.keysym = NoSymbol, \
+	.mods = 0, \
+	.action = 0x0, \
+	.arg = { 0 }, \
+}
+
 #define KEY_N(_id, _keysym, _mods, _action, ...) \
 	static keymap_t const key_##_id \
 		linker_array("keys") = { \
@@ -44,6 +51,8 @@ bool keys_registered(keymap_t *key, keysym_t sym, unsigned int mods);
 void keys_cycle_start(cycle_callback_t complete);
 void keys_cycle_complete(void);
 bool keys_cycle_active(void);
+
+int key_verify(keymap_t *key);
 
 
 /* external variables */

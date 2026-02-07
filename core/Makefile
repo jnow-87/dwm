@@ -11,11 +11,14 @@ dwm-y := \
 	main.o \
 	monitor.o \
 	statusbar.o \
+	launcher.o \
 	tags.o \
+	scheme.o \
 	xevents.o \
 	commands/ \
 	config/ \
 	layouts/ \
+	rc/ \
 	utils/ \
 	xlib/
 

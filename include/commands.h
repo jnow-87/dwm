@@ -17,10 +17,15 @@ typedef union{
 	void const *v;
 } cmd_arg_t;
 
+typedef void (*cmd_action_t)(cmd_arg_t const *);
+typedef int (*cmd_argparse_t)(char const *s, cmd_arg_t *args);
+
 typedef void (*cmd_t)(cmd_arg_t const *);
 
 
 /* prototypes */
+int cmd_parse(char *cmdline, cmd_action_t *action, cmd_arg_t *args);
+
 void cmd_lifecycle(cmd_arg_t const *arg);
 
 void cmd_statusbar_toggle(cmd_arg_t const *arg);

@@ -6,6 +6,13 @@
 
 
 /* macros */
+#define SCHEME_INITIALISER() (color_scheme_t){ \
+	.id = NSCMS, \
+	.fg = 0x0, \
+	.bg = 0x0, \
+	.border = 0x0, \
+}
+
 #define SCHEME(_id, _fg, _bg, _border) \
 	static color_scheme_t const scheme_##_id \
 		linker_array("schemes") noreorder = { \
@@ -30,15 +37,20 @@ typedef enum{
 typedef struct{
 	scheme_id_t id;
 
-	char const *fg,
-			   *bg,
-			   *border;
+	char *fg,
+		 *bg,
+		 *border;
 } color_scheme_t;
 
 
 /* external variables */
 extern color_scheme_t __start_schemes[],
 					  __stop_schemes[];
+
+
+/* prototypes */
+int schemes_verify(void);
+int scheme_verify(color_scheme_t *scm);
 
 
 #endif // SCHEME_H

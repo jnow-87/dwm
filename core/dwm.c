@@ -34,6 +34,7 @@
 #include <xlib/xlib.h>
 #include <utils/log.h>
 #include <utils/utils.h>
+#include <rc.h>
 
 
 /* local/static prototypes */
@@ -61,6 +62,11 @@ dwm_t dwm = {
 int dwm_setup(void){
 	int r = 0;
 
+
+	log_init(0x0, false);
+	
+	if(rc_init() != 0)
+		return ERROR("loading rc-file\n");
 
 	if(log_init(CONFIG_LOG_FILE, true) != 0)
 		return ERROR("opening log-file %s\n", CONFIG_LOG_FILE);
@@ -122,6 +128,8 @@ void dwm_cleanup(void){
 
 	xlib_cleanup();
 	log_cleanup();
+
+	rc_cleanup();
 }
 
 void dwm_run(void){

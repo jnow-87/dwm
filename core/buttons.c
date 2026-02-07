@@ -2,6 +2,7 @@
 #include <core/client.h>
 #include <core/dwm.h>
 #include <xlib/input.h>
+#include <utils/log.h>
 #include <utils/utils.h>
 
 
@@ -26,4 +27,11 @@ void button_handle(button_loc_t loc, unsigned int button, unsigned int mods){
 		if(loc == b->loc && b->action && b->button == button && CLEANMODS(b->mods) == CLEANMODS(mods))
 			b->action(&b->arg);
 	}
+}
+
+int button_verify(buttonmap_t *btn){
+	if(btn->action == 0x0)
+		return ERROR("missing action\n");
+
+	return 0;
 }
