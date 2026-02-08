@@ -32,8 +32,8 @@
 #include <core/tags.h>
 #include <core/xevents.h>
 #include <xlib/xlib.h>
+#include <utils/compiler.h>
 #include <utils/log.h>
-#include <utils/utils.h>
 #include <rc.h>
 
 

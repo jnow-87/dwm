@@ -8,7 +8,6 @@
 #include <core/scheme.h>
 #include <utils/list.h>
 #include <utils/log.h>
-#include <utils/utils.h>
 #include <utils/vector.h>
 #include <xlib/gfx.h>
 #include <xlib/xlib.h>

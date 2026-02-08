@@ -13,7 +13,6 @@
 #include <utils/list.h>
 #include <utils/log.h>
 #include <utils/stack.h>
-#include <utils/utils.h>
 
 
 /* macros */

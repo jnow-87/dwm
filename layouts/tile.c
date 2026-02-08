@@ -3,9 +3,9 @@
 #include <core/dwm.h>
 #include <core/layout.h>
 #include <core/monitor.h>
-#include <xlib/window.h>
 #include <utils/list.h>
-#include <utils/utils.h>
+#include <utils/math.h>
+#include <xlib/window.h>
 
 
 /* macros */

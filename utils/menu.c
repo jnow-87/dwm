@@ -1,11 +1,11 @@
 #include <config/config.h>
 #include <core/dwm.h>
 #include <core/statusbar.h>
+#include <utils/math.h>
 #include <xlib/gfx.h>
 #include <xlib/input.h>
 #include <xlib/window.h>
 #include <xlib/xlib.h>
-#include <utils/utils.h>
 
 
 /* macros */

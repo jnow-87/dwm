@@ -4,8 +4,8 @@
 
 #include <core/client.h>
 #include <core/monitor.h>
+#include <utils/compiler.h>
 #include <xlib/window.h>
-#include <utils/utils.h>
 
 
 /* macros */

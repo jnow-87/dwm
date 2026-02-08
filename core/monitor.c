@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include <core/dwm.h>
 #include <core/monitor.h>
+#include <utils/list.h>
+#include <utils/math.h>
 #include <xlib/input.h>
 #include <xlib/window.h>
 #include <xlib/xinerama.h>
-#include <utils/list.h>
-#include <utils/utils.h>
 
 
 /* global functions */

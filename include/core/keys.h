@@ -4,7 +4,6 @@
 
 #include <stdbool.h>
 #include <xlib/input.h>
-#include <utils/utils.h>
 #include <commands.h>
 
 

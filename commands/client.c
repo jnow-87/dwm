@@ -5,10 +5,10 @@
 #include <core/keys.h>
 #include <core/monitor.h>
 #include <core/xevents.h>
+#include <utils/log.h>
+#include <utils/math.h>
 #include <xlib/input.h>
 #include <xlib/window.h>
-#include <utils/log.h>
-#include <utils/utils.h>
 #include <commands.h>
 #include <rc.h>
 

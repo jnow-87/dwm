@@ -2,7 +2,6 @@
 #include <X11/XKBlib.h>
 #include <core/dwm.h>
 #include <utils/log.h>
-#include <utils/utils.h>
 #include <utils/vector.h>
 #include <xlib/gfx.h>
 #include <xlib/input.h>
