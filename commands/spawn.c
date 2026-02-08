@@ -4,21 +4,15 @@
 #include <sys/wait.h>
 #include <core/dwm.h>
 #include <core/scheme.h>
+#include <utils/exec.h>
 #include <utils/log.h>
 #include <utils/string.h>
 #include <utils/vector.h>
 #include <commands.h>
 
 
-/* local/static prototypes */
-static void exec(char * const argv[]);
-
-
 /* global functions */
 void cmd_spawn(cmd_arg_t const *arg){
-	if(fork() != 0)
-		return;
-
 	exec(arg->v);
 }
 
@@ -84,31 +78,8 @@ void cmd_dmenu_run(cmd_arg_t const *arg){
 	// 	the statusbar status, which would raise the statusbar
 	// 	window above dmenu in case both windows occupy the same
 	// 	screen area
-	pid = fork();
+	pid = exec((char **)dmenu);
 
-	switch(pid){
-	case 0:		exec((char **)dmenu); break;
-	case -1:	return;
-	default:	waitpid(pid, 0x0, 0); break;
-	}
-}
-
-
-/* local functions */
-static void exec(char * const argv[]){
-	struct sigaction sa;
-
-
-	if(dwm.dpy)
-		close(ConnectionNumber(dwm.dpy));
-
-	setsid();
-
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	sa.sa_handler = SIG_DFL;
-	sigaction(SIGCHLD, &sa, 0x0);
-
-	execvp(argv[0], argv);
-	ERROR("spawning %s\n", argv[0]);
+	if(pid > 0)
+		waitpid(pid, 0x0, 0);
 }

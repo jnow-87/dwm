@@ -113,10 +113,12 @@ void statusbar_update(void){
 	x = 0;
 
 	// launcher
-	bar->pos.launcher_begin = x;
-	draw_left(CONFIG_STATUSBAR_LAUNCHER_ICON " ", SCM_NORM, PADDING, &x);
-	draw_left(CONFIG_STATUSBAR_SPACER_LEFT, SCM_SPACER_NORM, 0, &x);
-	bar->pos.launcher_end = x;
+	if(rc.launcher.size > 0){
+		bar->pos.launcher_begin = x;
+		draw_left(CONFIG_STATUSBAR_LAUNCHER_ICON " ", SCM_NORM, PADDING, &x);
+		draw_left(CONFIG_STATUSBAR_SPACER_LEFT, SCM_SPACER_NORM, 0, &x);
+		bar->pos.launcher_end = x;
+	}
 
 	// tags
 	bar->pos.tags_begin = x;
