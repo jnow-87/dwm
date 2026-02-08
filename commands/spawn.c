@@ -13,7 +13,7 @@
 
 /* global functions */
 void cmd_spawn(cmd_arg_t const *arg){
-	exec(arg->v);
+	exec(((vector_t*)arg->v)->buf);
 }
 
 int cmd_spawn_parse(char const *tk, arg_id_t tk_id, cmd_arg_t *arg){

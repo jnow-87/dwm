@@ -10,6 +10,7 @@
 #include <utils/log.h>
 #include <utils/utils.h>
 #include <commands.h>
+#include <rc.h>
 
 
 /* macros */
@@ -84,8 +85,8 @@ static int inc_size(int v, int inc, int base);
 
 /* global functions */
 void cmd_client_cycle(cmd_arg_t const *arg){
-	int dir = ((int*)arg->v)[0];
-	bool ignore_zaphod = (bool)((int*)arg->v)[1];
+	int dir = arg->ui & ARG_CYCLE_FWD;
+	bool ignore_zaphod = (bool)(arg->ui & ARG_CYCLE_IGNORE_ZAPHOD);
 	client_t *c;
 
 
@@ -136,8 +137,9 @@ void cmd_client_move(cmd_arg_t const *arg){
 
 	geom = &c->geom;
 
-	nx = ((int*)(arg->v))[0];
-	ny = ((int*)(arg->v))[1];
+	ny = (arg->ui & ARG_MV_BORDER) ? INT_MAX : rc.win_move_pixel;
+	nx = ny * ((bool)(arg->ui & ARG_MV_RIGHT)) - ny * ((bool)(arg->ui & ARG_MV_LEFT));
+	ny = ny * ((bool)(arg->ui & ARG_MV_DOWN)) - ny * ((bool)(arg->ui & ARG_MV_UP));
 
 	MOVE(x, width, &nx, geom, c->mon);
 	MOVE(y, height, &ny, geom, c->mon);
@@ -209,14 +211,21 @@ void cmd_client_move_mouse(cmd_arg_t const *arg){
 
 void cmd_client_resize(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
+	int dx,
+		dy;
 	win_geom_t new;
 
 
 	if(precheck(c) != 0)
 		return;
 
-	new.width = MAX(1, ((int*)(arg->v))[0] + c->geom.width);
-	new.height = MAX(1, ((int*)(arg->v))[1] + c->geom.height);
+	dy = rc.win_resize_pixel;
+	dy = dy - 2 * dy * ((bool)(arg->ui & ARG_RSZ_SHRINK));
+	dx = dy * ((bool)(arg->ui & ARG_RSZ_HOR));
+	dy = dy * ((bool)(arg->ui & ARG_RSZ_VERT));
+
+	new.width = MAX(1, c->geom.width + dx);
+	new.height = MAX(1, c->geom.height + dy);
 
 	RESIZE_MOVE(x, width, &new, &c->geom, &c->hints);
 	RESIZE_MOVE(y, height, &new, &c->geom, &c->hints);
@@ -286,8 +295,8 @@ void cmd_client_max(cmd_arg_t const *arg){
 
 	new = c->geom;
 
-	if(((int*)(arg->v))[0] == 1)	MAX_TOGGLE(x, width, &new, &c->geom, &c->geom_store, c->mon);
-	if(((int*)(arg->v))[1] == 1)	MAX_TOGGLE(y, height, &new, &c->geom, &c->geom_store, c->mon);
+	if(arg->ui & ARG_RSZ_HOR)	MAX_TOGGLE(x, width, &new, &c->geom, &c->geom_store, c->mon);
+	if(arg->ui & ARG_RSZ_VERT)	MAX_TOGGLE(y, height, &new, &c->geom, &c->geom_store, c->mon);
 
 	client_resize(c, new.x, new.y, new.width, new.height, c->geom.border_width);
 }

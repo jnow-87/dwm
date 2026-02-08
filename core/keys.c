@@ -1,9 +1,10 @@
 #include <core/dwm.h>
 #include <core/keys.h>
-#include <xlib/input.h>
-#include <utils/timer.h>
 #include <utils/log.h>
-#include <utils/utils.h>
+#include <utils/timer.h>
+#include <utils/vector.h>
+#include <xlib/input.h>
+#include <rc.h>
 
 
 /* local/static prototypes */
@@ -52,7 +53,7 @@ int keys_register(void){
 	if(input_kbd_map_init(&map) != 0)
 		return -1;
 
-	config_for_each(keys, key)
+	vector_for_each(&rc.keys, key)
 		input_key_register(dwm.root, key->keysym, key->mods, &map);
 
 	input_kbd_map_release(&map);
@@ -64,7 +65,7 @@ void keys_handle(keysym_t sym, unsigned int mods){
 	keymap_t *key;
 
 
-	config_for_each(keys, key){
+	vector_for_each(&rc.keys, key){
 		if(keys_registered(key, sym, mods))
 			key->action(&(key->arg));
 	}

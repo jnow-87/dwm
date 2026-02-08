@@ -16,17 +16,6 @@
 	.arg = { 0 }, \
 }
 
-#define KEY_N(_id, _keysym, _mods, _action, ...) \
-	static keymap_t const key_##_id \
-		linker_array("keys") = { \
-			.keysym = _keysym, \
-			.mods = _mods, \
-			.action = _action, \
-			.arg = { __VA_ARGS__ }, \
-		}
-
-#define KEY(keysym, mods, action, ...)	UNIQUE(KEY_N, __COUNTER__, keysym, mods, action, __VA_ARGS__)
-
 
 /* types */
 typedef void (*cycle_callback_t)(void);
@@ -53,11 +42,6 @@ void keys_cycle_complete(void);
 bool keys_cycle_active(void);
 
 int key_verify(keymap_t *key);
-
-
-/* external variables */
-extern keymap_t __start_keys[],
-				__stop_keys[];
 
 
 #endif // KEYS_H

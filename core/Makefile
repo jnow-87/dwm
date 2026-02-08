@@ -16,7 +16,6 @@ dwm-y := \
 	scheme.o \
 	xevents.o \
 	commands/ \
-	config/ \
 	layouts/ \
 	rc/ \
 	utils/ \
