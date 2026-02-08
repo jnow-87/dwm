@@ -17,6 +17,7 @@
 
 
 #include <config/config.h>
+#include <version.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -64,7 +65,7 @@ int dwm_setup(void){
 	if(log_init(CONFIG_LOG_FILE, true) != 0)
 		return ERROR("opening log-file %s\n", CONFIG_LOG_FILE);
 
-	DEBUG("dwm hello\n");
+	DEBUG("hello dwm version " VERSION "\n");
 
 	/* register signal handler */
 	r |= signal_register(SIGCHLD, sigchild_hdlr, SA_NOCLDSTOP | SA_RESTART);
