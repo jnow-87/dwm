@@ -34,6 +34,5 @@ dwm-ldlibs := \
 	-L/usr/X11R6/lib \
 	-lX11 \
 	-lfontconfig \
-	-lXft
-
-dwm-ldlibs-$(CONFIG_XINERAMA) += -lXinerama
+	-lXft \
+	-lXinerama

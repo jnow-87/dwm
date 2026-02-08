@@ -12,10 +12,7 @@
 #include <xlib/atoms.h>
 #include <xlib/gfx.h>
 #include <xlib/window.h>
-
-
-/* macros */
-#define PADDING		CONFIG_STATUSBAR_PADDING
+#include <rc.h>
 
 
 /* local/static prototypes */
@@ -29,16 +26,16 @@ static int timer_hdlr(void);
 
 
 /* global functions */
-int statusbar_init(unsigned int height){
+int statusbar_init(void){
 	statusbar_t *bar = &dwm.statusbar;
 	monitor_t *m = dwm.mons;
 
 
 	bar->hidden = false;
 	bar->geom.x = m->x;
-	bar->geom.y = CONFIG_STATUSBAR_TOP ? m->y : m->y + m->height - height;
+	bar->geom.y = (rc.statusbar.location == RC_STATUSBAR_TOP) ? m->y : m->y + m->height - rc.statusbar.height;
 	bar->geom.width = m->width;
-	bar->geom.height = height;
+	bar->geom.height = rc.statusbar.height;
 	bar->geom.border_width = 0;
 
 	bar->win = win_create(&bar->geom, CUR_NORM, "dwm", true);
@@ -81,15 +78,15 @@ void statusbar_update(void){
 	/* right side */
 	// date and time
 	datetime(s, sizeof(s));
-	draw_right(s, SCM_NORM, PADDING, &x);
-	draw_right(CONFIG_STATUSBAR_SPACER_RIGHT, SCM_SPACER_NORM, 0, &x);
+	draw_right(s, SCM_NORM, rc.statusbar.padding, &x);
+	draw_right(rc.statusbar.icon_spacer_right, SCM_SPACER_NORM, 0, &x);
 
 	// status
 	if(win_get_name(dwm.root, s, sizeof(s)) != 0 || *s == 0)
 		strcpy(s, "no status info");
 
-	draw_right(s, SCM_STATUS, PADDING, &x);
-	draw_right(CONFIG_STATUSBAR_SPACER_RIGHT, SCM_SPACER_STATUS, 0, &x);
+	draw_right(s, SCM_STATUS, rc.statusbar.padding, &x);
+	draw_right(rc.statusbar.icon_spacer_right, SCM_SPACER_STATUS, 0, &x);
 
 	/* center */
 	x = 0;
@@ -97,14 +94,14 @@ void statusbar_update(void){
 
 	// keylock icon
 	if(dwm.keylock != 0x0)
-		x += snprintf(s + x, sizeof(s) - x - 1, CONFIG_STATUSBAR_KEYLOCK_ICON);
+		x += snprintf(s + x, sizeof(s) - x - 1, rc.statusbar.icon_keylock);
 
 	// zaphod icon
 	if(dwm.zaphod_en){
 		if(x > 0 && s[x - 1] != ' ')
 			x += snprintf(s + x, sizeof(s) - x - 1, " ");
 
-		x += snprintf(s + x, sizeof(s) - x - 1, CONFIG_STATUSBAR_ZAPHOD_ICON);
+		x += snprintf(s + x, sizeof(s) - x - 1, rc.statusbar.icon_zaphod);
 	}
 
 	draw_center(s, SCM_FOCUS);
@@ -115,21 +112,21 @@ void statusbar_update(void){
 	// launcher
 	if(rc.launcher.size > 0){
 		bar->pos.launcher_begin = x;
-		draw_left(CONFIG_STATUSBAR_LAUNCHER_ICON " ", SCM_NORM, PADDING, &x);
-		draw_left(CONFIG_STATUSBAR_SPACER_LEFT, SCM_SPACER_NORM, 0, &x);
+		draw_left(rc.statusbar.icon_launcher, SCM_NORM, rc.statusbar.padding * 2, &x);
+		draw_left(rc.statusbar.icon_spacer_left, SCM_SPACER_NORM, 0, &x);
 		bar->pos.launcher_end = x;
 	}
 
 	// tags
 	bar->pos.tags_begin = x;
-	draw_left(tags_name(dwm.tag_mask, s, sizeof(s)), SCM_STATUS, PADDING, &x);
-	draw_left(CONFIG_STATUSBAR_SPACER_INTRA_LEFT, SCM_SPACER_INTRA, 0, &x);
+	draw_left(tags_name(dwm.tag_mask, s, sizeof(s)), SCM_STATUS, rc.statusbar.padding, &x);
+	draw_left(rc.statusbar.icon_spacer_intra_left, SCM_SPACER_INTRA, 0, &x);
 	bar->pos.tags_end = x;
 
 	// layout symbol
 	bar->pos.layout_begin = x;
-	draw_left(dwm.layout->symbol, SCM_STATUS, PADDING, &x);
-	draw_left(CONFIG_STATUSBAR_SPACER_LEFT, SCM_SPACER_STATUS, 0, &x);
+	draw_left(dwm.layout->symbol, SCM_STATUS, rc.statusbar.padding, &x);
+	draw_left(rc.statusbar.icon_spacer_left, SCM_SPACER_STATUS, 0, &x);
 	bar->pos.layout_end = x;
 
 	/* sync */

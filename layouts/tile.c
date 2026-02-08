@@ -1,4 +1,3 @@
-#include <config/config.h>
 #include <core/client.h>
 #include <core/dwm.h>
 #include <core/layout.h>
@@ -6,10 +5,11 @@
 #include <utils/list.h>
 #include <utils/math.h>
 #include <xlib/window.h>
+#include <rc.h>
 
 
 /* macros */
-#define NMASTER	CONFIG_TILED_MASTER_WINDOWS
+#define NMASTER	rc.layouts.tiled_master_windows
 
 
 /* local functions */
@@ -32,7 +32,7 @@ static void arrange(void){
 		if(n == 0)
 			continue;
 
-		if(n > NMASTER)	w = NMASTER ? m->width * (CONFIG_TILED_MASTER_RATIO / 100.0) : 0;
+		if(n > NMASTER)	w = NMASTER ? m->width * (rc.layouts.tiled_master_ratio / 100.0) : 0;
 		else			w = m->width;
 
 		for(i=y=ty=0, c=layout_next_tiled(dwm.stack, m); c; c=layout_next_tiled(c->next, m), i++){

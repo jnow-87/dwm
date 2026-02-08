@@ -16,10 +16,6 @@ config XINERAMA
 	bool "xinerama"
 
 menu "statusbar"
-	config STATUSBAR_TOP
-		bool "show statusbar at the top"
-		default y
-
 	config STATUSBAR_HEIGHT
 		int "statusbar height"
 		default 20
@@ -57,11 +53,11 @@ menu "statusbar"
 		default "󰀎"
 endmenu
 
-config WIN_RESIZE_DELTA
-	int "delta for resizing a client [pixels]"
+config WIN_RESIZE_PIXEL
+	int "number of pixels by which to resize clients"
 
-config WIN_MOVE_DELTA
-	int "delta for moving a client [pixels]"
+config WIN_MOVE_PIXEL
+	int "number of pixels by which to move clients"
 
 config FADE_STEPS
 	int "number of animation steps for fading windows"
@@ -70,9 +66,6 @@ config FADE_STEPS
 config FADE_DELAY_MS
 	int "delay per fading window animation step [ms]"
 	default 25
-
-config MOUSEMOVE
-	bool "move mouse with client focus"
 
 menu "layouts"
 	source "layouts/Pconfig"

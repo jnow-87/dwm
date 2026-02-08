@@ -1,8 +1,8 @@
 #include <config/config.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <config/rc.h>
 #include <core/tags.h>
+#include <rc.h>
 
 
 /* macros */
@@ -40,7 +40,7 @@ char *tags_name(unsigned int tags, char *name, size_t n){
 		snprintf(name, n, "%s", (tag != 0x0) ? *tag : "none");
 	}
 	else
-		snprintf(name, n, "%s [%zu]", CONFIG_STATUSBAR_TAGS_MULTI, i);
+		snprintf(name, n, "%s [%zu]", rc.statusbar.icon_tags_multi, i);
 
 	return name;
 }

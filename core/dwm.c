@@ -68,8 +68,8 @@ int dwm_setup(void){
 	if(rc_init() != 0)
 		return ERROR("loading rc-file\n");
 
-	if(log_init(CONFIG_LOG_FILE, true) != 0)
-		return ERROR("opening log-file %s\n", CONFIG_LOG_FILE);
+	if(log_init(rc.log_file, true) != 0)
+		return ERROR("opening log-file %s\n", rc.log_file);
 
 	DEBUG("hello dwm version " VERSION "\n");
 
@@ -97,7 +97,7 @@ int dwm_setup(void){
 
 	/* init core components */
 	monitor_discover();
-	r |= statusbar_init(CONFIG_STATUSBAR_HEIGHT);
+	r |= statusbar_init();
 	r |= keys_init();
 	r |= clients_init();
 

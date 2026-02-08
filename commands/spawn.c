@@ -9,6 +9,7 @@
 #include <utils/string.h>
 #include <utils/vector.h>
 #include <commands.h>
+#include <rc.h>
 
 
 /* global functions */
@@ -61,7 +62,7 @@ err:
 void cmd_dmenu_run(cmd_arg_t const *arg){
 	char const *dmenu[] = {
 		"dmenurun",
-		"-fn", CONFIG_FONT,
+		"-fn", rc.font,
 		"-m", "0",
 		"-nf", dwm.gfx->schemes[SCM_NORM].names->fg,
 		"-nb", dwm.gfx->schemes[SCM_NORM].names->bg,

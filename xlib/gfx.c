@@ -66,7 +66,7 @@ gfx_t *gfx_create(unsigned int w, unsigned int h){
 	XSetLineAttributes(dwm.dpy, gfx->gc, 1, LineSolid, CapButt, JoinMiter);
 
 	/* init fonts */
-	font = font_create_from_name(gfx, CONFIG_FONT);
+	font = font_create_from_name(gfx, rc.font);
 
 	if(font == 0x0)
 		goto err_1;

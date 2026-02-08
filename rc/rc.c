@@ -20,8 +20,8 @@
 	.font = CONFIG_FONT, \
 	.border_pixel = CONFIG_BORDER_PIXEL, \
 	.snap_pixel = CONFIG_SNAP_PIXEL, \
-	.win_resize_pixel = CONFIG_WIN_RESIZE_DELTA, \
-	.win_move_pixel = CONFIG_WIN_MOVE_DELTA, \
+	.win_resize_pixel = CONFIG_WIN_RESIZE_PIXEL, \
+	.win_move_pixel = CONFIG_WIN_MOVE_PIXEL, \
 	.fade_steps = CONFIG_FADE_STEPS, \
 	.fade_delay_ms = CONFIG_FADE_DELAY_MS, \
 	.xinerama = CONFIG_XINERAMA, \

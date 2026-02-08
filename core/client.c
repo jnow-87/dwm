@@ -8,11 +8,12 @@
 #include <core/dwm.h>
 #include <core/keylock.h>
 #include <core/monitor.h>
-#include <xlib/atoms.h>
-#include <xlib/window.h>
 #include <utils/list.h>
 #include <utils/log.h>
 #include <utils/stack.h>
+#include <xlib/atoms.h>
+#include <xlib/window.h>
+#include <rc.h>
 
 
 /* macros */
@@ -81,9 +82,9 @@ void client_init(window_t win, win_attr_t *attr){
 	*geom = attr->geom;
 
 	c->mon = monitor_by_cursor();
-	geom->x = c->mon->x + (c->mon->width - (geom->width + 2 * CONFIG_BORDER_PIXEL)) / 2;
-	geom->y = c->mon->y + (c->mon->height - (geom->height + 2 * CONFIG_BORDER_PIXEL)) / 2;
-	geom->border_width = CONFIG_BORDER_PIXEL;
+	geom->x = c->mon->x + (c->mon->width - (geom->width + 2 * rc.border_pixel)) / 2;
+	geom->y = c->mon->y + (c->mon->height - (geom->height + 2 * rc.border_pixel)) / 2;
+	geom->border_width = rc.border_pixel;
 
 	c->geom_store = attr->geom;
 

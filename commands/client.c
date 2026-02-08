@@ -15,10 +15,10 @@
 
 /* macros */
 #define SNAP(origin, dim, new, geom, mon){ \
-	if(abs((mon)->origin - *(new)) < CONFIG_SNAP_PIXEL){ \
+	if(abs((mon)->origin - *(new)) < rc.snap_pixel){ \
 		*new = (mon)->origin; \
 	} \
-	else if(abs(((mon)->origin + (mon)->dim) - (*(new) + ((geom)->dim + (geom)->border_width * 2))) < CONFIG_SNAP_PIXEL){ \
+	else if(abs(((mon)->origin + (mon)->dim) - (*(new) + ((geom)->dim + (geom)->border_width * 2))) < rc.snap_pixel){ \
 		*new = (mon)->origin + (mon)->dim - ((geom)->dim + (geom)->border_width * 2); \
 	} \
 }
