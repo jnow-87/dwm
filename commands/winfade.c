@@ -5,10 +5,11 @@
 #include <core/dwm.h>
 #include <core/monitor.h>
 #include <core/tags.h>
+#include <utils/list.h>
 #include <xlib/window.h>
 #include <xlib/xlib.h>
-#include <utils/list.h>
 #include <commands.h>
+#include <rc.h>
 
 
 /* types */
@@ -30,6 +31,12 @@ static delta_t delta(int win_low, int win_high, int mon_low, int mon_high);
 
 
 /* global functions */
+int cmd_winfade_parse(char const *tk, arg_id_t tk_id, cmd_arg_t *arg){
+	arg->i = (1 << atoi(tk));
+
+	return 0;
+}
+
 void cmd_winfade_add(cmd_arg_t const *arg){
 	client_t *c = dwm.focused;
 
@@ -93,8 +100,8 @@ static void fade(size_t n, unsigned int fades){
 		if(dx[i].min < dy[i].min && dy[i].min > 0)		dy[i].delta = 0;
 		else if(dy[i].min < dx[i].min && dx[i].min > 0)	dx[i].delta = 0;
 
-		dx[i].delta /= (ssize_t)CONFIG_FADE_STEPS * dir;
-		dy[i].delta /= (ssize_t)CONFIG_FADE_STEPS * dir;
+		dx[i].delta /= (ssize_t)rc.fade_steps * dir;
+		dy[i].delta /= (ssize_t)rc.fade_steps * dir;
 	}
 
 	/* update windows */
@@ -103,18 +110,18 @@ static void fade(size_t n, unsigned int fades){
 		c = clients[i];
 
 		tags_set(&c->tags, dwm.tag_mask);
-		move(c, -dx[i].delta * CONFIG_FADE_STEPS, -dy[i].delta * CONFIG_FADE_STEPS);
+		move(c, -dx[i].delta * rc.fade_steps, -dy[i].delta * rc.fade_steps);
 		win_show(c->win);
 		win_focus(c->win);
 	}
 
 	// fade
-	for(i=1; i<=CONFIG_FADE_STEPS; i++){
+	for(i=1; i<=rc.fade_steps; i++){
 		for(size_t j=0; j<n; j++)
 			move(clients[j], dx[j].delta, dy[j].delta);
 
 		xlib_sync();
-		usleep(CONFIG_FADE_DELAY_MS * 1000);
+		usleep(rc.fade_delay_ms * 1000);
 	}
 
 	// fade-out epilogue

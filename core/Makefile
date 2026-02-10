@@ -11,11 +11,13 @@ dwm-y := \
 	main.o \
 	monitor.o \
 	statusbar.o \
+	launcher.o \
 	tags.o \
+	scheme.o \
 	xevents.o \
 	commands/ \
-	config/ \
 	layouts/ \
+	rc/ \
 	utils/ \
 	xlib/
 
@@ -32,6 +34,5 @@ dwm-ldlibs := \
 	-L/usr/X11R6/lib \
 	-lX11 \
 	-lfontconfig \
-	-lXft
-
-dwm-ldlibs-$(CONFIG_XINERAMA) += -lXinerama
+	-lXft \
+	-lXinerama

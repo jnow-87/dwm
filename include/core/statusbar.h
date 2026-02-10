@@ -28,7 +28,7 @@ typedef struct{
 
 
 /* prototypes */
-int statusbar_init(unsigned int height);
+int statusbar_init(void);
 void statusbar_destroy(void);
 
 void statusbar_update(void);

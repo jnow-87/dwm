@@ -1,16 +1,17 @@
 #include <config/config.h>
 #include <core/dwm.h>
 #include <core/statusbar.h>
+#include <utils/math.h>
 #include <xlib/gfx.h>
 #include <xlib/input.h>
 #include <xlib/window.h>
 #include <xlib/xlib.h>
-#include <utils/utils.h>
+#include <rc.h>
 
 
 /* macros */
-#define PADDING			CONFIG_STATUSBAR_PADDING
-#define ENTRY_HEIGHT	CONFIG_STATUSBAR_HEIGHT
+#define PADDING			rc.statusbar.padding
+#define ENTRY_HEIGHT	rc.statusbar.height
 #define TEXTW(s)		(gfx_text_width(dwm.gfx, s) + PADDING)
 
 #define WITHIN(_x, _y, _geom)	((_x) >= 0 && (_x) < (_geom).width && (_y) >= 0 && (_y) < (_geom).height)

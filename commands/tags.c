@@ -1,12 +1,15 @@
+#include <stdlib.h>
 #include <core/clientstack.h>
 #include <core/dwm.h>
 #include <core/layout.h>
 #include <core/statusbar.h>
 #include <core/tags.h>
 #include <xlib/atoms.h>
-#include <utils/menu.h>
 #include <utils/list.h>
+#include <utils/menu.h>
+#include <utils/vector.h>
 #include <commands.h>
+#include <rc.h>
 
 
 /* local/static prototypes */
@@ -14,6 +17,12 @@ static void set(unsigned int *tags, unsigned int v);
 
 
 /* global functions */
+int cmd_tag_parse(char const *tk, arg_id_t tk_id, cmd_arg_t *arg){
+	arg->i = (1 << atoi(tk));
+
+	return 0;
+}
+
 void cmd_tags_view(cmd_arg_t const *arg){
 	client_t *c;
 
@@ -54,13 +63,12 @@ void cmd_tags_client_toggle(cmd_arg_t const *arg){
 
 void cmd_tags_menu(cmd_arg_t const *arg){
 	int n = 0;
-	char const *names[__stop_tags - __start_tags];
+	char const *names[rc.tags.size];
 	char **tag;
 
 
-	config_for_each(tags, tag){
+	vector_for_each(&rc.tags, tag)
 		names[n++] = *tag;
-	}
 
 	n = menu(names, n);
 

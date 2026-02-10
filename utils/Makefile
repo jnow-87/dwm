@@ -1,5 +1,8 @@
 obj-y := \
 	list2.o \
-	timer.o \
 	log.o \
-	menu.o
+	exec.o \
+	menu.o \
+	string.o \
+	timer.o \
+	vector.o

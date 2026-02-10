@@ -17,6 +17,7 @@
 
 
 #include <config/config.h>
+#include <version.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -31,8 +32,9 @@
 #include <core/tags.h>
 #include <core/xevents.h>
 #include <xlib/xlib.h>
+#include <utils/compiler.h>
 #include <utils/log.h>
-#include <utils/utils.h>
+#include <rc.h>
 
 
 /* local/static prototypes */
@@ -61,10 +63,15 @@ int dwm_setup(void){
 	int r = 0;
 
 
-	if(log_init(CONFIG_LOG_FILE, true) != 0)
-		return ERROR("opening log-file %s\n", CONFIG_LOG_FILE);
+	log_init(0x0, false);
+	
+	if(rc_init() != 0)
+		return ERROR("loading rc-file\n");
 
-	DEBUG("dwm hello\n");
+	if(log_init(rc.log_file, true) != 0)
+		return ERROR("opening log-file %s\n", rc.log_file);
+
+	DEBUG("hello dwm version " VERSION "\n");
 
 	/* register signal handler */
 	r |= signal_register(SIGCHLD, sigchild_hdlr, SA_NOCLDSTOP | SA_RESTART);
@@ -90,7 +97,7 @@ int dwm_setup(void){
 
 	/* init core components */
 	monitor_discover();
-	r |= statusbar_init(CONFIG_STATUSBAR_HEIGHT);
+	r |= statusbar_init();
 	r |= keys_init();
 	r |= clients_init();
 
@@ -121,6 +128,8 @@ void dwm_cleanup(void){
 
 	xlib_cleanup();
 	log_cleanup();
+
+	rc_cleanup();
 }
 
 void dwm_run(void){

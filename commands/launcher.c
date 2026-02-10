@@ -1,17 +1,20 @@
 #include <unistd.h>
 #include <core/launcher.h>
+#include <utils/exec.h>
 #include <utils/menu.h>
+#include <utils/vector.h>
 #include <commands.h>
+#include <rc.h>
 
 
 /* global functions */
 void cmd_launcher_menu(cmd_arg_t const *arg){
 	int n = 0;
-	char const *names[__stop_launcher_items - __start_launcher_items];
+	char const *names[rc.launcher.size];
 	launcher_item_t *item;
 
 
-	config_for_each(launcher_items, item){
+	vector_for_each(&rc.launcher, item){
 		names[n++] = item->name;
 	}
 
@@ -20,6 +23,6 @@ void cmd_launcher_menu(cmd_arg_t const *arg){
 	if(n == -1)
 		return;
 
-	if(fork() == 0)
-		execl("/bin/sh", "sh", "-c", __start_launcher_items[n].cmd, 0x0);
+	item = vector_get(&rc.launcher, n);
+	exec(item->argv.buf);
 }

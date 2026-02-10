@@ -1,20 +1,11 @@
-#include <version.h>
-#include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 #include <core/dwm.h>
 
 
 /* global functions */
 int main(int argc, char *argv[]){
-	if(argc == 2 && !strcmp("-v", argv[1]))
-		return printf("dwm-" VERSION) != 0;
-
-	if(argc != 1)
-		return fprintf(stderr, "usage: dwm [-v]");
-
 	if(dwm_setup() != 0)
-		fprintf(stderr, "setup failed\n");
+		return 1;
 
 	dwm_run();
 	dwm_cleanup();

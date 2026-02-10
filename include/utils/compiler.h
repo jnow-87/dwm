@@ -1,20 +1,9 @@
-#ifndef MATH_H
-#define MATH_H
+#ifndef COMPILER_H
+#define COMPILER_H
 
 
 /* macros */
 #define LENGTH(X)	(sizeof X / sizeof X[0])
-
-#define CMP(x, y, op)({ \
-	typeof(x) _x = x; \
-	typeof(y) _y = y; \
-	\
-	\
-	(_x op _y) ? _x : _y; \
-})
-
-#define MIN(x, y)	CMP(x, y, <)
-#define MAX(x, y)	CMP(x, y, >)
 
 #define section(sec)			__attribute__((section(sec)))
 #define align(base)				__attribute__((aligned(base)))
@@ -28,4 +17,4 @@
 	for(el=__start_##obj; el!=__stop_##obj; el++)
 
 
-#endif // MATH_H
+#endif // COMPILER_H

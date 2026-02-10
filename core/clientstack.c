@@ -1,14 +1,15 @@
 #include <config/config.h>
 #include <stdbool.h>
 #include <core/client.h>
-#include <core/dwm.h>
 #include <core/clientstack.h>
+#include <core/dwm.h>
 #include <core/monitor.h>
 #include <core/statusbar.h>
-#include <xlib/input.h>
-#include <xlib/window.h>
 #include <utils/list.h>
 #include <utils/stack.h>
+#include <xlib/input.h>
+#include <xlib/window.h>
+#include <rc.h>
 
 
 /* local/static prototypes */
@@ -73,9 +74,8 @@ void clientstack_focus(client_t *c, bool restack){
 
 		win_focus(c->win);
 
-#ifdef CONFIG_MOUSEMOVE
-		input_pointer_move(c->win, c->geom.width, c->geom.height);
-#endif // CONFIG_MOUSEMOVE
+		if(rc.mouse_move)
+			input_pointer_move(c->win, c->geom.width, c->geom.height);
 	}
 	else
 		win_focus(dwm.root);

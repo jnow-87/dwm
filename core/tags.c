@@ -2,10 +2,11 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <core/tags.h>
+#include <rc.h>
 
 
 /* macros */
-#define TAGMASK		((1 << (__stop_tags - __start_tags)) - 1)
+#define TAGMASK		((1 << (rc.tags.size)) - 1)
 
 
 /* local/static prototypes */
@@ -29,12 +30,17 @@ void tags_toggle(unsigned int *tags, unsigned int v){
 
 char *tags_name(unsigned int tags, char *name, size_t n){
 	size_t i;
+	char **tag;
 
 
 	i = ntags(tags);
 
-	if(i > 1)	snprintf(name, n, "%s [%zu]", CONFIG_STATUSBAR_TAGS_MULTI, i);
-	else		snprintf(name, n, "%s", __start_tags[first(tags)]);
+	if(i == 1){
+		tag = vector_get(&rc.tags, first(tags));
+		snprintf(name, n, "%s", (tag != 0x0) ? *tag : "none");
+	}
+	else
+		snprintf(name, n, "%s [%zu]", rc.statusbar.icon_tags_multi, i);
 
 	return name;
 }
@@ -45,7 +51,7 @@ static size_t ntags(unsigned int tags){
 	size_t n = 0;
 
 
-	for(size_t i=0; i<__stop_tags-__start_tags; i++){
+	for(size_t i=0; i<rc.tags.size; i++){
 		if(tags & (1 << i))
 			n++;
 	}
@@ -54,7 +60,7 @@ static size_t ntags(unsigned int tags){
 }
 
 static size_t first(unsigned int tags){
-	for(size_t i=0; i<__stop_tags-__start_tags; i++){
+	for(size_t i=0; i<rc.tags.size; i++){
 		if(tags & (1 << i))
 			return i;
 	}

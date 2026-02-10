@@ -6,11 +6,12 @@
 #include <X11/Xlib.h>
 #include <core/dwm.h>
 #include <core/scheme.h>
-#include <xlib/gfx.h>
-#include <xlib/xlib.h>
 #include <utils/list.h>
 #include <utils/log.h>
-#include <utils/utils.h>
+#include <utils/vector.h>
+#include <xlib/gfx.h>
+#include <xlib/xlib.h>
+#include <rc.h>
 
 
 /* macros */
@@ -65,18 +66,14 @@ gfx_t *gfx_create(unsigned int w, unsigned int h){
 	XSetLineAttributes(dwm.dpy, gfx->gc, 1, LineSolid, CapButt, JoinMiter);
 
 	/* init fonts */
-	font = font_create_from_name(gfx, CONFIG_FONT);
+	font = font_create_from_name(gfx, rc.font);
 
 	if(font == 0x0)
 		goto err_1;
 
 	list_add_tail(gfx->fonts, font);
 
-	/* init color schemes */
-	if(__stop_schemes - __start_schemes > NSCMS)
-		INFO("more than %d schemes defined, the rest will be ignored\n", NSCMS);
-
-	config_for_each(schemes, scheme){
+	vector_for_each(&rc.schemes, scheme){
 		if(scheme_create(gfx, scheme, gfx->schemes + scheme->id) != 0)
 			goto err_1;
 	}

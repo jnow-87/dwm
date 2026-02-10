@@ -4,6 +4,7 @@
 
 #include <stddef.h>
 #include <X11/X.h>
+#include <utils/vector.h>
 #include <xlib/gfx.h>
 #include <xlib/window.h>
 
@@ -42,6 +43,7 @@ int input_pointer_coord(int *x, int *y);
 unsigned int input_get_numlock_mask(void);
 unsigned int input_get_mod_state(void);
 keysym_t input_keysym(unsigned int keycode);
+int input_modkeys(vector_t *keys, unsigned int *mods);
 
 
 #endif // INPUT_H

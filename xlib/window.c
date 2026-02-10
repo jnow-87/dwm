@@ -2,11 +2,11 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <core/dwm.h>
-#include <xlib/input.h>
+#include <utils/math.h>
 #include <xlib/gfx.h>
+#include <xlib/input.h>
 #include <xlib/window.h>
 #include <xlib/xlib.h>
-#include <utils/utils.h>
 
 
 /* local/static prototypes */

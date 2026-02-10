@@ -3,22 +3,17 @@
 
 
 #include <core/client.h>
-#include <utils/utils.h>
 #include <commands.h>
 
 
 /* macros */
-#define BUTTON_N(_id, _button, _mods, _loc, _action, ...) \
-	static buttonmap_t const button_##_id \
-		linker_array("buttons") = { \
-			.loc = _loc, \
-			.mods = _mods, \
-			.button = _button, \
-			.action = _action, \
-			.arg = { __VA_ARGS__ }, \
-		}
-
-#define BUTTON(button, mods, loc, action, ...)	UNIQUE(BUTTON_N, __COUNTER__, button, mods, loc, action, __VA_ARGS__)
+#define BUTTON_INITIALISER() (buttonmap_t){ \
+	.loc = BLOC_UNKNOWN, \
+	.mods = 0, \
+	.button = 0, \
+	.action = 0x0, \
+	.arg = { 0 }, \
+}
 
 
 /* types */
@@ -37,7 +32,7 @@ typedef struct{
 	unsigned int mods;
 	unsigned int button;
 
-	cmd_t action;
+	cmd_action_t action;
 	cmd_arg_t arg;
 } buttonmap_t;
 
@@ -45,11 +40,7 @@ typedef struct{
 /* global functions */
 void buttons_register(client_t *c);
 void button_handle(button_loc_t loc, unsigned int button, unsigned int mods);
-
-
-/* external variables */
-extern buttonmap_t __start_buttons[],
-				   __stop_buttons[];
+int button_verify(buttonmap_t *btn);
 
 
 #endif // BUTTONS_H

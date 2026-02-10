@@ -3,6 +3,5 @@ obj-y := \
 	gfx.o \
 	input.o \
 	window.o \
-	xlib.o
-
-obj-$(CONFIG_XINERAMA) += xinerama.o
+	xlib.o \
+	xinerama.o
