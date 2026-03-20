@@ -1,4 +1,5 @@
 #include <config/config.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <core/client.h>
 #include <core/clientstack.h>
@@ -25,7 +26,7 @@ typedef struct{
 
 
 /* local/static prototypes */
-static void fade(size_t n, unsigned int fades);
+static void fade(client_t **clients, size_t n, fade_t dir);
 static void move(client_t *c, int dx, int dy);
 static delta_t delta(int win_low, int win_high, int mon_low, int mon_high);
 
@@ -48,45 +49,39 @@ void cmd_winfade_add(cmd_arg_t const *arg){
 }
 
 void cmd_winfade_fade(cmd_arg_t const *arg){
+	bool visible = false;
+	unsigned int fades = arg->ui;
 	size_t n = 0;
+	client_t *clients[dwm.nclients];
 	client_t *c;
 
-
-	list_for_each(dwm.stack, c){
-		if(c->fades & arg->ui)
-			n++;
-	}
-
-	fade(n, arg->ui);
-}
-
-
-/* local functions */
-static void fade(size_t n, unsigned int fades){
-	size_t i;
-	client_t *clients[n];
-	win_geom_t *geom;
-	delta_t dx[n],
-			dy[n];
-	fade_t dir;
-	client_t *c;
-	monitor_t *m;
-
-
-	if(n == 0)
-		return;
-
-	i = 0;
 
 	list_for_each(dwm.stack, c){
 		if((c->fades & fades) == 0)
 			continue;
 
-		clients[i++] = c;
+		clients[n++] = c;
 		c->geom_store = c->geom;
+
+		visible = visible || win_visible(c->win);
 	}
 
-	dir = win_visible(clients[0]->win) ? FADE_OUT : FADE_IN;
+	if(n == 0)
+		return;
+
+	fade(clients, n, visible ? FADE_OUT : FADE_IN);
+}
+
+
+/* local functions */
+static void fade(client_t **clients, size_t n, fade_t dir){
+	size_t i;
+	win_geom_t *geom;
+	delta_t dx[n],
+			dy[n];
+	client_t *c;
+	monitor_t *m;
+
 
 	/* calculate x, y movement per client */
 	for(i=0; i<n; i++){

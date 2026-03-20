@@ -53,6 +53,7 @@ typedef struct{
 	layout_t *layout;
 
 	// client handling
+	size_t nclients;
 	client_t *stack,
 			 *focused,
 			 *keylock;
