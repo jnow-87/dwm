@@ -50,6 +50,7 @@ static void sigrestart_hdlr(int sig);
 /* global variables */
 dwm_t dwm = {
 	.zaphod_en = true,
+	.nclients = 0,
 	.stack = 0x0,
 	.layout = __start_layouts,
 	.state = DWM_ERROR,

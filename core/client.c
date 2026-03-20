@@ -98,6 +98,8 @@ void client_init(window_t win, win_attr_t *attr){
 	/* update clientstack */
 	stack_push(dwm.stack, c);
 	clientstack_focus(c, true);
+
+	dwm.nclients++;
 }
 
 void client_cleanup(client_t *c, bool destroyed){
@@ -115,6 +117,7 @@ void client_cleanup(client_t *c, bool destroyed){
 	if(!destroyed)
 		win_release(c->win, &c->geom_store);
 
+	dwm.nclients--;
 	free(c);
 
 	/* update client list */
