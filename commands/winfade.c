@@ -26,7 +26,9 @@ typedef struct{
 
 
 /* local/static prototypes */
+static void focus(client_t **clients, size_t n);
 static void fade(client_t **clients, size_t n, fade_t dir);
+
 static void move(client_t *c, int dx, int dy);
 static delta_t delta(int win_low, int win_high, int mon_low, int mon_high);
 
@@ -49,7 +51,8 @@ void cmd_winfade_add(cmd_arg_t const *arg){
 }
 
 void cmd_winfade_fade(cmd_arg_t const *arg){
-	bool visible = false;
+	bool visible = false,
+		 focused = false;
 	unsigned int fades = arg->ui;
 	size_t n = 0;
 	client_t *clients[dwm.nclients];
@@ -64,16 +67,25 @@ void cmd_winfade_fade(cmd_arg_t const *arg){
 		c->geom_store = c->geom;
 
 		visible = visible || win_visible(c->win);
+		focused = focused || ((c == dwm.stack) && visible);
 	}
 
 	if(n == 0)
 		return;
 
-	fade(clients, n, visible ? FADE_OUT : FADE_IN);
+	if(!focused && visible)	focus(clients, n);
+	else					fade(clients, n, visible ? FADE_OUT : FADE_IN);
 }
 
 
 /* local functions */
+static void focus(client_t **clients, size_t n){
+	for(size_t i=0; i<n; i++)
+		win_focus(clients[n - i - 1]->win);
+
+	clientstack_focus(clients[0], true);
+}
+
 static void fade(client_t **clients, size_t n, fade_t dir){
 	size_t i;
 	win_geom_t *geom;
